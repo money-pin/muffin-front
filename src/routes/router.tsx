@@ -15,6 +15,7 @@ import RankingPage from "@/pages/ranking/RankingPage";
 import MyPage from "@/pages/my/MyPage";
 import MySettingsPage from "@/pages/my/MySettingsPage";
 import MyStoragePage from "@/pages/my/MyStoragePage";
+import ShowcasePage from "@/pages/_showcase/ShowcasePage";
 import NotFoundPage from "@/pages/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -76,6 +77,10 @@ export const router = createBrowserRouter([
       {
         path: "/my/storage",
         element: <MyStoragePage />,
+      },
+      {
+        path: "/showcase",
+        element: <ShowcasePage />,
       },
       {
         path: "*",
