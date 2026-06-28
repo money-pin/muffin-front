@@ -1,23 +1,26 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  IoHome,
-  IoHomeOutline,
-  IoNewspaper,
-  IoNewspaperOutline,
-  IoStatsChart,
-  IoStatsChartOutline,
-  IoPerson,
-  IoPersonOutline,
-} from "react-icons/io5";
+import homeIcon from "@/assets/icon-24px/home.svg";
+import homeActiveIcon from "@/assets/icon-24px/home-active.svg";
+import newsIcon from "@/assets/icon-24px/news.svg";
+import newsActiveIcon from "@/assets/icon-24px/news-active.svg";
+import investmentIcon from "@/assets/icon-24px/investment.svg";
+import investmentActiveIcon from "@/assets/icon-24px/investment-active.svg";
+import myIcon from "@/assets/icon-24px/my.svg";
+import myActiveIcon from "@/assets/icon-24px/my-active.svg";
 
 // Figma: 비활성=아웃라인(회색), 활성=filled(주황 #F46C0E) — 색만이 아니라 아이콘 자체가 교체됨.
 // 아이콘 이름은 Figma의 IconHome/IconNews/IconPaperTrading/IconMyPage(+Pr=활성) 매핑.
-// ⚠️ react-icons(Ionicons) 근사치 — 디자이너 SVG 받으면 1:1 교체 예정.
+//⚠️ home icon 추출 시 오류 -> 확인 필요.
 const TABS = [
-  { label: "홈", path: "/home", Active: IoHome, Inactive: IoHomeOutline },
-  { label: "뉴스", path: "/news", Active: IoNewspaper, Inactive: IoNewspaperOutline },
-  { label: "모의투자", path: "/invest", Active: IoStatsChart, Inactive: IoStatsChartOutline },
-  { label: "마이", path: "/my", Active: IoPerson, Inactive: IoPersonOutline },
+  { label: "홈", path: "/home", Active: homeActiveIcon, Inactive: homeIcon },
+  { label: "뉴스", path: "/news", Active: newsActiveIcon, Inactive: newsIcon },
+  {
+    label: "모의투자",
+    path: "/invest",
+    Active: investmentActiveIcon,
+    Inactive: investmentIcon,
+  },
+  { label: "마이", path: "/my", Active: myActiveIcon, Inactive: myIcon },
 ];
 
 export default function BottomNavigation() {
@@ -30,13 +33,21 @@ export default function BottomNavigation() {
         const active = location.pathname === path;
         const Icon = active ? Active : Inactive;
         const color = active ? "text-[#F46C0E]" : "text-[#999999]";
+
         return (
           <button
             key={path}
+            type="button"
             onClick={() => navigate(path)}
             className={`flex h-[60px] w-[60px] flex-col items-center justify-center gap-0.5 ${color}`}
           >
-            <Icon size={24} />
+            <img
+              src={Icon}
+              alt=""
+              aria-hidden="true"
+              className="h-6 w-6 object-contain"
+              draggable={false}
+            />
             <span className="text-[10px] font-bold">{label}</span>
           </button>
         );
