@@ -72,7 +72,7 @@ export default function ShowcasePage() {
         <SectionHeader title="따끈한 금융 소식" icon={<span>📢</span>} />
       </Section>
 
-      <Section title="CharacterAvatar (이미지 에셋 대기 — placeholder)">
+      <Section title="CharacterAvatar">
         <div className="flex items-end gap-4">
           <CharacterAvatar size="small" />
           <CharacterAvatar size="medium" />
