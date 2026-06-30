@@ -111,9 +111,7 @@ export default function SortDropdown<const T extends string>({
           src={chevronDown}
           alt=""
           aria-hidden="true"
-          className={`size-5 transition-transform duration-150 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className="size-5"
         />
       </button>
 
