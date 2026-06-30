@@ -122,7 +122,7 @@ export default function SortDropdown<const T extends string>({
           id={menuId}
           role="listbox"
           aria-label={ariaLabel}
-          className={`absolute top-[calc(100%+4px)] z-50 flex w-[116px] flex-col rounded-lg border border-neutral-100 bg-neutral-0 px-4 py-3 ${
+          className={`absolute top-[calc(100%+4px)] z-50 flex w-[116px] flex-col gap-2 rounded-lg border border-neutral-100 bg-neutral-0 px-4 py-3 ${
             align === "end" ? "right-0" : "left-0"
           }`}
         >
@@ -140,7 +140,7 @@ export default function SortDropdown<const T extends string>({
                 aria-selected={isSelected}
                 tabIndex={isSelected ? 0 : -1}
                 disabled={option.disabled}
-                className={`flex h-7 w-full items-center whitespace-nowrap text-left disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`flex h-[22px] w-full items-center whitespace-nowrap text-left disabled:cursor-not-allowed disabled:opacity-40 ${
                   isSelected
                     ? "text-body-14-md text-neutral-900"
                     : "text-body-14-rg text-neutral-600"
