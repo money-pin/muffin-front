@@ -48,7 +48,7 @@ export default function BottomNavigation() {
               className="h-6 w-6 object-contain"
               draggable={false}
             />
-            <span className="text-[10px] font-bold">{label}</span>
+            <span className="text-caption-12-md-tighter">{label}</span>
           </button>
         );
       })}
