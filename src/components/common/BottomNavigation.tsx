@@ -28,18 +28,18 @@ export default function BottomNavigation() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 h-[92px] w-full max-w-[390px] bg-white border-t border-[#D9D9D9] flex justify-between items-start px-8 pt-1">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 h-[92px] w-full max-w-[390px] bg-white border-t border-neutral-100 flex justify-between items-start px-8 pt-1">
       {TABS.map(({ label, path, Active, Inactive }) => {
         const active = location.pathname === path;
         const Icon = active ? Active : Inactive;
-        const color = active ? "text-[#F46C0E]" : "text-[#999999]";
+        const color = active ? "text-primary" : "text-neutral-400";
 
         return (
           <button
             key={path}
             type="button"
             onClick={() => navigate(path)}
-            className={`flex h-[60px] w-[60px] flex-col items-center justify-center gap-0.5 ${color}`}
+            className={`flex h-[60px] w-[60px] flex-col items-center justify-center gap-1 ${color}`}
           >
             <img
               src={Icon}
