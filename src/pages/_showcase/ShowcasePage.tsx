@@ -10,11 +10,29 @@ import SectionHeader from "@/components/common/SectionHeader";
 import CharacterAvatar from "@/components/common/CharacterAvatar";
 import TopBar from "@/components/common/TopBar";
 import BottomNavigation from "@/components/common/BottomNavigation";
+import SortDropdown, {
+  type SortOption,
+} from "@/components/common/SortDropdown";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+const SORT_OPTIONS = [
+  { value: "investment-asc", label: "투자금 낮은 순" },
+  { value: "investment-desc", label: "투자금 높은 순" },
+  { value: "profit-desc", label: "수익률 높은 순" },
+  { value: "profit-asc", label: "수익률 낮은 순" },
+] as const satisfies readonly SortOption[];
+
+type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="flex flex-col gap-3 border-b border-[#F5F5F5] px-5 py-6">
-      <h2 className="text-xs font-bold text-[#999999]">{title}</h2>
+    <section className="flex flex-col gap-3 border-b border-neutral-50 px-5 py-6">
+      <h2 className="text-caption-12-bd text-neutral-400">{title}</h2>
       {children}
     </section>
   );
@@ -25,6 +43,7 @@ export default function ShowcasePage() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("HelloMuffin123");
   const [onb, setOnb] = useState(2);
+  const [sort, setSort] = useState<SortValue>("profit-desc");
 
   return (
     <div className="pb-[120px]">
@@ -35,9 +54,25 @@ export default function ShowcasePage() {
       </Section>
 
       <Section title="TextField">
-        <TextField label="이메일" placeholder="example@email.com" value={email} onChange={setEmail} required />
-        <TextField label="비밀번호" type="password" value={pw} onChange={setPw} />
-        <TextField label="에러 상태" value="잘못된 값" onChange={() => {}} error="에러 메시지입니다" />
+        <TextField
+          label="이메일"
+          placeholder="example@email.com"
+          value={email}
+          onChange={setEmail}
+          required
+        />
+        <TextField
+          label="비밀번호"
+          type="password"
+          value={pw}
+          onChange={setPw}
+        />
+        <TextField
+          label="에러 상태"
+          value="잘못된 값"
+          onChange={() => {}}
+          error="에러 메시지입니다"
+        />
       </Section>
 
       <Section title="Button">
@@ -53,7 +88,12 @@ export default function ShowcasePage() {
 
       <Section title="OnboardingButton (선택 토글)">
         {["거의 안 봐요", "가끔 봐요", "매일 챙겨봐요"].map((l, i) => (
-          <OnboardingButton key={l} label={l} selected={onb === i} onClick={() => setOnb(i)} />
+          <OnboardingButton
+            key={l}
+            label={l}
+            selected={onb === i}
+            onClick={() => setOnb(i)}
+          />
         ))}
       </Section>
 
@@ -70,6 +110,16 @@ export default function ShowcasePage() {
 
       <Section title="SectionHeader">
         <SectionHeader title="따끈한 금융 소식" icon={<span>📢</span>} />
+      </Section>
+
+      <Section title="SortDropdown">
+        <div className="flex justify-end">
+          <SortDropdown
+            options={SORT_OPTIONS}
+            value={sort}
+            onChange={setSort}
+          />
+        </div>
       </Section>
 
       <Section title="CharacterAvatar">
