@@ -18,7 +18,7 @@ export default function SocialLoginButton({ onClick }: SocialLoginButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="flex h-[56px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#E5E5EC] bg-white text-base font-bold text-[#1B1B1B] transition-all"
+      className="flex h-[56px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#E5E5EC] bg-white text-body-16-md-tighter text-neutral-900 transition-all"
     >
       <GoogleIcon />
       구글로 계속하기
