@@ -29,7 +29,7 @@ export default function TextField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-body-14-md text-neutral-900">
+      <label className="text-body-14-md text-neutral-700">
         {label}
         {required && <span className="ml-0.5 text-positive">*</span>}
       </label>
@@ -47,7 +47,7 @@ export default function TextField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent text-body-14-rg text-neutral-900 outline-none placeholder:text-neutral-100"
+          className="flex-1 bg-transparent text-body-14-rg text-neutral-900 outline-none placeholder:text-neutral-400"
         />
 
         <div className="flex items-center gap-2">
