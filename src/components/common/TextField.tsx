@@ -87,7 +87,7 @@ export default function TextField({
         </div>
       </div>
 
-      {error && <p className="text-xs text-positive">{error}</p>}
+      {error && <p className="text-caption-12-md text-positive">{error}</p>}
     </div>
   );
 }
