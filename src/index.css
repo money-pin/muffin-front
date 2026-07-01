@@ -7,7 +7,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Regular"),
-    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo-Regular.woff2")
+    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo/SpoqaHanSansNeo-Regular.woff2")
       format("woff2");
 }
 
@@ -18,7 +18,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Medium"),
-    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo-Medium.woff2")
+    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo/SpoqaHanSansNeo-Medium.woff2")
       format("woff2");
 }
 
@@ -29,7 +29,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Bold"),
-    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo-Bold.woff2")
+    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo/SpoqaHanSansNeo-Bold.woff2")
       format("woff2");
 }
 
@@ -82,7 +82,7 @@
   --text-heading-24-md--font-weight: 500;
 
   --text-heading-20-bd: 1.25rem;
-  --text-heading-20-bd--line-height: 1.6;
+  --text-heading-20-bd--line-height: 1.5;
   --text-heading-20-bd--font-weight: 700;
 
   --text-heading-20-md: 1.25rem;
@@ -95,8 +95,9 @@
   --text-heading-20-md-tightest--letter-spacing: -0.8px;
 
   --text-heading-18-bd: 1.125rem;
-  --text-heading-18-bd--line-height: 1.6;
+  --text-heading-18-bd--line-height: 1.4;
   --text-heading-18-bd--font-weight: 700;
+  --text-heading-18-bd--letter-spacing: -0.4px;
 
   /* Body */
   --text-body-16-md: 1rem;
@@ -104,17 +105,17 @@
   --text-body-16-md--font-weight: 500;
 
   --text-body-16-bd-tighter: 1rem;
-  --text-body-16-bd-tighter--line-height: 1.6;
+  --text-body-16-bd-tighter--line-height: 1.4;
   --text-body-16-bd-tighter--font-weight: 700;
   --text-body-16-bd-tighter--letter-spacing: -0.4px;
 
   --text-body-16-md-tighter: 1rem;
-  --text-body-16-md-tighter--line-height: 1.6;
+  --text-body-16-md-tighter--line-height: 1.4;
   --text-body-16-md-tighter--font-weight: 500;
   --text-body-16-md-tighter--letter-spacing: -0.4px;
 
   --text-body-16-rg-tighter: 1rem;
-  --text-body-16-rg-tighter--line-height: 1.6;
+  --text-body-16-rg-tighter--line-height: 1.4;
   --text-body-16-rg-tighter--font-weight: 400;
   --text-body-16-rg-tighter--letter-spacing: -0.4px;
 
