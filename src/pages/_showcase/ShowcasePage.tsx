@@ -100,8 +100,6 @@ export default function ShowcasePage() {
 
       <Section title="Button">
         <Button variant="primary">로그인 (primary)</Button>
-        <Button variant="secondary">secondary</Button>
-        <Button variant="outline">outline</Button>
         <Button disabled>비활성 (disabled)</Button>
       </Section>
 
@@ -122,8 +120,7 @@ export default function ShowcasePage() {
 
       <Section title="QuizButton">
         <QuizButton label="기본 (default)" state="default" />
-        <QuizButton label="선택됨 (selected)" state="selected" />
-        <QuizButton label="정답 (correct · 파랑)" state="correct" />
+        <QuizButton label="정답 (correct)" state="correct" />
         <QuizButton label="오답 (wrong · 빨강)" state="wrong" />
       </Section>
 
