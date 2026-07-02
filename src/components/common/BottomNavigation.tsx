@@ -8,9 +8,7 @@ import investmentActiveIcon from "@/assets/icon-24px/investment-active.svg";
 import myIcon from "@/assets/icon-24px/my.svg";
 import myActiveIcon from "@/assets/icon-24px/my-active.svg";
 
-// Figma: 비활성=아웃라인(회색), 활성=filled(주황 #F46C0E) — 색만이 아니라 아이콘 자체가 교체됨.
-// 아이콘 이름은 Figma의 IconHome/IconNews/IconPaperTrading/IconMyPage(+Pr=활성) 매핑.
-//⚠️ home icon 추출 시 오류 -> 확인 필요.
+
 const TABS = [
   { label: "홈", path: "/home", Active: homeActiveIcon, Inactive: homeIcon },
   { label: "뉴스", path: "/news", Active: newsActiveIcon, Inactive: newsIcon },
