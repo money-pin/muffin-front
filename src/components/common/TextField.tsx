@@ -29,17 +29,17 @@ export default function TextField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-bold text-[#1B1B1B]">
+      <label className="text-body-14-md text-neutral-700">
         {label}
-        {required && <span className="ml-0.5 text-[#FF3045]">*</span>}
+        {required && <span className="ml-0.5 text-positive">*</span>}
       </label>
 
       <div
         className={`flex h-[50px] items-center gap-2.5 rounded-[8px] border bg-white px-4 transition-all
         ${
           error
-            ? "border-[#FF3045]"
-            : "border-[#E2E2E2] focus-within:border-[#F46C0E]"
+            ? "border-positive"
+            : "border-neutral-100 focus-within:border-primary"
         }`}
       >
         <input
@@ -47,7 +47,7 @@ export default function TextField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent text-sm text-[#1B1B1B] outline-none placeholder:text-[#E2E2E2]"
+          className="flex-1 bg-transparent text-body-14-rg text-neutral-900 outline-none placeholder:text-neutral-400"
         />
 
         <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export default function TextField({
         </div>
       </div>
 
-      {error && <p className="text-xs text-[#FF3045]">{error}</p>}
+      {error && <p className="text-caption-12-md text-positive">{error}</p>}
     </div>
   );
 }

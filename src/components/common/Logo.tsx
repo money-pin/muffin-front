@@ -17,7 +17,7 @@ export default function Logo({ tagline = false, className = "" }: LogoProps) {
         className="h-[66px] w-[188px] object-contain"
       />
 
-      {tagline && <p className="text-sm font-bold text-[#F46C0E]">{TAGLINE}</p>}
+      {tagline && <p className="text-body-16-bd-tighter text-primary">{TAGLINE}</p>}
     </div>
   );
 }

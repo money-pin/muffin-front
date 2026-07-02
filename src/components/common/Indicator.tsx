@@ -11,7 +11,7 @@ export default function Indicator({ total, current }: IndicatorProps) {
         <div
           key={i}
           className={`h-1 flex-1 rounded-full transition-all ${
-            i < current ? "bg-[#F46C0E]" : "bg-[#E2E2E2]"
+            i < current ? "bg-primary" : "bg-neutral-100"
           }`}
         />
       ))}

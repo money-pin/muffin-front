@@ -13,8 +13,8 @@ export default function Badge({
     "inline-flex items-center justify-center px-2 py-0.5 rounded-[4px] text-[10px] font-bold tracking-tight select-none";
 
   const variants = {
-    orange: "bg-[#FFF4EA] text-[#F46C0E]",
-    gray: "bg-[#F5F5F5] text-[#999999]",
+    orange: "bg-primary-50 text-primary",
+    gray: "bg-neutral-50 text-neutral-400",
   };
 
   return (

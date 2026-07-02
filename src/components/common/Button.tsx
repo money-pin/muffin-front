@@ -14,14 +14,14 @@ export default function Button({
   className = "",
 }: ButtonProps) {
   const base =
-    "w-full h-[52px] rounded-[12px] font-bold text-base transition-all px-5 flex items-center justify-center gap-1";
+    "w-full h-[52px] rounded-[12px] text-body-16-bd-tighter transition-all px-5 flex items-center justify-center gap-1";
   const variants = {
-    primary: "bg-[#F46C0E] text-white",
-    secondary: "bg-[#FF9900] text-white",
-    outline: "border border-[#F46C0E] text-[#F46C0E] bg-white",
+    primary: "bg-primary text-white",
+    secondary: "bg-secondary text-white",
+    outline: "border border-primary text-primary bg-white",
   };
   // Figma: disabled = Neutral/Gray06 배경(#F5F5F5)
-  const disabledStyle = "bg-[#F5F5F5] text-[#999999] border-transparent";
+  const disabledStyle = "bg-neutral-50 text-neutral-400 border-transparent";
 
   return (
     <button
