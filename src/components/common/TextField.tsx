@@ -12,6 +12,7 @@ interface TextFieldProps {
   type?: "text" | "password" | "email" | "tel";
   error?: string;
   required?: boolean;
+  rightSlot?: React.ReactNode; // 예: 인증번호 타이머("05:00") 등 커스텀 우측 요소
 }
 
 export default function TextField({
@@ -22,6 +23,7 @@ export default function TextField({
   type = "text",
   error,
   required = false,
+  rightSlot,
 }: TextFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
   const inputType =
@@ -51,6 +53,8 @@ export default function TextField({
         />
 
         <div className="flex items-center gap-2">
+          {rightSlot}
+
           {type === "password" && (
             <button
               type="button"

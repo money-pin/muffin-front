@@ -13,6 +13,9 @@ import BottomNavigation from "@/components/common/BottomNavigation";
 import SortDropdown, {
   type SortOption,
 } from "@/components/common/SortDropdown";
+import Badge from "@/components/common/Badge";
+import TabBar from "@/components/common/TabBar";
+import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 
 const SORT_OPTIONS = [
   { value: "investment-asc", label: "투자금 낮은 순" },
@@ -22,6 +25,15 @@ const SORT_OPTIONS = [
 ] as const satisfies readonly SortOption[];
 
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+
+const NEWS_TABS = [
+  { value: "all", label: "전체" },
+  { value: "economy", label: "경제" },
+  { value: "stock", label: "증권" },
+  { value: "world", label: "세계" },
+] as const;
+
+type NewsTabValue = (typeof NEWS_TABS)[number]["value"];
 
 function Section({
   title,
@@ -42,8 +54,10 @@ function Section({
 export default function ShowcasePage() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("HelloMuffin123");
+  const [otp, setOtp] = useState("");
   const [onb, setOnb] = useState(2);
   const [sort, setSort] = useState<SortValue>("profit-desc");
+  const [newsTab, setNewsTab] = useState<NewsTabValue>("all");
 
   return (
     <div className="pb-[120px]">
@@ -72,6 +86,15 @@ export default function ShowcasePage() {
           value="잘못된 값"
           onChange={() => {}}
           error="에러 메시지입니다"
+        />
+        <TextField
+          label="인증번호"
+          placeholder="인증번호 6자리"
+          value={otp}
+          onChange={setOtp}
+          rightSlot={
+            <span className="text-body-14-md text-primary">05:00</span>
+          }
         />
       </Section>
 
@@ -109,7 +132,17 @@ export default function ShowcasePage() {
       </Section>
 
       <Section title="SectionHeader">
-        <SectionHeader title="따끈한 금융 소식" icon={<span>📢</span>} />
+        <SectionHeader
+          title="따끈한 금융 소식"
+          icon={
+            <img
+              src={megaphoneIcon}
+              alt=""
+              aria-hidden="true"
+              className="size-5"
+            />
+          }
+        />
       </Section>
 
       <Section title="SortDropdown">
@@ -120,6 +153,21 @@ export default function ShowcasePage() {
             onChange={setSort}
           />
         </div>
+      </Section>
+
+      <Section title="Badge">
+        <div className="flex items-center gap-2">
+          <Badge variant="orange">경제</Badge>
+          <Badge variant="gray">3/5</Badge>
+        </div>
+      </Section>
+
+      <Section title="TabBar">
+        <TabBar
+          tabs={NEWS_TABS}
+          currentTab={newsTab}
+          onTabChange={setNewsTab}
+        />
       </Section>
 
       <Section title="CharacterAvatar">
