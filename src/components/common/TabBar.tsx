@@ -30,8 +30,8 @@ export default function TabBar<T extends string = string>({
               className="relative flex-1 flex flex-col items-center justify-center h-[48px] focus:outline-none bg-transparent"
             >
               <span
-                className={`text-sm font-bold transition-colors duration-200
-                  ${isActive ? "text-neutral-900" : "text-neutral-400"}`}
+                className={`transition-colors duration-200
+                  ${isActive ? "text-body-16-bd-tighter text-primary" : "text-body-16-md-tighter text-neutral-400"}`}
               >
                 {tab.label}
               </span>
