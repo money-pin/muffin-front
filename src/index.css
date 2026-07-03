@@ -187,3 +187,25 @@
     outline-offset: 2px;
   }
 }
+
+/* 스플래시 로고 인트로: 아래에서 페이드인 + 스케일업 */
+@keyframes splash-logo-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-splash-logo {
+  animation: splash-logo-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-splash-logo {
+    animation: none;
+  }
+}
