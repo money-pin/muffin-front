@@ -37,6 +37,10 @@ export const router = createBrowserRouter([
         path: "login",
         element: <LoginPage />,
       },
+      {
+        path: "onboarding",
+        element: <OnboardingPage />,
+      },
 
       {
         element: <NavLayout />,
@@ -74,10 +78,6 @@ export const router = createBrowserRouter([
           {
             path: "signup",
             element: <SignupPage />,
-          },
-          {
-            path: "onboarding",
-            element: <OnboardingPage />,
           },
           {
             path: "news/:newsId",
