@@ -4,7 +4,7 @@ interface TabOption<T extends string = string> {
 }
 
 interface TabBarProps<T extends string = string> {
-  tabs: TabOption<T>[];
+  tabs: readonly TabOption<T>[];
   currentTab: T;
   onTabChange: (value: T) => void;
   className?: string;

@@ -8,16 +8,16 @@ interface QuizButtonProps {
 
 export default function QuizButton({ label, state = "default", onClick }: QuizButtonProps) {
   const styles: Record<QuizState, string> = {
-    default: "border-neutral-100 bg-white text-neutral-900",
-    selected: "border-primary bg-primary-50 text-primary",
-    correct: "border-negative-300 bg-negative-50 text-negative-300",
-    wrong: "border-positive-300 bg-positive-50 text-positive-300",
+    default: "border-neutral-100 bg-white text-neutral-900 text-body-16-md-tighter",
+    selected: "border-primary bg-primary-50 text-primary text-body-16-bd-tighter",
+    correct: "border-primary bg-primary-50 text-primary text-body-16-bd-tighter",
+    wrong: "border-positive-300 bg-positive-50 text-positive text-body-16-bd-tighter",
   };
 
   return (
     <button
       onClick={onClick}
-      className={`w-full h-[58px] flex items-center justify-center rounded-[8px] text-body-16-bd-tighter border transition-all ${styles[state]}`}
+      className={`w-full h-[58px] flex items-center justify-center rounded-[8px] border transition-all ${styles[state]}`}
     >
       {label}
     </button>
