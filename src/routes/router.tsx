@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import MobileLayout from "@/layouts/MobileLayout";
+import NavLayout from "@/layouts/NavLayout";
+import TopBarLayout from "@/layouts/TopBarLayout";
 
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
@@ -23,63 +25,76 @@ export const router = createBrowserRouter([
     element: <MobileLayout />,
     children: [
       {
-        path: "/",
+        index: true,
         element: <Navigate to="/home" replace />,
       },
       {
-        path: "/login",
+        path: "login",
         element: <LoginPage />,
       },
+
       {
-        path: "/signup",
-        element: <SignupPage />,
+        element: <NavLayout />,
+        children: [
+          {
+            path: "home",
+            element: <HomePage />,
+          },
+          {
+            path: "news",
+            element: <NewsPage />,
+          },
+          {
+            path: "invest",
+            element: <InvestPage />,
+          },
+          {
+            path: "stats",
+            element: <StatsPage />,
+          },
+          {
+            path: "ranking",
+            element: <RankingPage />,
+          },
+          {
+            path: "my",
+            element: <MyPage />,
+          },
+        ],
       },
+
       {
-        path: "/onboarding",
-        element: <OnboardingPage />,
+        element: <TopBarLayout />,
+        children: [
+          {
+            path: "signup",
+            element: <SignupPage />,
+          },
+          {
+            path: "onboarding",
+            element: <OnboardingPage />,
+          },
+          {
+            path: "news/:newsId",
+            element: <NewsDetailPage />,
+          },
+          {
+            path: "quiz",
+            element: <QuizPage />,
+          },
+          {
+            path: "my/settings",
+            element: <MySettingsPage />,
+          },
+          {
+            path: "my/storage",
+            element: <MyStoragePage />,
+          },
+        ],
       },
+
       {
-        path: "/home",
-        element: <HomePage />,
-      },
-      {
-        path: "/news",
-        element: <NewsPage />,
-      },
-      {
-        path: "/news/:newsId",
-        element: <NewsDetailPage />,
-      },
-      {
-        path: "/quiz",
-        element: <QuizPage />,
-      },
-      {
-        path: "/invest",
-        element: <InvestPage />,
-      },
-      {
-        path: "/stats",
-        element: <StatsPage />,
-      },
-      {
-        path: "/ranking",
-        element: <RankingPage />,
-      },
-      {
-        path: "/my",
-        element: <MyPage />,
-      },
-      {
-        path: "/my/settings",
-        element: <MySettingsPage />,
-      },
-      {
-        path: "/my/storage",
-        element: <MyStoragePage />,
-      },
-      {
-        path: "/showcase",
+        path: "showcase",
         element: <ShowcasePage />,
       },
       {
