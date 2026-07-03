@@ -11,6 +11,7 @@ interface TextFieldProps {
   onChange: (v: string) => void;
   type?: "text" | "password" | "email" | "tel";
   error?: string;
+  success?: string; // 긍정 안내(주황). 우선순위 error > success > hint
   hint?: string; // 안내 문구(회색). error가 있으면 error가 우선 표시됨
   required?: boolean;
   rightSlot?: React.ReactNode; // 예: 인증번호 타이머("05:00") 등 커스텀 우측 요소
@@ -23,6 +24,7 @@ export default function TextField({
   onChange,
   type = "text",
   error,
+  success,
   hint,
   required = false,
   rightSlot,
@@ -95,9 +97,11 @@ export default function TextField({
 
       {error ? (
         <p className="text-caption-12-md text-positive">{error}</p>
-      ) : (
-        hint && <p className="text-caption-12-md text-neutral-400">{hint}</p>
-      )}
+      ) : success ? (
+        <p className="text-caption-12-md text-primary">{success}</p>
+      ) : hint ? (
+        <p className="text-caption-12-md text-neutral-400">{hint}</p>
+      ) : null}
     </div>
   );
 }
