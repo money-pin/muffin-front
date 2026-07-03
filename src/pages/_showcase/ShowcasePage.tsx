@@ -15,6 +15,7 @@ import SortDropdown, {
 } from "@/components/common/SortDropdown";
 import Badge from "@/components/common/Badge";
 import TabBar from "@/components/common/TabBar";
+import BottomSheet from "@/components/common/BottomSheet";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 
 const SORT_OPTIONS = [
@@ -58,6 +59,7 @@ export default function ShowcasePage() {
   const [onb, setOnb] = useState(2);
   const [sort, setSort] = useState<SortValue>("profit-desc");
   const [newsTab, setNewsTab] = useState<NewsTabValue>("all");
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
   return (
     <div className="pb-[120px]">
@@ -174,6 +176,30 @@ export default function ShowcasePage() {
           <CharacterAvatar size="large" />
         </div>
       </Section>
+
+      <Section title="BottomSheet">
+        <Button onClick={() => setIsBottomSheetOpen(true)}>
+          바텀시트 열기
+        </Button>
+      </Section>
+
+      <BottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={() => setIsBottomSheetOpen(false)}
+        ariaLabel="용어 설명"
+      >
+        <div className="px-[21px] pb-[60px] pt-4">
+          <div className="border-b border-neutral-100 py-2">
+            <h3 className="text-heading-20-bd text-neutral-1000">
+              <span className="text-primary">양적완화</span>란?
+            </h3>
+          </div>
+
+          <p className="pt-4 text-body-16-rg-tighter text-neutral-900">
+            중앙은행이 시중에 돈을 더 많이 풀어서 경제를 활성화하는 정책
+          </p>
+        </div>
+      </BottomSheet>
 
       <BottomNavigation />
     </div>
