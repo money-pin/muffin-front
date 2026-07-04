@@ -34,14 +34,14 @@ export default function EmailVerifyStep({ onComplete }: EmailVerifyStepProps) {
   const canComplete = code.length === 6 && !expired;
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-8 pt-2">
-      <h2 className="text-heading-20-bd leading-[1.4] text-neutral-1000">
+    <div className="flex flex-1 flex-col px-5 pb-8 pt-5">
+      <h2 className="text-heading-20-bd leading-[1.5] text-neutral-1000">
         이메일로 전송된
         <br />
         인증번호를 입력해주세요.
       </h2>
 
-      <div className="mt-8">
+      <div className="mt-9">
         <TextField
           label="인증번호"
           type="tel"
@@ -62,12 +62,12 @@ export default function EmailVerifyStep({ onComplete }: EmailVerifyStepProps) {
           }
         />
 
-        <p className="mt-2 text-body-14-md text-neutral-600">
+        <p className="mt-5 text-body-14-md-tighter text-neutral-400">
           인증 문자를 받지 못하셨나요?{" "}
           <button
             type="button"
             onClick={handleResend}
-            className="text-body-14-bd text-primary underline"
+            className="text-body-14-md-tighter text-primary underline"
           >
             다시 보내기
           </button>
