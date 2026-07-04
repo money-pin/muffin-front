@@ -29,8 +29,11 @@ export default function SignupFormStep({
   const { name, email, password, passwordConfirm, agreed } = values;
 
   const passwordValid = PASSWORD_RE.test(password);
-  const passwordError = password !== "" && !passwordValid ? PASSWORD_GUIDE : undefined;
-  const passwordSuccess = passwordValid ? "사용 가능한 비밀번호입니다." : undefined;
+  const passwordError =
+    password !== "" && !passwordValid ? PASSWORD_GUIDE : undefined;
+  const passwordSuccess = passwordValid
+    ? "사용 가능한 비밀번호입니다."
+    : undefined;
 
   const confirmMatch = passwordConfirm !== "" && passwordConfirm === password;
   const confirmError =
@@ -47,7 +50,7 @@ export default function SignupFormStep({
     agreed;
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-8 pt-2">
+    <div className="flex flex-1 flex-col px-5 pb-8 pt-4">
       <div className="flex flex-col gap-6">
         <TextField
           label="이름"
@@ -94,12 +97,14 @@ export default function SignupFormStep({
           className="flex items-center gap-2"
         >
           <span
-            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
-              agreed ? "border-primary bg-primary" : "border-neutral-100 bg-white"
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
+              agreed
+                ? "border-primary bg-primary"
+                : "border-neutral-100 bg-white"
             }`}
           >
             {agreed && (
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
                 <path
                   d="M2.5 6.5 5 9l4.5-5.5"
                   stroke="white"
@@ -110,14 +115,14 @@ export default function SignupFormStep({
               </svg>
             )}
           </span>
-          <span className="flex-1 text-left text-body-14-md text-neutral-700">
+          <span className="flex-1 text-left text-body-14-md-tighter text-neutral-700">
             개인정보처리방침 동의 <span className="text-primary">(필수)</span>
           </span>
           <img
             src={chevronRightIcon}
             alt=""
             aria-hidden="true"
-            className="h-6 w-6"
+            className="h-5 w-5"
             draggable={false}
           />
         </button>
