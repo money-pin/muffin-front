@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 import Indicator from "@/components/common/Indicator";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
+import muffinPlain from "@/assets/avatars/muffin-plain.png";
 
 import { ONBOARDING_QUESTIONS } from "./onboardingData";
 import NicknameStep from "./steps/NicknameStep";
 import MessageStep from "./steps/MessageStep";
 import QuestionStep from "./steps/QuestionStep";
 import FeatureStep from "./steps/FeatureStep";
+import StartFundCard from "./steps/StartFundCard";
 
 // 온보딩 스텝 순서 (question-N 은 ONBOARDING_QUESTIONS 인덱스)
 const STEPS = [
@@ -68,20 +70,23 @@ function OnboardingPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-white">
       <header className="relative flex h-14 shrink-0 items-center px-5">
-        <button
-          type="button"
-          onClick={goBack}
-          aria-label="뒤로가기"
-          className="flex h-7 w-7 items-center justify-center"
-        >
-          <img
-            src={chevronLeftIcon}
-            alt=""
-            aria-hidden="true"
-            className="h-7 w-7"
-            draggable={false}
-          />
-        </button>
+        {/* Figma: welcome 스텝만 뒤로가기 없음 */}
+        {step !== "welcome" && (
+          <button
+            type="button"
+            onClick={goBack}
+            aria-label="뒤로가기"
+            className="flex h-7 w-7 items-center justify-center"
+          >
+            <img
+              src={chevronLeftIcon}
+              alt=""
+              aria-hidden="true"
+              className="h-7 w-7"
+              draggable={false}
+            />
+          </button>
+        )}
         {step === "nickname" && (
           <h1 className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-heading-18-bd text-neutral-900">
             닉네임 설정
@@ -105,6 +110,15 @@ function OnboardingPage() {
 
       {step === "welcome" && (
         <MessageStep
+          media={
+            <img
+              src={muffinPlain}
+              alt=""
+              aria-hidden="true"
+              className="h-[142px] w-[148px] object-contain"
+              draggable={false}
+            />
+          }
           title={`반가워요, ${displayName}님!`}
           subtitle={
             <>
@@ -136,6 +150,15 @@ function OnboardingPage() {
 
       {step === "result" && (
         <MessageStep
+          media={
+            <img
+              src={muffinPlain}
+              alt=""
+              aria-hidden="true"
+              className="h-[142px] w-[148px] object-contain"
+              draggable={false}
+            />
+          }
           title={
             <>
               투자가 서툰 {displayName}님을 위해
@@ -153,14 +176,16 @@ function OnboardingPage() {
           buttonLabel="다음"
           onNext={goNext}
         >
-          <div className="mt-4 flex items-center gap-2 rounded-full border border-neutral-100 px-3 py-2">
-            <span className="text-body-14-md text-neutral-600">추천 섹터</span>
-            <span className="rounded-full bg-primary-50 px-2.5 py-1 text-body-14-bd text-primary">
-              반도체
-            </span>
-            <span className="rounded-full bg-primary-50 px-2.5 py-1 text-body-14-bd text-primary">
-              금
-            </span>
+          <div className="flex w-full items-center gap-4 rounded-[12px] border border-neutral-100 p-4">
+            <span className="text-body-14-md text-neutral-700">추천 섹터</span>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex min-w-[28px] items-center justify-center rounded-[4px] bg-secondary-100 px-1 text-body-14-md-tighter text-primary">
+                반도체
+              </span>
+              <span className="inline-flex min-w-[28px] items-center justify-center rounded-[4px] bg-secondary-100 px-1 text-body-14-md-tighter text-primary">
+                금
+              </span>
+            </div>
           </div>
         </MessageStep>
       )}
@@ -169,6 +194,7 @@ function OnboardingPage() {
 
       {step === "complete" && (
         <MessageStep
+          media={<StartFundCard />}
           title="시작 자금 100만원이 충전되었어요!"
           subtitle={
             <>
