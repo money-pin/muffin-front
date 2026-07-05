@@ -11,6 +11,8 @@ interface TextFieldProps {
   onChange: (v: string) => void;
   type?: "text" | "password" | "email" | "tel";
   error?: string;
+  success?: string; // 긍정 안내(주황). 우선순위 error > success > hint
+  hint?: string; // 안내 문구(회색). error가 있으면 error가 우선 표시됨
   required?: boolean;
   rightSlot?: React.ReactNode; // 예: 인증번호 타이머("05:00") 등 커스텀 우측 요소
 }
@@ -22,6 +24,8 @@ export default function TextField({
   onChange,
   type = "text",
   error,
+  success,
+  hint,
   required = false,
   rightSlot,
 }: TextFieldProps) {
@@ -30,68 +34,77 @@ export default function TextField({
     type === "password" ? (showPassword ? "text" : "password") : type;
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-body-14-md text-neutral-700">
-        {label}
-        {required && <span className="ml-0.5 text-positive">*</span>}
-      </label>
+    // 피그마: 라벨→입력창 8px, 입력창→메시지 4px (서로 다른 간격)
+    <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
+        <label className="text-body-14-md text-neutral-700">
+          {label}
+          {required && <span className="ml-0.5 font-bold text-primary">*</span>}
+        </label>
 
-      <div
-        className={`flex h-[50px] items-center gap-2.5 rounded-[8px] border bg-white px-4 transition-all
-        ${
-          error
-            ? "border-positive"
-            : "border-neutral-100 focus-within:border-primary"
-        }`}
-      >
-        <input
-          type={inputType}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="flex-1 bg-transparent text-body-14-rg text-neutral-900 outline-none placeholder:text-neutral-400"
-        />
+        <div
+          className={`flex h-[50px] items-center gap-2.5 rounded-[8px] border bg-white px-4 transition-all
+          ${
+            error
+              ? "border-positive"
+              : "border-neutral-100 focus-within:border-primary"
+          }`}
+        >
+          <input
+            type={inputType}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className="flex-1 bg-transparent text-body-14-rg text-neutral-900 outline-none placeholder:text-neutral-400"
+          />
 
-        <div className="flex items-center gap-2">
-          {rightSlot}
+          <div className="flex items-center gap-2">
+            {rightSlot}
 
-          {type === "password" && (
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="flex h-6 w-6 items-center justify-center"
-              aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
-            >
-              <img
-                src={showPassword ? eyeIcon : eyeOffIcon}
-                alt=""
-                aria-hidden="true"
-                className="h-6 w-6 object-contain"
-                draggable={false}
-              />
-            </button>
-          )}
+            {type === "password" && (
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="flex h-6 w-6 items-center justify-center"
+                aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+              >
+                <img
+                  src={showPassword ? eyeIcon : eyeOffIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-6 w-6 object-contain"
+                  draggable={false}
+                />
+              </button>
+            )}
 
-          {value && (
-            <button
-              type="button"
-              onClick={() => onChange("")}
-              className="flex h-6 w-6 items-center justify-center"
-              aria-label="입력값 지우기"
-            >
-              <img
-                src={closeButtonIcon}
-                alt=""
-                aria-hidden="true"
-                className="h-[18px] w-[18px] object-contain"
-                draggable={false}
-              />
-            </button>
-          )}
+            {value && (
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                className="flex h-6 w-6 items-center justify-center"
+                aria-label="입력값 지우기"
+              >
+                <img
+                  src={closeButtonIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-[18px] w-[18px] object-contain"
+                  draggable={false}
+                />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {error && <p className="text-caption-12-md text-positive">{error}</p>}
+      {error ? (
+        <p className="px-1 text-caption-12-md text-positive">{error}</p>
+      ) : success ? (
+        <p className="px-1 text-caption-12-md text-primary">{success}</p>
+      ) : hint ? (
+        <p className="px-1 text-caption-12-md text-neutral-400">{hint}</p>
+      ) : null}
     </div>
   );
 }

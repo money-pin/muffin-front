@@ -10,9 +10,7 @@ import {
 
 import TopBar from "@/components/common/TopBar";
 
-const TOP_SAFE_AREA_HEIGHT = 62;
-const TOP_BAR_HEIGHT = 56;
-
+// 상단 고정 영역: 상태바 세이프에어리어(62px) + 탑바(56px) = 본문 pt-[118px]
 export interface TopBarOptions {
   title?: string;
   showBack?: boolean;

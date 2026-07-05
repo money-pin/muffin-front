@@ -4,6 +4,7 @@ import MobileLayout from "@/layouts/MobileLayout";
 import NavLayout from "@/layouts/NavLayout";
 import TopBarLayout from "@/layouts/TopBarLayout";
 
+import SplashPage from "@/pages/auth/SplashPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
 import OnboardingPage from "@/pages/onboarding/OnboardingPage";
@@ -29,8 +30,16 @@ export const router = createBrowserRouter([
         element: <Navigate to="/home" replace />,
       },
       {
+        path: "splash",
+        element: <SplashPage />,
+      },
+      {
         path: "login",
         element: <LoginPage />,
+      },
+      {
+        path: "signup",
+        element: <SignupPage />,
       },
 
       {
@@ -66,10 +75,6 @@ export const router = createBrowserRouter([
       {
         element: <TopBarLayout />,
         children: [
-          {
-            path: "signup",
-            element: <SignupPage />,
-          },
           {
             path: "onboarding",
             element: <OnboardingPage />,
