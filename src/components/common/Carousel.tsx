@@ -11,6 +11,7 @@ export default function Carousel({ children }: CarouselProps) {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    touchEndX.current = e.touches[0].clientX;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -38,11 +39,11 @@ export default function Carousel({ children }: CarouselProps) {
         <div 
           className="flex transition-transform duration-300 ease-out gap-[12px]"
           style={{ 
-            transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 12}px))` 
+            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 12}px))` 
           }}
         >
           {children.map((child, index) => (
-            <div key={index} className="w-full min-w-full sm:min-w-[350px] shrink-0">
+            <div key={index} className="w-[85%] min-w-[85%] sm:w-auto sm:min-w-[350px] shrink-0">
               {child}
             </div>
           ))}
