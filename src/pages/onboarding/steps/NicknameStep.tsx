@@ -15,20 +15,17 @@ export default function NicknameStep({
   const canSubmit = nickname.trim() !== "";
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-8 pt-4">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-heading-20-bd text-neutral-1000">
-          가입이 완료됐어요!
-        </h2>
-        <p className="text-body-14-rg text-neutral-600">
-          앞으로 사용할 닉네임을 설정해 주세요.
-        </p>
+    <div className="flex flex-1 flex-col px-5 pb-8 pt-5">
+      <div className="text-heading-20-bd text-neutral-1000">
+        <p>가입이 완료됐어요!</p>
+        <p>앞으로 사용할 닉네임을 설정해 주세요.</p>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-9">
         <TextField
-          label="닉네임"
-          placeholder="닉네임을 입력해주세요"
+          placeholder="최대 6자 설정 가능"
+          hint="나중에 언제든지 변경할 수 있어요."
+          maxLength={6}
           value={nickname}
           onChange={onChange}
         />
