@@ -41,6 +41,10 @@ export const router = createBrowserRouter([
         path: "signup",
         element: <SignupPage />,
       },
+      {
+        path: "onboarding",
+        element: <OnboardingPage />,
+      },
 
       {
         element: <NavLayout />,
@@ -75,10 +79,6 @@ export const router = createBrowserRouter([
       {
         element: <TopBarLayout />,
         children: [
-          {
-            path: "onboarding",
-            element: <OnboardingPage />,
-          },
           {
             path: "news/:newsId",
             element: <NewsDetailPage />,

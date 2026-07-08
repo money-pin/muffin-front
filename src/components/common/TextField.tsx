@@ -5,7 +5,7 @@ import eyeOffIcon from "@/assets/icon-24px/eye-off.svg";
 import closeButtonIcon from "@/assets/icon-24px/close-button.svg";
 
 interface TextFieldProps {
-  label: string;
+  label?: string; // 없으면 라벨 미노출 (예: 온보딩 닉네임)
   placeholder?: string;
   value: string;
   onChange: (v: string) => void;
@@ -14,6 +14,7 @@ interface TextFieldProps {
   success?: string; // 긍정 안내(주황). 우선순위 error > success > hint
   hint?: string; // 안내 문구(회색). error가 있으면 error가 우선 표시됨
   required?: boolean;
+  maxLength?: number;
   rightSlot?: React.ReactNode; // 예: 인증번호 타이머("05:00") 등 커스텀 우측 요소
 }
 
@@ -27,6 +28,7 @@ export default function TextField({
   success,
   hint,
   required = false,
+  maxLength,
   rightSlot,
 }: TextFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -37,10 +39,14 @@ export default function TextField({
     // 피그마: 라벨→입력창 8px, 입력창→메시지 4px (서로 다른 간격)
     <div className="flex flex-col gap-1">
       <div className="flex flex-col gap-2">
-        <label className="text-body-14-md text-neutral-700">
-          {label}
-          {required && <span className="ml-0.5 font-bold text-primary">*</span>}
-        </label>
+        {label && (
+          <label className="text-body-14-md text-neutral-700">
+            {label}
+            {required && (
+              <span className="ml-0.5 font-bold text-primary">*</span>
+            )}
+          </label>
+        )}
 
         <div
           className={`flex h-[50px] items-center gap-2.5 rounded-[8px] border bg-white px-4 transition-all
@@ -55,6 +61,7 @@ export default function TextField({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
+            maxLength={maxLength}
             className="flex-1 bg-transparent text-body-14-rg text-neutral-900 outline-none placeholder:text-neutral-400"
           />
 
