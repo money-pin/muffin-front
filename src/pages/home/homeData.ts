@@ -35,6 +35,22 @@ export interface HomeNews {
   image: "economy" | "IT" | "world"; // newscard 에셋 키
 }
 
+export interface InvestResult {
+  date: string; // 정산 기준일 (YYYY.MM.DD)
+  profit: number; // 최종 수익금(원, 음수 가능)
+  profitRate: number; // 수익률(%)
+  principal: number; // 투자 원금(원)
+  finalAssets: number; // 최종 자산(원)
+}
+
+export const HOME_INVEST_RESULT: InvestResult = {
+  date: "2026.05.07",
+  profit: 48_000,
+  profitRate: 4.8,
+  principal: 1_000_000,
+  finalAssets: 1_045_000,
+};
+
 export interface TopSector {
   rank: 1 | 2 | 3;
   name: string;
