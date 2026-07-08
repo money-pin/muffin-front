@@ -35,6 +35,19 @@ export interface HomeNews {
   image: "economy" | "IT" | "world"; // newscard 에셋 키
 }
 
+export interface TopSector {
+  rank: 1 | 2 | 3;
+  name: string;
+  change: number; // 수익액(원)
+  changeRate: number; // 수익률(%)
+}
+
+export const HOME_TOP_SECTORS: TopSector[] = [
+  { rank: 1, name: "반도체", change: 45_000, changeRate: 12.5 },
+  { rank: 2, name: "테크", change: 85_000, changeRate: 8.7 },
+  { rank: 3, name: "코인", change: 65_000, changeRate: 6.8 },
+];
+
 export const HOME_NEWS: HomeNews[] = [
   {
     id: 1,

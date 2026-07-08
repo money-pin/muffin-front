@@ -4,12 +4,19 @@ import Logo from "@/components/common/Logo";
 import Carousel from "@/components/common/Carousel";
 import SectionHeader from "@/components/common/SectionHeader";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
+import rankingIcon from "@/assets/icon-20px/ranking.svg";
 
 import CharacterGreeting from "./components/CharacterGreeting";
 import AssetCard from "./components/AssetCard";
 import QuizBanner from "./components/QuizBanner";
 import NewsCard from "./components/NewsCard";
-import { HOME_USER, HOME_ASSETS, HOME_NEWS } from "./homeData";
+import TopSectorList from "./components/TopSectorList";
+import {
+  HOME_USER,
+  HOME_ASSETS,
+  HOME_NEWS,
+  HOME_TOP_SECTORS,
+} from "./homeData";
 
 // Figma Home: 위 흰색 → 아래 주황빛(secondary-300 20%) 그라데이션 위에
 // 캐릭터·총자산 카드, 그 아래 흰색 라운드 시트(퀴즈·뉴스·TOP3)가 얹히는 구조
@@ -65,6 +72,24 @@ function HomePage() {
               />
             ))}
           </Carousel>
+        </section>
+
+        <section className="flex flex-col gap-2 px-5">
+          <div className="px-1">
+            <SectionHeader
+              title="수익 TOP 3 섹터"
+              icon={
+                <img
+                  src={rankingIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-5 w-5"
+                  draggable={false}
+                />
+              }
+            />
+          </div>
+          <TopSectorList sectors={HOME_TOP_SECTORS} />
         </section>
       </div>
     </div>
