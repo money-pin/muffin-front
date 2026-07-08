@@ -25,3 +25,39 @@ export const HOME_ASSETS: HomeAssets = {
   changeRate: 4.5,
   lastInvestedAt: { month: 5, day: 7 },
 };
+
+export interface HomeNews {
+  id: number;
+  title: string;
+  category: string; // 예: 경제, IT, 세계
+  date: string; // YYYY-MM-DD
+  views: string; // 예: "31만"
+  image: "economy" | "IT" | "world"; // newscard 에셋 키
+}
+
+export const HOME_NEWS: HomeNews[] = [
+  {
+    id: 1,
+    title: "엔비디아 실적 발표, 국내 반도체 ETF에도 훈풍 부나?",
+    category: "경제",
+    date: "2026-05-08",
+    views: "31만",
+    image: "economy",
+  },
+  {
+    id: 2,
+    title: "AI 반도체 수요 폭증, 삼성전자 HBM 증설 나선다",
+    category: "IT",
+    date: "2026-05-08",
+    views: "24만",
+    image: "IT",
+  },
+  {
+    id: 3,
+    title: "美 연준 금리 동결, 신흥국 증시 안도 랠리",
+    category: "세계",
+    date: "2026-05-07",
+    views: "18만",
+    image: "world",
+  },
+];
