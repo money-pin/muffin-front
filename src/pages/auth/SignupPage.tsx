@@ -1,121 +1,76 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
-import TextField from "@/components/common/TextField";
-import Button from "@/components/common/Button";
-import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
+import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
+import SignupFormStep from "./signup/SignupFormStep";
+import type { SignupFormValues } from "./signup/SignupFormStep";
+import EmailVerifyStep from "./signup/EmailVerifyStep";
+
+const INITIAL_FORM: SignupFormValues = {
+  name: "",
+  email: "",
+  password: "",
+  passwordConfirm: "",
+  agreed: false,
+};
 
 function SignupPage() {
   const navigate = useNavigate();
-  const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
+  const [step, setStep] = useState<"form" | "verify">("form");
+  const [form, setForm] = useState<SignupFormValues>(INITIAL_FORM);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [agreed, setAgreed] = useState(false);
+  const updateForm = (patch: Partial<SignupFormValues>) =>
+    setForm((prev) => ({ ...prev, ...patch }));
 
-  useEffect(() => {
-    setTopBar({ title: "가입하기", showBack: true, background: "white" });
-    return () => resetTopBar();
-  }, [setTopBar, resetTopBar]);
+  const handleFormNext = () => {
+    // TODO: 중복 이메일 확인 + 인증번호 발송 API
+    setStep("verify");
+  };
 
-  const passwordMismatch =
-    passwordConfirm !== "" && password !== passwordConfirm;
-
-  const canSubmit =
-    name.trim() !== "" &&
-    email.trim() !== "" &&
-    password.trim() !== "" &&
-    passwordConfirm.trim() !== "" &&
-    !passwordMismatch &&
-    agreed;
-
-  const handleNext = () => {
-    // TODO: 회원가입 API 연결 / 다음 스텝 이동
+  const handleComplete = () => {
+    // TODO: 인증번호 검증 + 계정 생성 API
     navigate("/onboarding");
   };
 
-  return (
-    <div className="flex min-h-[calc(100dvh-118px)] flex-col px-5 pb-8">
-      <div className="flex flex-col gap-6">
-        <TextField
-          label="이름"
-          required
-          placeholder="홍길동"
-          value={name}
-          onChange={setName}
-        />
-        <TextField
-          label="이메일"
-          type="email"
-          required
-          placeholder="example@email.com"
-          value={email}
-          onChange={setEmail}
-        />
-        <TextField
-          label="비밀번호"
-          type="password"
-          required
-          placeholder="8자 이상 입력해주세요."
-          hint="영문, 숫자를 포함한 8-16 조합으로 입력해주세요."
-          value={password}
-          onChange={setPassword}
-        />
-        <TextField
-          label="비밀번호 재입력"
-          type="password"
-          required
-          placeholder="다시 한번 입력해주세요."
-          value={passwordConfirm}
-          onChange={setPasswordConfirm}
-          error={passwordMismatch ? "비밀번호가 일치하지 않습니다." : undefined}
-        />
-      </div>
+  const goBack = () => {
+    if (step === "verify") {
+      setStep("form");
+    } else {
+      navigate(-1);
+    }
+  };
 
-      <div className="mt-auto flex flex-col gap-5 pt-8">
+  return (
+    <div className="flex min-h-dvh flex-col bg-white">
+      <header className="relative flex h-14 shrink-0 items-center px-5">
         <button
           type="button"
-          onClick={() => setAgreed((v) => !v)}
-          className="flex items-center gap-2"
+          onClick={goBack}
+          aria-label="뒤로가기"
+          className="flex h-7 w-7 items-center justify-center"
         >
-          <span
-            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
-              agreed
-                ? "border-primary bg-primary"
-                : "border-neutral-100 bg-white"
-            }`}
-          >
-            {agreed && (
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path
-                  d="M2.5 6.5 5 9l4.5-5.5"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
-          </span>
-          <span className="flex-1 text-left text-body-14-md text-neutral-700">
-            개인정보처리방침 동의 <span className="text-primary">(필수)</span>
-          </span>
           <img
-            src={chevronRightIcon}
+            src={chevronLeftIcon}
             alt=""
             aria-hidden="true"
-            className="h-6 w-6"
+            className="h-7 w-7"
             draggable={false}
           />
         </button>
+        <h1 className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-heading-18-bd text-neutral-900">
+          가입하기
+        </h1>
+      </header>
 
-        <Button onClick={handleNext} disabled={!canSubmit}>
-          다음
-        </Button>
-      </div>
+      {step === "form" ? (
+        <SignupFormStep
+          values={form}
+          onChange={updateForm}
+          onNext={handleFormNext}
+        />
+      ) : (
+        <EmailVerifyStep onComplete={handleComplete} />
+      )}
     </div>
   );
 }
