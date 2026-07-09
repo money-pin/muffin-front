@@ -17,33 +17,37 @@ export default function TabBar<T extends string = string>({
   className = "",
 }: TabBarProps<T>) {
   return (
-    <div className={`w-full bg-white border-b border-neutral-100 ${className}`}>
-      <div className="flex justify-between items-center px-4">
-        {tabs.map((tab) => {
-          const isActive = tab.value === currentTab;
+    <nav className={`flex h-12 w-full items-center bg-neutral-0 ${className}`}>
+      {tabs.map((tab) => {
+        const isActive = tab.value === currentTab;
 
-          return (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => onTabChange(tab.value)}
-              className="relative flex-1 flex flex-col items-center justify-center h-[48px] focus:outline-none bg-transparent"
+        return (
+          <button
+            key={tab.value}
+            type="button"
+            aria-current={isActive ? "page" : undefined}
+            onClick={() => onTabChange(tab.value)}
+            className="relative flex h-full flex-1 items-center justify-center px-2.5 py-3"
+          >
+            <span
+              className={
+                isActive
+                  ? "text-body-16-bd-tighter text-primary"
+                  : "text-body-16-md-tighter text-neutral-400"
+              }
             >
-              <span
-                className={`transition-colors duration-200
-                  ${isActive ? "text-body-16-bd-tighter text-primary" : "text-body-16-md-tighter text-neutral-400"}`}
-              >
-                {tab.label}
-              </span>
+              {tab.label}
+            </span>
 
-              <div
-                className={`absolute bottom-0 left-0 right-0 h-[2px] transition-all duration-200
-                  ${isActive ? "bg-primary" : "bg-transparent"}`}
-              />
-            </button>
-          );
-        })}
-      </div>
-    </div>
+            <span
+              aria-hidden="true"
+              className={`absolute bottom-0 h-0.5 w-full ${
+                isActive ? "bg-primary" : "bg-transparent"
+              }`}
+            />
+          </button>
+        );
+      })}
+    </nav>
   );
 }
