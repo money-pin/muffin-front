@@ -51,7 +51,7 @@ function HomePage() {
         isOpen={resultOpen}
         onClose={() => setResultOpen(false)}
         result={HOME_INVEST_RESULT}
-        onDetailClick={() => navigate("/stats")}
+        onDetailClick={() => navigate("/invest/stats")}
         onInvestClick={() => navigate("/invest")}
       />
 
