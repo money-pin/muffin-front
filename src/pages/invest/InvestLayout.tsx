@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
 
-import InvestTabBar from "@/pages/invest/components/InvestTabBar";
+import InvestHeader from "@/pages/invest/components/InvestHeader";
 
 export default function InvestLayout() {
   return (
     <>
-      <InvestTabBar />
+      <InvestHeader />
       <Outlet />
     </>
   );
