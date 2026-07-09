@@ -12,9 +12,10 @@ import HomePage from "@/pages/home/HomePage";
 import NewsPage from "@/pages/news/NewsPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
 import QuizPage from "@/pages/quiz/QuizPage";
+import InvestLayout from "@/pages/invest/InvestLayout";
 import InvestPage from "@/pages/invest/InvestPage";
-import StatsPage from "@/pages/stats/StatsPage";
-import RankingPage from "@/pages/ranking/RankingPage";
+import StatsPage from "@/pages/invest/StatsPage";
+import RankingPage from "@/pages/invest/RankingPage";
 import MyPage from "@/pages/my/MyPage";
 import MySettingsPage from "@/pages/my/MySettingsPage";
 import MyStoragePage from "@/pages/my/MyStoragePage";
@@ -59,15 +60,21 @@ export const router = createBrowserRouter([
           },
           {
             path: "invest",
-            element: <InvestPage />,
-          },
-          {
-            path: "stats",
-            element: <StatsPage />,
-          },
-          {
-            path: "ranking",
-            element: <RankingPage />,
+            element: <InvestLayout />,
+            children: [
+              {
+                index: true,
+                element: <InvestPage />,
+              },
+              {
+                path: "stats",
+                element: <StatsPage />,
+              },
+              {
+                path: "ranking",
+                element: <RankingPage />,
+              },
+            ],
           },
           {
             path: "my",

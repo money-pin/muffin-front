@@ -28,7 +28,8 @@ export default function BottomNavigation() {
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 h-[80px] w-full max-w-[390px] bg-white border-t border-neutral-100 flex justify-between items-start px-8 pt-1">
       {TABS.map(({ label, path, Active, Inactive }) => {
-        const active = location.pathname === path;
+        const active =
+          location.pathname === path || location.pathname.startsWith(`${path}/`);
         const Icon = active ? Active : Inactive;
         const color = active ? "text-primary" : "text-neutral-400";
 
