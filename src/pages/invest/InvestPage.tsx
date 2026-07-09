@@ -2,8 +2,8 @@ import InvestBudgetCard from "./components/invest/InvestBudgetCard";
 
 function InvestPage() {
   return (
-    <div className="min-h-full bg-[var(--color-neutral-50)] px-5 py-5">
-      <InvestBudgetCard />
+    <div className="flex flex-col gap-6">
+      <InvestBudgetCard totalBudget={1000000} remainingBudget={1000000} />
     </div>
   );
 }
