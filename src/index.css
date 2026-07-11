@@ -163,6 +163,7 @@
   #root {
     min-width: 320px;
     min-height: 100%;
+    overscroll-behavior-y: none;
   }
 
   body {

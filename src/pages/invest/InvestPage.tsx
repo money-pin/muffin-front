@@ -1,8 +1,37 @@
+import InvestBudgetCard from "./trade/components/InvestBudgetCard";
+import InvestAssetCard from "./trade/components/InvestAssetCard";
+
+import { INVEST_ASSET_SECTIONS } from "./trade/constants/investAsset";
+import { MOCK_INVEST_MARKET_DATA } from "./trade/mocks/mockInvestMarketData";
+
 function InvestPage() {
   return (
-    <div className="min-h-dvh px-5 py-6 text-black">
-      <h1 className="text-2xl font-bold">Invest</h1>
-      <p className="mt-2 text-sm text-gray-500">모의투자 화면입니다.</p>
+    <div className="bg-[var(--color-neutral-50)] flex flex-1 flex-col gap-5 px-5 py-5">
+      <InvestBudgetCard
+        totalBudget={MOCK_INVEST_MARKET_DATA.totalBudget}
+        remainingBudget={MOCK_INVEST_MARKET_DATA.remainingBudget}
+      />
+
+      {INVEST_ASSET_SECTIONS.map((section) => (
+        <div key={section.id} className="flex flex-col gap-2">
+          <h2 className="text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] text-[var(--color-neutral-900)]">
+            {section.title}
+          </h2>
+
+          <div className="flex justify-between">
+            {section.items.map((asset) => (
+              <InvestAssetCard
+                key={asset.id}
+                name={asset.name}
+                icon={asset.icon}
+                activeIcon={asset.activeIcon}
+                status="default"
+                quantity={0}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

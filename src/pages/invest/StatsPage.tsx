@@ -10,12 +10,12 @@ import semiconductorIcon from "@/assets/investment/investment-semiconductor.svg"
 import technologyIcon from "@/assets/investment/investment-technology.svg";
 import BottomSheet from "@/components/common/BottomSheet";
 
-import InvestmentStyleCard from "./components/InvestmentStyleCard";
-import ProfitRateTrendCard from "./components/ProfitRateTrendCard";
-import RecentPerformanceCard from "./components/RecentPerformanceCard";
-import RecentPerformanceSheetContent from "./components/RecentPerformanceSheetContent";
-import TopProfitSectorsCard from "./components/TopProfitSectorsCard";
-import TotalProfitCard from "./components/TotalProfitCard";
+import InvestmentStyleCard from "./stats/components/InvestmentStyleCard";
+import ProfitRateTrendCard from "./stats/components/ProfitRateTrendCard";
+import RecentPerformanceCard from "./stats/components/RecentPerformanceCard";
+import RecentPerformanceSheetContent from "./stats/components/RecentPerformanceSheetContent";
+import TopProfitSectorsCard from "./stats/components/TopProfitSectorsCard";
+import TotalProfitCard from "./stats/components/TotalProfitCard";
 import type {
   CumulativeProfit,
   InvestmentProfile,
@@ -23,7 +23,7 @@ import type {
   RecentPerformanceSummary,
   SectorPerformanceDetail,
   TopSector,
-} from "./types";
+} from "./stats/types";
 
 const statsMock: {
   recentPerformance: RecentPerformanceSummary;
@@ -138,8 +138,7 @@ const statsMock: {
 };
 
 export default function StatsPage() {
-  const [isRecentPerformanceOpen, setIsRecentPerformanceOpen] =
-    useState(false);
+  const [isRecentPerformanceOpen, setIsRecentPerformanceOpen] = useState(false);
 
   return (
     <>
