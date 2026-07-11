@@ -5,11 +5,38 @@ export interface InvestmentResultDate {
 
 export type ProfitHistoryPeriod = "day" | "week" | "month" | "year" | "all";
 
+export type ProfitHistoryApiPeriod = "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
+
+export type ProfitHistorySortKey =
+  | "AMOUNT_DESC"
+  | "AMOUNT_ASC"
+  | "RATE_DESC"
+  | "RATE_ASC";
+
 export interface ProfitHistorySummary {
   title: string;
   profitAmount: number;
   profitRate: number;
   investmentAmount: number;
+}
+
+export interface ProfitHistorySector {
+  sectorCode: string;
+  name: string;
+  iconSrc: string;
+  profitAmount: number;
+  profitRate: number;
+  investmentAmount: number;
+}
+
+export interface ProfitHistoryData {
+  period: ProfitHistoryApiPeriod;
+  date?: string;
+  hasPrev: boolean;
+  hasNext: boolean;
+  summary: ProfitHistorySummary;
+  sort: ProfitHistorySortKey;
+  sectors: ProfitHistorySector[];
 }
 
 export interface RecentPerformanceSummary {

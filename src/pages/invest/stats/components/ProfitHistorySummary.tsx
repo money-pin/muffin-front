@@ -7,6 +7,10 @@ import type {
 interface ProfitHistorySummaryProps {
   period: ProfitHistoryPeriod;
   data: ProfitHistorySummaryType;
+  hasPrev?: boolean;
+  hasNext?: boolean;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
 
 function formatCurrency(value: number) {
@@ -30,6 +34,10 @@ function getProfitColorClass(value: number) {
 export default function ProfitHistorySummary({
   period,
   data,
+  hasPrev = false,
+  hasNext = false,
+  onPrev,
+  onNext,
 }: ProfitHistorySummaryProps) {
   const showPeriodControls = period !== "all";
 
@@ -40,7 +48,9 @@ export default function ProfitHistorySummary({
           <button
             type="button"
             aria-label="이전 기간"
-            className="flex size-3 items-center justify-center text-neutral-900"
+            disabled={!hasPrev}
+            className="flex size-3 items-center justify-center text-neutral-900 disabled:text-neutral-200"
+            onClick={onPrev}
           >
             <span aria-hidden="true" className="text-[10px] leading-none">
               ◀
@@ -56,7 +66,9 @@ export default function ProfitHistorySummary({
           <button
             type="button"
             aria-label="다음 기간"
-            className="flex size-3 items-center justify-center text-neutral-200"
+            disabled={!hasNext}
+            className="flex size-3 items-center justify-center text-neutral-900 disabled:text-neutral-200"
+            onClick={onNext}
           >
             <span aria-hidden="true" className="text-[10px] leading-none">
               ▶
@@ -76,7 +88,7 @@ export default function ProfitHistorySummary({
             >
               {getSignedCurrency(data.profitAmount)}
             </p>
-            <ProfitRateBadge rate={data.profitRate} size="md" className="h-6" />
+            <ProfitRateBadge rate={data.profitRate} size="md" />
           </div>
         </div>
 
