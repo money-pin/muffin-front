@@ -4,9 +4,12 @@ import InvestHeader from "@/pages/invest/components/InvestHeader";
 
 export default function InvestLayout() {
   return (
-    <>
+    <div className="flex min-h-dvh flex-col">
       <InvestHeader />
-      <Outlet />
-    </>
+
+      <main className="flex-1 flex flex-col">
+        <Outlet />
+      </main>
+    </div>
   );
 }
