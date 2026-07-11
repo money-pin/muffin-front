@@ -1,5 +1,5 @@
-import InvestBudgetCard from "./components/invest/InvestBudgetCard";
-import InvestAssetCard from "./components/invest/InvestAssetCard";
+import InvestBudgetCard from "./components/InvestBudgetCard";
+import InvestAssetCard from "./components/InvestAssetCard";
 
 import { INVEST_ASSET_SECTIONS } from "./constants/investAsset";
 import { MOCK_INVEST_MARKET_DATA } from "./mocks/mockInvestMarketData";
