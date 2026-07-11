@@ -1,15 +1,162 @@
+import { useMemo, useState } from "react";
+
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
+import InvestAssetCountBar from "@/pages/invest/trade/components/InvestAssetCountBar";
+import InvestBottomAction from "@/pages/invest/trade/components/InvestBottomAction";
 import InvestBudgetCard from "@/pages/invest/trade/components/InvestBudgetCard";
 
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
 import { MOCK_INVEST_MARKET_DATA } from "@/pages/invest/trade/mocks/mockInvestMarketData";
 
+import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
+
+type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
+
 function InvestPage() {
+  const [selectedAssetId, setSelectedAssetId] = useState<InvestAssetId | null>(
+    null,
+  );
+
+  const [assetQuantities, setAssetQuantities] = useState<AssetQuantityMap>({});
+
+  const allAssets = useMemo(() => {
+    return INVEST_ASSET_SECTIONS.flatMap((section) => section.items);
+  }, []);
+
+  const selectedAsset = useMemo(() => {
+    return allAssets.find((asset) => asset.id === selectedAssetId);
+  }, [allAssets, selectedAssetId]);
+
+  const selectedQuantity = selectedAssetId
+    ? (assetQuantities[selectedAssetId] ?? 0)
+    : 0;
+
+  const selectedAssetPrice = selectedAssetId
+    ? MOCK_INVEST_MARKET_DATA.assetPrices[selectedAssetId]
+    : 0;
+
+  const selectedAssetTotalAmount = selectedAssetPrice * selectedQuantity;
+
+  const totalInvestAmount = Object.entries(assetQuantities).reduce(
+    (sum, [assetId, quantity]) => {
+      const price =
+        MOCK_INVEST_MARKET_DATA.assetPrices[assetId as InvestAssetId] ?? 0;
+
+      return sum + price * (quantity ?? 0);
+    },
+    0,
+  );
+
+  const remainingBudget = Math.max(
+    0,
+    MOCK_INVEST_MARKET_DATA.totalBudget - totalInvestAmount,
+  );
+
+  const canDecrease = selectedQuantity > 0;
+
+  const canIncrease =
+    selectedAssetPrice > 0 && remainingBudget >= selectedAssetPrice;
+
+  const hasAnyInvestment = totalInvestAmount > 0;
+
+  const handleAssetClick = (assetId: InvestAssetId) => {
+    setSelectedAssetId(assetId);
+
+    setAssetQuantities((prev) => {
+      const currentQuantity = prev[assetId] ?? 0;
+
+      if (currentQuantity > 0) {
+        return prev;
+      }
+
+      const assetPrice = MOCK_INVEST_MARKET_DATA.assetPrices[assetId];
+
+      if (
+        totalInvestAmount + assetPrice >
+        MOCK_INVEST_MARKET_DATA.totalBudget
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [assetId]: 1,
+      };
+    });
+  };
+
+  const handleDecrease = () => {
+    if (!selectedAssetId) return;
+
+    setAssetQuantities((prev) => {
+      const currentQuantity = prev[selectedAssetId] ?? 0;
+      const nextQuantity = Math.max(0, currentQuantity - 1);
+
+      if (nextQuantity === 0) {
+        const next = { ...prev };
+        delete next[selectedAssetId];
+
+        setSelectedAssetId(null);
+
+        return next;
+      }
+
+      return {
+        ...prev,
+        [selectedAssetId]: nextQuantity,
+      };
+    });
+  };
+
+  const handleIncrease = () => {
+    if (!selectedAssetId || !canIncrease) return;
+
+    setAssetQuantities((prev) => {
+      const currentQuantity = prev[selectedAssetId] ?? 0;
+
+      return {
+        ...prev,
+        [selectedAssetId]: currentQuantity + 1,
+      };
+    });
+  };
+
+  const handleReset = () => {
+    setSelectedAssetId(null);
+    setAssetQuantities({});
+  };
+
+  const handlePurchase = () => {
+    if (!hasAnyInvestment) return;
+
+    const investmentPayload = Object.entries(assetQuantities)
+      .filter(([, quantity]) => (quantity ?? 0) > 0)
+      .map(([assetId, quantity]) => {
+        const typedAssetId = assetId as InvestAssetId;
+        const asset = allAssets.find((item) => item.id === typedAssetId);
+        const unitPrice = MOCK_INVEST_MARKET_DATA.assetPrices[typedAssetId];
+
+        return {
+          assetId: typedAssetId,
+          name: asset?.name,
+          unitPrice,
+          quantity,
+          totalAmount: unitPrice * (quantity ?? 0),
+        };
+      });
+
+    console.log("백엔드로 보낼 투자 내용:", {
+      totalAmount: totalInvestAmount,
+      remainingBudget,
+      investments: investmentPayload,
+    });
+  };
+
   return (
-    <div className="bg-[var(--color-neutral-50)] flex flex-1 flex-col gap-5 px-5 py-5">
+    <div className="flex flex-1 flex-col gap-5 bg-[var(--color-neutral-50)] px-5 pt-5 pb-[240px]">
       <InvestBudgetCard
         totalBudget={MOCK_INVEST_MARKET_DATA.totalBudget}
-        remainingBudget={MOCK_INVEST_MARKET_DATA.remainingBudget}
+        remainingBudget={remainingBudget}
       />
 
       {INVEST_ASSET_SECTIONS.map((section) => (
@@ -19,19 +166,50 @@ function InvestPage() {
           </h2>
 
           <div className="flex justify-between">
-            {section.items.map((asset) => (
-              <InvestAssetCard
-                key={asset.id}
-                name={asset.name}
-                icon={asset.icon}
-                activeIcon={asset.activeIcon}
-                status="default"
-                quantity={0}
-              />
-            ))}
+            {section.items.map((asset) => {
+              const quantity = assetQuantities[asset.id] ?? 0;
+              const isSelected = selectedAssetId === asset.id && quantity > 0;
+              const isPurchased = selectedAssetId !== asset.id && quantity > 0;
+
+              return (
+                <InvestAssetCard
+                  key={asset.id}
+                  name={asset.name}
+                  icon={asset.icon}
+                  activeIcon={asset.activeIcon}
+                  status={
+                    isSelected
+                      ? "selected"
+                      : isPurchased
+                        ? "purchased"
+                        : "default"
+                  }
+                  quantity={quantity}
+                  onClick={() => handleAssetClick(asset.id)}
+                />
+              );
+            })}
           </div>
         </div>
       ))}
+
+      {selectedAsset && selectedQuantity > 0 && (
+        <InvestAssetCountBar
+          name={selectedAsset.name}
+          totalAmount={selectedAssetTotalAmount}
+          quantity={selectedQuantity}
+          canDecrease={canDecrease}
+          canIncrease={canIncrease}
+          onDecrease={handleDecrease}
+          onIncrease={handleIncrease}
+        />
+      )}
+
+      <InvestBottomAction
+        selectedTotalAmount={totalInvestAmount}
+        onReset={handleReset}
+        onPurchase={handlePurchase}
+      />
     </div>
   );
 }
