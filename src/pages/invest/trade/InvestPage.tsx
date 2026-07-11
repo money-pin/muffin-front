@@ -1,8 +1,8 @@
-import InvestBudgetCard from "./trade/components/InvestBudgetCard";
-import InvestAssetCard from "./trade/components/InvestAssetCard";
+import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
+import InvestBudgetCard from "@/pages/invest/trade/components/InvestBudgetCard";
 
-import { INVEST_ASSET_SECTIONS } from "./trade/constants/investAsset";
-import { MOCK_INVEST_MARKET_DATA } from "./trade/mocks/mockInvestMarketData";
+import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
+import { MOCK_INVEST_MARKET_DATA } from "@/pages/invest/trade/mocks/mockInvestMarketData";
 
 function InvestPage() {
   return (

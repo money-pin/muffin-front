@@ -10,12 +10,12 @@ import semiconductorIcon from "@/assets/investment/investment-semiconductor.svg"
 import technologyIcon from "@/assets/investment/investment-technology.svg";
 import BottomSheet from "@/components/common/BottomSheet";
 
-import InvestmentStyleCard from "./stats/components/InvestmentStyleCard";
-import ProfitRateTrendCard from "./stats/components/ProfitRateTrendCard";
-import RecentPerformanceCard from "./stats/components/RecentPerformanceCard";
-import RecentPerformanceSheetContent from "./stats/components/RecentPerformanceSheetContent";
-import TopProfitSectorsCard from "./stats/components/TopProfitSectorsCard";
-import TotalProfitCard from "./stats/components/TotalProfitCard";
+import InvestmentStyleCard from "@/pages/invest/stats/components/InvestmentStyleCard";
+import ProfitRateTrendCard from "@/pages/invest/stats/components/ProfitRateTrendCard";
+import RecentPerformanceCard from "@/pages/invest/stats/components/RecentPerformanceCard";
+import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
+import TopProfitSectorsCard from "@/pages/invest/stats/components/TopProfitSectorsCard";
+import TotalProfitCard from "@/pages/invest/stats/components/TotalProfitCard";
 import type {
   CumulativeProfit,
   InvestmentProfile,
@@ -23,7 +23,7 @@ import type {
   RecentPerformanceSummary,
   SectorPerformanceDetail,
   TopSector,
-} from "./stats/types";
+} from "@/pages/invest/stats/types";
 
 const statsMock: {
   recentPerformance: RecentPerformanceSummary;
