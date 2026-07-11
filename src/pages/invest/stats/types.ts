@@ -3,6 +3,13 @@ export interface InvestmentResultDate {
   day: number;
 }
 
+export interface RecentPerformanceSummary {
+  date: InvestmentResultDate;
+  profitAmount: number;
+  profitRate: number;
+  investmentAmount: number;
+}
+
 export interface CumulativeProfit {
   amount: number;
   rate: number;
@@ -18,6 +25,15 @@ export interface TopSector {
   name: string;
   profitAmount: number;
   profitRate: number;
+}
+
+export interface SectorPerformanceDetail {
+  id: string;
+  name: string;
+  iconSrc: string;
+  profitAmount: number;
+  profitRate: number;
+  investmentAmount: number;
 }
 
 export interface InvestmentProfile {

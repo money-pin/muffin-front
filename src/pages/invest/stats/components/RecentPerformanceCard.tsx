@@ -5,13 +5,19 @@ import type { InvestmentResultDate } from "@/pages/invest/stats/types";
 
 interface RecentPerformanceCardProps {
   date: InvestmentResultDate;
+  onClick?: () => void;
 }
 
 export default function RecentPerformanceCard({
   date,
+  onClick,
 }: RecentPerformanceCardProps) {
   return (
-    <div className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 py-5 pl-5 pr-4">
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 py-5 pl-5 pr-4 text-left"
+    >
       <div className="flex items-center gap-1">
         <img
           src={calendarIcon}
@@ -37,6 +43,6 @@ export default function RecentPerformanceCard({
           draggable={false}
         />
       </div>
-    </div>
+    </button>
   );
 }

@@ -1,6 +1,7 @@
 import chartIcon from "@/assets/icon-20px/stats-graph.svg";
-import ProfitRateGraph from "@/pages/invest/stats/components/ProfitRateGraph";
 import type { ProfitTrendPoint } from "@/pages/invest/stats/types";
+
+import ProfitRateGraph from "./ProfitRateGraph";
 
 interface ProfitRateTrendCardProps {
   data: ProfitTrendPoint[];

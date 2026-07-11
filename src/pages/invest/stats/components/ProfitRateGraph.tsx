@@ -17,13 +17,20 @@ export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
   const height = 200;
   const paddingLeft = 45;
   const paddingRight = 25;
-  const paddingTop = 15;
-  const paddingBottom = 25;
+  const paddingTop = 10;
+  const paddingBottom = 30;
   const chartWidth = width - paddingLeft - paddingRight;
   const chartHeight = height - paddingTop - paddingBottom;
   const maxY = 60000;
   const yGridValues = [60000, 45000, 30000, 15000, 0];
   const canDrawGraph = data.length >= 2;
+  const gridColor = "#E2E2E2";
+  const labelColor = "#999999";
+  const lineColor = "#6F6F6F";
+  const axisFontSize = 12;
+  const gridDash = "4 4";
+  const axisColor = "#999999";
+  const tickLength = 6;
 
   if (!canDrawGraph) return <EmptyGraph />;
 
@@ -52,6 +59,32 @@ export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
         xmlns="http://www.w3.org/2000/svg"
         className="select-none"
       >
+        <line
+          x1={paddingLeft}
+          y1={paddingTop}
+          x2={paddingLeft}
+          y2={height - paddingBottom - 8}
+          stroke={axisColor}
+          strokeWidth="1"
+        />
+
+        {data.map((point, index) => {
+          const x = getX(index);
+
+          return (
+            <line
+              key={`x-grid-${point.label}`}
+              x1={x}
+              y1={paddingTop}
+              x2={x}
+              y2={height - paddingBottom}
+              stroke={gridColor}
+              strokeWidth="1"
+              strokeDasharray={gridDash}
+            />
+          );
+        })}
+
         {yGridValues.map((value) => {
           const y = getY(value);
           const label = value === 0 ? "0k" : `${value / 1000}k`;
@@ -59,19 +92,27 @@ export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
           return (
             <g key={value}>
               <line
+                x1={paddingLeft - tickLength}
+                y1={y}
+                x2={paddingLeft}
+                y2={y}
+                stroke={axisColor}
+                strokeWidth="1"
+              />
+              <line
                 x1={paddingLeft}
                 y1={y}
                 x2={width - paddingRight}
                 y2={y}
-                stroke="#E2E2E2"
+                stroke={gridColor}
                 strokeWidth="1"
-                strokeDasharray="4 4"
+                strokeDasharray={gridDash}
               />
               <text
-                x={paddingLeft - 8}
-                y={y + 4}
-                fill="#999999"
-                fontSize="11"
+                x={paddingLeft - 10}
+                y={y + 5}
+                fill={labelColor}
+                fontSize={axisFontSize}
                 fontWeight="500"
                 textAnchor="end"
               >
@@ -83,7 +124,7 @@ export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
 
         <path
           d={pathD}
-          stroke="#6F6F6F"
+          stroke={lineColor}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -91,13 +132,21 @@ export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
 
         {data.map((point, index) => (
           <circle
+            key={`halo-${point.label}`}
+            cx={getX(index)}
+            cy={getY(point.value)}
+            r="7"
+            fill="white"
+          />
+        ))}
+
+        {data.map((point, index) => (
+          <circle
             key={point.label}
             cx={getX(index)}
             cy={getY(point.value)}
-            r="4"
-            fill="#535353"
-            stroke="#FFFFFF"
-            strokeWidth="1.5"
+            r="5"
+            fill={lineColor}
           />
         ))}
 
@@ -105,9 +154,9 @@ export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
           <text
             key={point.label}
             x={getX(index)}
-            y={height - 6}
-            fill="#999999"
-            fontSize="11"
+            y={height - 10}
+            fill={labelColor}
+            fontSize={axisFontSize}
             fontWeight="500"
             textAnchor="middle"
           >
