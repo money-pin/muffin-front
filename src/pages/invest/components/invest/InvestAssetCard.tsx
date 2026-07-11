@@ -27,7 +27,7 @@ function InvestAssetCard({
       onClick={onClick}
       className={[
         "relative flex h-[98px] w-[80px] flex-col items-center justify-center gap-1 rounded-[12px] bg-[var(--color-neutral-0)]",
-        isSelected && "border border-[var(--color-primary)]",
+        isSelected && "border border-[var(--color-primary)] border-2",
       ]
         .filter(Boolean)
         .join(" ")}

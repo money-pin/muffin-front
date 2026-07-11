@@ -6,7 +6,7 @@ import { MOCK_INVEST_MARKET_DATA } from "./mocks/mockInvestMarketData";
 
 function InvestPage() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="bg-[var(--color-neutral-50)] flex flex-1 flex-col gap-5 px-5 py-5">
       <InvestBudgetCard
         totalBudget={MOCK_INVEST_MARKET_DATA.totalBudget}
         remainingBudget={MOCK_INVEST_MARKET_DATA.remainingBudget}

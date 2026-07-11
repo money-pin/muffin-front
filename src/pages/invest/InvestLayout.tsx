@@ -7,7 +7,7 @@ export default function InvestLayout() {
     <div className="flex min-h-dvh flex-col">
       <InvestHeader />
 
-      <main className="flex-1 bg-[var(--color-neutral-50)] px-5 py-5">
+      <main className="flex-1 flex flex-col">
         <Outlet />
       </main>
     </div>
