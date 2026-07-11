@@ -7,11 +7,12 @@ interface InvestAssetSummaryProps {
 }
 
 function formatCurrency(value: number) {
-  return `${value.toLocaleString("ko-KR")}원`;
+  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
 }
 
 function getSignedCurrency(value: number) {
   if (value > 0) return `+${formatCurrency(value)}`;
+  if (value < 0) return `-${formatCurrency(value)}`;
 
   return formatCurrency(value);
 }

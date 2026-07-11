@@ -13,7 +13,7 @@ import NewsPage from "@/pages/news/NewsPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
 import QuizPage from "@/pages/quiz/QuizPage";
 import InvestLayout from "@/pages/invest/InvestLayout";
-import InvestPage from "@/pages/invest/trade/InvestPage";
+import InvestPage from "@/pages/invest/InvestPage";
 import StatsPage from "@/pages/invest/StatsPage";
 import RankingPage from "@/pages/invest/RankingPage";
 import MyPage from "@/pages/my/MyPage";
