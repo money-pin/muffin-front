@@ -5,6 +5,7 @@ import type { CumulativeProfit } from "@/pages/invest/stats/types";
 
 interface TotalProfitCardProps {
   data: CumulativeProfit;
+  onClick?: () => void;
 }
 
 function formatCurrency(value: number) {
@@ -25,9 +26,13 @@ function getProfitColorClass(value: number) {
   return "text-neutral-600";
 }
 
-export default function TotalProfitCard({ data }: TotalProfitCardProps) {
+export default function TotalProfitCard({ data, onClick }: TotalProfitCardProps) {
   return (
-    <div className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 p-5">
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 p-5 text-left"
+    >
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1">
           <img
@@ -59,6 +64,6 @@ export default function TotalProfitCard({ data }: TotalProfitCardProps) {
         className="h-6 w-6 object-contain"
         draggable={false}
       />
-    </div>
+    </button>
   );
 }

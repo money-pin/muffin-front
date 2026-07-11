@@ -3,6 +3,15 @@ export interface InvestmentResultDate {
   day: number;
 }
 
+export type ProfitHistoryPeriod = "day" | "week" | "month" | "year" | "all";
+
+export interface ProfitHistorySummary {
+  title: string;
+  profitAmount: number;
+  profitRate: number;
+  investmentAmount: number;
+}
+
 export interface RecentPerformanceSummary {
   date: InvestmentResultDate;
   profitAmount: number;
