@@ -92,7 +92,9 @@ export default function SortDropdown<const T extends string>({
         type="button"
         className="flex items-center justify-center gap-1 text-body-14-md text-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label={
-          selectedOption ? `${ariaLabel}, 현재 ${selectedOption.label}` : ariaLabel
+          selectedOption
+            ? `${ariaLabel}, 현재 ${selectedOption.label}`
+            : ariaLabel
         }
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -111,7 +113,7 @@ export default function SortDropdown<const T extends string>({
           src={chevronDown}
           alt=""
           aria-hidden="true"
-          className="size-5"
+          className={`size-5 ${isOpen ? "" : "rotate-180"}`}
         />
       </button>
 
