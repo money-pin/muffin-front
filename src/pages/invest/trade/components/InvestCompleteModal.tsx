@@ -5,9 +5,14 @@ import checkConfirmIcon from "@/assets/check-confirm.svg";
 interface InvestCompleteModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm: () => void;
 }
 
-function InvestCompleteModal({ isOpen, onClose }: InvestCompleteModalProps) {
+function InvestCompleteModal({
+  isOpen,
+  onClose,
+  onConfirm,
+}: InvestCompleteModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col items-center pt-6">
@@ -28,8 +33,8 @@ function InvestCompleteModal({ isOpen, onClose }: InvestCompleteModalProps) {
 
         <button
           type="button"
-          disabled
-          className="mt-6 h-[52px] w-[292px] rounded-[12px] bg-[var(--color-primary)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-0)] disabled:cursor-default disabled:opacity-100"
+          onClick={onConfirm}
+          className="mt-6 h-[52px] w-[292px] rounded-[12px] bg-[var(--color-primary)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-0)]"
         >
           확인
         </button>

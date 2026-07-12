@@ -1,0 +1,145 @@
+import { useEffect, useState } from "react";
+
+import clockIcon from "@/assets/icon-24px/clock.svg";
+
+import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
+
+interface TodayInvestItem {
+  assetId: InvestAssetId;
+  name: string;
+  icon: string;
+  amount: number;
+  percentage: number;
+}
+
+interface InvestTodayStatusPageProps {
+  items: TodayInvestItem[];
+  onEdit: () => void;
+}
+
+function formatCurrency(value: number) {
+  return value.toLocaleString("ko-KR");
+}
+
+function getKstRemainingTimeText() {
+  const now = new Date();
+
+  const kstNow = new Date(
+    now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
+  );
+
+  const midnight = new Date(kstNow);
+  midnight.setHours(24, 0, 0, 0);
+
+  const diffMs = Math.max(0, midnight.getTime() - kstNow.getTime());
+  const totalMinutes = Math.ceil(diffMs / 1000 / 60);
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0",
+  )}`;
+}
+
+function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
+  const [remainingTimeText, setRemainingTimeText] = useState(
+    getKstRemainingTimeText,
+  );
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setRemainingTimeText(getKstRemainingTimeText());
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="flex flex-1 flex-col bg-[var(--color-neutral-50)] px-5 pt-5 pb-[100px]">
+      <section className="flex h-[66px] w-full items-center rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-5 py-3">
+        <img src={clockIcon} alt="" className="h-6 w-6 shrink-0" />
+
+        <div className="ml-4 flex flex-col">
+          <strong className="text-[length:var(--text-body-14-bd)] leading-[var(--text-body-14-bd--line-height)] font-[var(--text-body-14-bd--font-weight)] text-[var(--color-primary)]">
+            오늘 투자 진행 중
+          </strong>
+
+          <span className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-neutral-600)]">
+            수정 마감까지 남은 시간
+          </span>
+        </div>
+
+        <span className="ml-auto flex h-[30px] w-[54px] shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)] px-2 py-1 text-[length:var(--text-body-14-bd)] leading-[var(--text-body-14-bd--line-height)] font-[var(--text-body-14-bd--font-weight)] text-[var(--color-primary)]">
+          {remainingTimeText}
+        </span>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-[length:var(--text-body-14-md-tighter)] leading-[var(--text-body-14-md-tighter--line-height)] font-[var(--text-body-14-md-tighter--font-weight)] tracking-[var(--text-body-14-md-tighter--letter-spacing)] text-[var(--color-neutral-600)]">
+          오늘 투자 현황
+        </h2>
+
+        <div className="mt-2 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-4 py-4">
+          {items.map((item, index) => {
+            const isLast = index === items.length - 1;
+
+            return (
+              <div key={item.assetId}>
+                <div className="w-[318px]">
+                  <div className="flex h-10 items-center">
+                    <img
+                      src={item.icon}
+                      alt=""
+                      className="h-10 w-10 shrink-0"
+                    />
+
+                    <div className="ml-4 flex min-w-0 flex-1 items-baseline">
+                      <span className="text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
+                        {item.name}
+                      </span>
+
+                      <span className="ml-2 text-[length:var(--text-body-14-md)] leading-[var(--text-body-14-md--line-height)] font-[var(--text-body-14-md--font-weight)] text-[var(--color-neutral-400)]">
+                        {item.percentage}%
+                      </span>
+                    </div>
+
+                    <strong className="shrink-0 text-right text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
+                      {formatCurrency(item.amount)}원
+                    </strong>
+                  </div>
+
+                  <div className="mt-2 ml-[56px] h-1 w-[258px] overflow-hidden rounded-[27px] bg-[var(--color-neutral-50)]">
+                    <div
+                      className="h-full rounded-[27px] bg-[var(--color-primary)]"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
+                </div>
+
+                {!isLast && (
+                  <div className="my-3 h-px w-full bg-[var(--color-neutral-50)]" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <button
+        type="button"
+        onClick={onEdit}
+        className="mt-4 h-[52px] w-full rounded-[12px] border border-[var(--color-primary-300)] bg-[var(--color-primary-100)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-primary)]"
+      >
+        투자 수정하기
+      </button>
+
+      <p className="mt-[9px] text-center text-[length:var(--text-caption-12-md-tighter)] leading-[var(--text-caption-12-md-tighter--line-height)] font-[var(--text-caption-12-md-tighter--font-weight)] tracking-[var(--text-caption-12-md-tighter--letter-spacing)] text-[var(--color-neutral-400)]">
+        자정 이후에는 오늘 투자를 수정할 수 없어요
+      </p>
+    </div>
+  );
+}
+
+export default InvestTodayStatusPage;
