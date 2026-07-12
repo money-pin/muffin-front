@@ -4,7 +4,8 @@ import clockIcon from "@/assets/icon-24px/clock.svg";
 import lockIcon from "@/assets/icon-24px/lock.svg";
 
 import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
-const FORCE_CLOSED_VIEW = false;
+
+const FORCE_CLOSED_VIEW = true;
 
 interface TodayInvestItem {
   assetId: InvestAssetId;
@@ -59,6 +60,7 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
   const [remainingTimeText, setRemainingTimeText] = useState(
     getKstRemainingTimeText,
   );
+
   const [isClosedTime, setIsClosedTime] = useState(
     FORCE_CLOSED_VIEW || getIsClosedTime(),
   );
@@ -123,7 +125,7 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
 
         <div
           className={[
-            "mt-2 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-4 py-4",
+            "mt-2 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] p-5",
             isClosedTime && "opacity-50",
           ]
             .filter(Boolean)
@@ -131,42 +133,56 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
         >
           {items.map((item, index) => {
             const isLast = index === items.length - 1;
+            const progressPercent = Math.max(
+              0,
+              Math.min(100, Number(item.percentage)),
+            );
+            const investColor = `var(--color-invest-${item.assetId})`;
+
+            console.log(item.name, item.percentage, progressPercent);
 
             return (
               <div key={item.assetId}>
-                <div className="w-[318px]">
-                  <div className="flex h-10 items-center">
+                <div className="w-full">
+                  <div className="flex h-10 w-full items-center">
                     <img
                       src={item.icon}
                       alt=""
                       className="h-10 w-10 shrink-0"
                     />
 
-                    <div className="ml-4 flex min-w-0 flex-1 items-baseline">
-                      <span className="text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
-                        {item.name}
-                      </span>
+                    <div className="ml-4 flex min-w-0 flex-1 flex-col">
+                      <div className="flex h-[22px] w-full items-center">
+                        <div className="flex min-w-0 flex-1 items-baseline">
+                          <span className="text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
+                            {item.name}
+                          </span>
 
-                      <span className="ml-2 text-[length:var(--text-body-14-md)] leading-[var(--text-body-14-md--line-height)] font-[var(--text-body-14-md--font-weight)] text-[var(--color-neutral-400)]">
-                        {item.percentage}%
-                      </span>
+                          <span className="ml-2 text-[length:var(--text-body-14-md)] leading-[var(--text-body-14-md--line-height)] font-[var(--text-body-14-md--font-weight)] text-[var(--color-neutral-400)]">
+                            {progressPercent}%
+                          </span>
+                        </div>
+
+                        <strong className="shrink-0 text-right text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
+                          {formatCurrency(item.amount)}원
+                        </strong>
+                      </div>
+
+                      <div className="mt-2 h-1 w-full overflow-hidden rounded-[27px] bg-[var(--color-neutral-50)]">
+                        <div
+                          className="h-full rounded-[27px]"
+                          style={{
+                            width: `${progressPercent}%`,
+                            backgroundColor: investColor,
+                          }}
+                        />
+                      </div>
                     </div>
-
-                    <strong className="shrink-0 text-right text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
-                      {formatCurrency(item.amount)}원
-                    </strong>
-                  </div>
-
-                  <div className="mt-2 ml-[56px] h-1 w-[258px] overflow-hidden rounded-[27px] bg-[var(--color-neutral-50)]">
-                    <div
-                      className="h-full rounded-[27px] bg-[var(--color-primary)]"
-                      style={{ width: `${item.percentage}%` }}
-                    />
                   </div>
                 </div>
 
                 {!isLast && (
-                  <div className="my-3 h-px w-full bg-[var(--color-neutral-50)]" />
+                  <div className="my-4 h-px w-full bg-[var(--color-neutral-50)]" />
                 )}
               </div>
             );
@@ -183,7 +199,7 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
           </p>
 
           <p className="mt-1 text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-neutral-600)]">
-            당신 씨네 변동을 반영해 투자 수익을 집계해요.
+            당일 시세 변동을 반영해 투자 수익을 집계해요.
           </p>
         </section>
       ) : (
