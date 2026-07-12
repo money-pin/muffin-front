@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-
+import InvestCompleteModal from "@/pages/invest/trade/components/InvestCompleteModal";
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
 import InvestAssetCountBar from "@/pages/invest/trade/components/InvestAssetCountBar";
 import InvestBottomAction from "@/pages/invest/trade/components/InvestBottomAction";
@@ -14,6 +14,7 @@ import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
 type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
 
 function InvestPage() {
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedAssetId, setSelectedAssetId] = useState<InvestAssetId | null>(
     null,
   );
@@ -177,6 +178,7 @@ function InvestPage() {
     });
 
     setIsConfirmSheetOpen(false);
+    setIsCompleteModalOpen(true);
   };
 
   return (
@@ -247,6 +249,11 @@ function InvestPage() {
         totalAmount={totalInvestAmount}
         onClose={() => setIsConfirmSheetOpen(false)}
         onConfirm={handleConfirmPurchase}
+      />
+
+      <InvestCompleteModal
+        isOpen={isCompleteModalOpen}
+        onClose={() => setIsCompleteModalOpen(false)}
       />
     </>
   );
