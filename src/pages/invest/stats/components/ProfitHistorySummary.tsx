@@ -1,8 +1,14 @@
+import polygonIcon from "@/assets/investment/investment-polygon.svg";
 import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
 import type {
   ProfitHistoryPeriod,
   ProfitHistorySummary as ProfitHistorySummaryType,
 } from "@/pages/invest/stats/types";
+import {
+  formatCurrency,
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface ProfitHistorySummaryProps {
   period: ProfitHistoryPeriod;
@@ -11,24 +17,6 @@ interface ProfitHistorySummaryProps {
   hasNext?: boolean;
   onPrev?: () => void;
   onNext?: () => void;
-}
-
-function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
-}
-
-function getSignedCurrency(value: number) {
-  if (value > 0) return `+${formatCurrency(value)}`;
-  if (value < 0) return `-${formatCurrency(value)}`;
-
-  return formatCurrency(value);
-}
-
-function getProfitColorClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-
-  return "text-neutral-600";
 }
 
 export default function ProfitHistorySummary({
@@ -49,12 +37,16 @@ export default function ProfitHistorySummary({
             type="button"
             aria-label="이전 기간"
             disabled={!hasPrev}
-            className="flex size-3 items-center justify-center text-neutral-900 disabled:text-neutral-200"
+            className="flex size-3 items-center justify-center disabled:opacity-20"
             onClick={onPrev}
           >
-            <span aria-hidden="true" className="text-[10px] leading-none">
-              ◀
-            </span>
+            <img
+              src={polygonIcon}
+              alt=""
+              aria-hidden="true"
+              className="h-[9px] w-2"
+              draggable={false}
+            />
           </button>
         )}
 
@@ -67,12 +59,16 @@ export default function ProfitHistorySummary({
             type="button"
             aria-label="다음 기간"
             disabled={!hasNext}
-            className="flex size-3 items-center justify-center text-neutral-900 disabled:text-neutral-200"
+            className="flex size-3 items-center justify-center disabled:opacity-20"
             onClick={onNext}
           >
-            <span aria-hidden="true" className="text-[10px] leading-none">
-              ▶
-            </span>
+            <img
+              src={polygonIcon}
+              alt=""
+              aria-hidden="true"
+              className="h-[9px] w-2 rotate-180"
+              draggable={false}
+            />
           </button>
         )}
       </div>
@@ -86,7 +82,7 @@ export default function ProfitHistorySummary({
                 data.profitAmount,
               )}`}
             >
-              {getSignedCurrency(data.profitAmount)}
+              {formatSignedCurrency(data.profitAmount)}
             </p>
             <ProfitRateBadge rate={data.profitRate} size="md" />
           </div>

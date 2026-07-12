@@ -1,27 +1,14 @@
 import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
+import {
+  formatCurrency,
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface InvestAssetSummaryProps {
   totalAsset: number;
   profitAmount: number;
   profitRate: number;
-}
-
-function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
-}
-
-function getSignedCurrency(value: number) {
-  if (value > 0) return `+${formatCurrency(value)}`;
-  if (value < 0) return `-${formatCurrency(value)}`;
-
-  return formatCurrency(value);
-}
-
-function getProfitColorClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-
-  return "text-neutral-600";
 }
 
 export default function InvestAssetSummary({
@@ -44,7 +31,7 @@ export default function InvestAssetSummary({
           )}`}
         >
           <p className="text-body-16-bd-tighter">
-            {getSignedCurrency(profitAmount)}
+            {formatSignedCurrency(profitAmount)}
           </p>
 
           <ProfitRateBadge rate={profitRate} />

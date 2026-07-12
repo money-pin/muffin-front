@@ -1,26 +1,13 @@
 import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
 import type { ProfitHistorySector } from "@/pages/invest/stats/types";
+import {
+  formatCurrency,
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface ProfitHistorySectorCardProps {
   sector: ProfitHistorySector;
-}
-
-function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
-}
-
-function getSignedCurrency(value: number) {
-  if (value > 0) return `+${formatCurrency(value)}`;
-  if (value < 0) return `-${formatCurrency(value)}`;
-
-  return formatCurrency(value);
-}
-
-function getProfitColorClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-
-  return "text-neutral-600";
 }
 
 export default function ProfitHistorySectorCard({
@@ -48,7 +35,7 @@ export default function ProfitHistorySectorCard({
                 sector.profitAmount,
               )}`}
             >
-              {getSignedCurrency(sector.profitAmount)}
+              {formatSignedCurrency(sector.profitAmount)}
             </p>
             <ProfitRateBadge rate={sector.profitRate} />
           </div>

@@ -2,28 +2,14 @@ import noteIcon from "@/assets/icon-20px/note.svg";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
 import type { CumulativeProfit } from "@/pages/invest/stats/types";
+import {
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface TotalProfitCardProps {
   data: CumulativeProfit;
   onClick?: () => void;
-}
-
-function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
-}
-
-function getSignedCurrency(value: number) {
-  if (value > 0) return `+${formatCurrency(value)}`;
-  if (value < 0) return `-${formatCurrency(value)}`;
-
-  return formatCurrency(value);
-}
-
-function getProfitColorClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-
-  return "text-neutral-600";
 }
 
 export default function TotalProfitCard({ data, onClick }: TotalProfitCardProps) {
@@ -51,7 +37,7 @@ export default function TotalProfitCard({ data, onClick }: TotalProfitCardProps)
           <span
             className={`text-heading-20-bd ${getProfitColorClass(data.amount)}`}
           >
-            {getSignedCurrency(data.amount)}
+            {formatSignedCurrency(data.amount)}
           </span>
           <ProfitRateBadge rate={data.rate} size="md" />
         </div>
