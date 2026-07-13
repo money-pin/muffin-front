@@ -56,7 +56,7 @@ function InvestBottomAction({
       ? "border border-[var(--color-primary-300)] bg-[var(--color-primary-100)] text-[var(--color-primary)]"
       : isActive
         ? "bg-[var(--color-primary)] text-[var(--color-neutral-0)]"
-        : "bg-[var(--color-neutral-400)] text-[var(--color-neutral-50)]";
+        : "bg-[var(--color-neutral-50)] text-[var(--color-neutral-400)]";
 
   return (
     <div
