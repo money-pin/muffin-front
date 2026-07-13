@@ -1,3 +1,4 @@
+//투자 확정 바텀시트
 import BottomSheet from "@/components/common/BottomSheet";
 
 import type { InvestAssetId } from "@/pages/invest/trade/types/invest";

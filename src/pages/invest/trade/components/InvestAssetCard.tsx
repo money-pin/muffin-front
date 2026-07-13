@@ -1,3 +1,4 @@
+//투자 항목 카드
 import type { InvestAssetCardStatus } from "@/pages/invest/trade/types/invest";
 
 interface InvestAssetCardProps {

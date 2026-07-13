@@ -1,3 +1,4 @@
+//하단 액션 버튼
 import refreshIcon from "@/assets/icon-24px/refresh.svg";
 
 interface InvestBottomActionProps {

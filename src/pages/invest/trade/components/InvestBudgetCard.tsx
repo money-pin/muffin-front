@@ -1,3 +1,4 @@
+//오늘 남은 투자 예산 카드
 import walletIcon from "@/assets/icon-20px/wallet.svg";
 
 interface InvestBudgetCardProps {

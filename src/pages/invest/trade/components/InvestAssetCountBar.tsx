@@ -1,3 +1,4 @@
+//투자 수량 조절 바
 import minusIcon from "@/assets/icon-24px/minus.svg";
 import plusIcon from "@/assets/icon-24px/plus.svg";
 import plusDisabledIcon from "@/assets/icon-24px/plus-disabled.svg";

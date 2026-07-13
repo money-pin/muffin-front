@@ -10,12 +10,28 @@ import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodaySt
 
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
 import { MOCK_INVEST_MARKET_DATA } from "@/pages/invest/trade/mocks/mockInvestMarketData";
-
+import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
 import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
 
+//자산 구매 현황 저장
 type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
+// 투자 페이지 모드
 type InvestViewMode = "trade" | "summary" | "edit";
 
+function getKstDate() {
+  return new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
+  );
+}
+
+function getIsKstWeekend() {
+  const kstNow = getKstDate();
+  const day = kstNow.getDay();
+
+  return day === 0 || day === 6;
+}
+
+//총 투자 금액 계산
 function getTotalInvestAmount(assetQuantities: AssetQuantityMap) {
   return Object.entries(assetQuantities).reduce((sum, [assetId, quantity]) => {
     const typedAssetId = assetId as InvestAssetId;
@@ -25,6 +41,7 @@ function getTotalInvestAmount(assetQuantities: AssetQuantityMap) {
   }, 0);
 }
 
+//수정 버튼용 수량체크
 function isSameQuantityMap(
   current: AssetQuantityMap,
   confirmed: AssetQuantityMap,
@@ -42,6 +59,7 @@ function isSameQuantityMap(
 }
 
 function InvestPage() {
+  const isWeekend = getIsKstWeekend();
   const [viewMode, setViewMode] = useState<InvestViewMode>("trade");
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedAssetId, setSelectedAssetId] = useState<InvestAssetId | null>(
@@ -70,7 +88,6 @@ function InvestPage() {
     : 0;
 
   const selectedAssetTotalAmount = selectedAssetPrice * selectedQuantity;
-
   const totalInvestAmount = getTotalInvestAmount(assetQuantities);
   const confirmedTotalInvestAmount = getTotalInvestAmount(confirmedQuantities);
 
@@ -79,6 +96,7 @@ function InvestPage() {
     MOCK_INVEST_MARKET_DATA.totalBudget - totalInvestAmount,
   );
 
+  //확정된 구매 목록
   const confirmItems = Object.entries(assetQuantities)
     .filter(([, quantity]) => (quantity ?? 0) > 0)
     .map(([assetId, quantity]) => {
@@ -135,6 +153,7 @@ function InvestPage() {
   const isEditChanged =
     isEditMode && !isSameQuantityMap(assetQuantities, confirmedQuantities);
 
+  //하단 액션버튼 종류
   const bottomActionVariant =
     isEditMode && isEditChanged
       ? "editSubmit"
@@ -170,6 +189,7 @@ function InvestPage() {
     });
   };
 
+  //수량 감소
   const handleDecrease = () => {
     if (!selectedAssetId) return;
 
@@ -193,6 +213,7 @@ function InvestPage() {
     });
   };
 
+  //수량 증가
   const handleIncrease = () => {
     if (!selectedAssetId || !canIncrease) return;
 
@@ -211,6 +232,7 @@ function InvestPage() {
     setAssetQuantities({});
   };
 
+  //구매하기 버튼 -> 확인 모달 오픈
   const handlePurchase = () => {
     if (!hasAnyInvestment) return;
 
@@ -273,7 +295,11 @@ function InvestPage() {
 
   return (
     <>
-      {viewMode === "summary" ? (
+      {isWeekend ? (
+        <div className="-mb-[80px] flex flex-1 flex-col">
+          <InvestWeekendClosedPage />
+        </div>
+      ) : viewMode === "summary" ? (
         <div className="-mb-[80px] flex flex-1 flex-col">
           <InvestTodayStatusPage
             items={todayStatusItems}
