@@ -32,7 +32,7 @@ function InvestConfirmBottomSheet({
 }: InvestConfirmBottomSheetProps) {
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} ariaLabel="오늘의 투자 확정">
-      <div className="px-5 pb-8 pt-9">
+      <div className="px-5 py-8">
         <div className="flex flex-col gap-1">
           <h2 className="text-[length:var(--text-heading-18-bd)] leading-[var(--text-heading-18-bd--line-height)] font-[var(--text-heading-18-bd--font-weight)] tracking-[var(--text-heading-18-bd--letter-spacing)] text-[var(--color-neutral-900)]">
             오늘의 투자를 확정할까요?
@@ -43,7 +43,7 @@ function InvestConfirmBottomSheet({
           </p>
         </div>
 
-        <div className="mt-6 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-4 py-4">
+        <div className="mt-4 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-4 py-4">
           {items.map((item, index) => {
             const isLast = index === items.length - 1;
 
