@@ -77,7 +77,8 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
 
   return (
     <div className="flex flex-1 flex-col bg-[var(--color-neutral-50)] px-5 pt-5 pb-[100px]">
-      <section className="flex h-[66px] w-full items-center rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-5 py-3">
+      <section className="flex h-[66px] w-full items-center rounded-[12px] bg-[var(--color-neutral-0)] py-[14px] pl-5 pr-4 ring-1 ring-inset ring-[var(--color-neutral-100)]">
+        {" "}
         {isClosedTime ? (
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)]">
             <img src={lockIcon} alt="" className="h-6 w-6" />
@@ -85,7 +86,6 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
         ) : (
           <img src={clockIcon} alt="" className="h-6 w-6 shrink-0" />
         )}
-
         <div className="ml-4 flex flex-col">
           <strong
             className={[
@@ -104,7 +104,6 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
               : "수정 마감까지 남은 시간"}
           </span>
         </div>
-
         {!isClosedTime && (
           <span className="ml-auto flex h-[30px] w-[54px] shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)] px-2 py-1 text-[length:var(--text-body-14-bd)] leading-[var(--text-body-14-bd--line-height)] font-[var(--text-body-14-bd--font-weight)] text-[var(--color-primary)]">
             {remainingTimeText}
@@ -126,7 +125,7 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
 
         <div
           className={[
-            "mt-2 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] p-5",
+            "mt-2 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-4 py-5",
             isClosedTime && "opacity-50",
           ]
             .filter(Boolean)

@@ -1,4 +1,4 @@
-//구매 확정 안내 모달
+// 구매 확정 안내 모달
 import Modal from "@/components/common/Modal2";
 
 import checkConfirmIcon from "@/assets/check-confirm.svg";
@@ -18,8 +18,8 @@ function InvestCompleteModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="w-[350px] rounded-[20px] px-[29px] py-6"
-      contentClassName="flex flex-col items-center text-center"
+      className="h-[286px] w-[332px] rounded-[20px] px-5 pb-5 pt-6"
+      contentClassName="flex h-full flex-col items-center text-center"
     >
       <img src={checkConfirmIcon} alt="" />
 
@@ -40,7 +40,7 @@ function InvestCompleteModal({
       <button
         type="button"
         onClick={onConfirm}
-        className="mt-6 h-[52px] w-[292px] rounded-[12px] bg-[var(--color-primary)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-0)]"
+        className="mt-6 h-[52px] w-[292px] shrink-0 rounded-[12px] bg-[var(--color-primary)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-0)]"
       >
         확인
       </button>

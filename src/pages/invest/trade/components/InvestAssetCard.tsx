@@ -34,7 +34,7 @@ function InvestAssetCard({
       ].join(" ")}
     >
       {showBadge && (
-        <span className="text-body-14-bd absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary)] text-center leading-none text-[var(--color-neutral-0)]">
+        <span className="text-body-14-bd absolute right-[6px] top-[6px] flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary)] text-center leading-none text-[var(--color-neutral-0)]">
           {quantity}
         </span>
       )}
