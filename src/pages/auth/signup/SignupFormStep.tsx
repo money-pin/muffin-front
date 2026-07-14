@@ -28,6 +28,11 @@ export default function SignupFormStep({
 }: SignupFormStepProps) {
   const { name, email, password, passwordConfirm, agreed } = values;
 
+  const emailError =
+    email !== "" && !EMAIL_RE.test(email)
+      ? "이메일 형식이 올바르지 않습니다."
+      : undefined;
+
   const passwordValid = PASSWORD_RE.test(password);
   const passwordError =
     password !== "" && !passwordValid ? PASSWORD_GUIDE : undefined;
@@ -64,6 +69,7 @@ export default function SignupFormStep({
           type="email"
           required
           placeholder="example@email.com"
+          error={emailError}
           value={email}
           onChange={(v) => onChange({ email: v })}
         />
