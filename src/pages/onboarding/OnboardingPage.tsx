@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Indicator from "@/components/common/Indicator";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import muffinPlain from "@/assets/avatars/muffin-plain.png";
+import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
+import muffinButter from "@/assets/avatars/muffin-butter.png";
 
-import { ONBOARDING_QUESTIONS } from "./onboardingData";
+import {
+  ONBOARDING_QUESTIONS,
+  ONBOARDING_RESULTS,
+  resolveOnboardingResult,
+  type OnboardingResultType,
+} from "./onboardingData";
 import NicknameStep from "./steps/NicknameStep";
 import MessageStep from "./steps/MessageStep";
 import QuestionStep from "./steps/QuestionStep";
@@ -36,6 +43,37 @@ const PROGRESS: Partial<Record<Step, number>> = {
   complete: 6,
 };
 const PROGRESS_TOTAL = 6;
+
+// 결과 타입별 캐릭터 이미지
+const RESULT_IMAGES: Record<OnboardingResultType, string> = {
+  plain: muffinPlain,
+  sprinkle: muffinSprinkle,
+  butter: muffinButter,
+};
+
+// titleTemplate({name}/{char}/\n) → JSX. \n은 <br/>, {char}는 primary 강조.
+function renderResultTitle(
+  template: string,
+  name: string,
+  characterName: string,
+): ReactNode {
+  const lines = template.replace(/{name}/g, name).split("\n");
+  return lines.map((line, lineIndex) => {
+    const [before, after] = line.split("{char}");
+    return (
+      <Fragment key={lineIndex}>
+        {lineIndex > 0 && <br />}
+        {before}
+        {after !== undefined && (
+          <>
+            <span className="text-primary">{characterName}</span>
+            {after}
+          </>
+        )}
+      </Fragment>
+    );
+  });
+}
 
 function OnboardingPage() {
   const navigate = useNavigate();
@@ -148,47 +186,53 @@ function OnboardingPage() {
           );
         })()}
 
-      {step === "result" && (
-        <MessageStep
-          media={
-            <img
-              src={muffinPlain}
-              alt=""
-              aria-hidden="true"
-              className="h-[142px] w-[148px] object-contain"
-              draggable={false}
-            />
-          }
-          title={
-            <>
-              투자가 서툰 {displayName}님을 위해
-              <br />
-              <span className="text-primary">플레인 머핀</span>이 함께해요!
-            </>
-          }
-          subtitle={
-            <>
-              비교적 변동성이 적은 '반도체' 또는
-              <br />
-              '금' 섹터를 추천해요.
-            </>
-          }
-          buttonLabel="다음"
-          onNext={goNext}
-        >
-          <div className="flex w-full items-center gap-4 rounded-[12px] border border-neutral-100 p-4">
-            <span className="text-body-14-md text-neutral-700">추천 섹터</span>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex min-w-[28px] items-center justify-center rounded-[4px] bg-secondary-100 px-1 text-body-14-md-tighter text-primary">
-                반도체
-              </span>
-              <span className="inline-flex min-w-[28px] items-center justify-center rounded-[4px] bg-secondary-100 px-1 text-body-14-md-tighter text-primary">
-                금
-              </span>
-            </div>
-          </div>
-        </MessageStep>
-      )}
+      {step === "result" &&
+        (() => {
+          const resultType = resolveOnboardingResult(answers);
+          const result = ONBOARDING_RESULTS[resultType];
+          return (
+            <MessageStep
+              media={
+                <img
+                  src={RESULT_IMAGES[resultType]}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-[142px] w-[148px] object-contain"
+                  draggable={false}
+                />
+              }
+              title={renderResultTitle(
+                result.titleTemplate,
+                displayName,
+                result.characterName,
+              )}
+              subtitle={
+                <>
+                  비교적 변동성이 적은 '{result.sectors[0]}' 또는
+                  <br />'{result.sectors[1]}' 섹터를 추천해요.
+                </>
+              }
+              buttonLabel="다음"
+              onNext={goNext}
+            >
+              <div className="flex w-full items-center gap-4 rounded-[12px] border border-neutral-100 p-4">
+                <span className="text-body-14-md text-neutral-700">
+                  추천 섹터
+                </span>
+                <div className="flex items-center gap-2">
+                  {result.sectors.map((sector) => (
+                    <span
+                      key={sector}
+                      className="inline-flex min-w-[28px] items-center justify-center rounded-[4px] bg-secondary-100 px-1 text-body-14-md-tighter text-primary"
+                    >
+                      {sector}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </MessageStep>
+          );
+        })()}
 
       {step === "feature" && <FeatureStep onNext={goNext} />}
 
