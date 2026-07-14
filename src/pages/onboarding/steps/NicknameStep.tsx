@@ -7,6 +7,9 @@ interface NicknameStepProps {
   onNext: () => void;
 }
 
+// 영문·한글 상관없이 최대 6글자
+const MAX_NICKNAME_LENGTH = 6;
+
 export default function NicknameStep({
   nickname,
   onChange,
@@ -25,9 +28,9 @@ export default function NicknameStep({
         <TextField
           placeholder="최대 6자 설정 가능"
           hint="나중에 언제든지 변경할 수 있어요."
-          maxLength={6}
+          maxLength={MAX_NICKNAME_LENGTH}
           value={nickname}
-          onChange={onChange}
+          onChange={(v) => onChange(v.slice(0, MAX_NICKNAME_LENGTH))}
         />
       </div>
 
