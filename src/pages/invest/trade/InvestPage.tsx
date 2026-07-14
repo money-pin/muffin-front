@@ -254,12 +254,6 @@ function InvestPage() {
         };
       });
 
-    console.log("백엔드로 보낼 투자 내용:", {
-      totalAmount: totalInvestAmount,
-      remainingBudget,
-      investments: investmentPayload,
-    });
-
     setConfirmedQuantities(assetQuantities);
     setIsConfirmSheetOpen(false);
     setIsCompleteModalOpen(true);

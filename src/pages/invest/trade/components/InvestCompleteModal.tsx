@@ -28,7 +28,7 @@ function InvestCompleteModal({
       </h2>
 
       <p className="mt-2 text-[length:var(--text-body-16-md-tighter)] leading-[var(--text-body-16-md-tighter--line-height)] font-[var(--text-body-16-md-tighter--font-weight)] tracking-[var(--text-body-16-md-tighter--letter-spacing)] text-[var(--color-neutral-400)]">
-        <span className="text-center text-[length:var(--16,16px)] font-bold leading-[1.6] tracking-[var(--font-letterSpacing-tight,0)] text-[var(--Prymary-500---pr,#F46C0E)]">
+        <span className="text-center text-[16px] font-bold font-bold leading-[1.6] tracking-[0] text-[var(--color-primary)]">
           {" "}
           내일 오전 10시
         </span>

@@ -6,7 +6,7 @@ import lockIcon from "@/assets/icon-24px/lock.svg";
 
 import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
 
-const FORCE_CLOSED_VIEW = true;
+const FORCE_CLOSED_VIEW = false;
 
 interface TodayInvestItem {
   assetId: InvestAssetId;
@@ -138,8 +138,6 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
               Math.min(100, Number(item.percentage)),
             );
             const investColor = `var(--color-invest-${item.assetId})`;
-
-            console.log(item.name, item.percentage, progressPercent);
 
             return (
               <div key={item.assetId}>
