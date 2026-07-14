@@ -15,6 +15,7 @@ import QuizPage from "@/pages/quiz/QuizPage";
 import InvestLayout from "@/pages/invest/InvestLayout";
 import InvestPage from "@/pages/invest/trade/InvestPage";
 import StatsPage from "@/pages/invest/stats/StatsPage";
+import ProfitHistoryPage from "@/pages/invest/stats/ProfitHistoryPage";
 import RankingPage from "@/pages/invest/ranking/RankingPage";
 import MyPage from "@/pages/my/MyPage";
 import MySettingsPage from "@/pages/my/MySettingsPage";
@@ -93,6 +94,10 @@ export const router = createBrowserRouter([
           {
             path: "quiz",
             element: <QuizPage />,
+          },
+          {
+            path: "invest/profit-history",
+            element: <ProfitHistoryPage />,
           },
           {
             path: "my/settings",

@@ -2,32 +2,23 @@ import noteIcon from "@/assets/icon-20px/note.svg";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
 import type { CumulativeProfit } from "@/pages/invest/stats/types";
+import {
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface TotalProfitCardProps {
   data: CumulativeProfit;
+  onClick?: () => void;
 }
 
-function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
-}
-
-function getSignedCurrency(value: number) {
-  if (value > 0) return `+${formatCurrency(value)}`;
-  if (value < 0) return `-${formatCurrency(value)}`;
-
-  return formatCurrency(value);
-}
-
-function getProfitColorClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-
-  return "text-neutral-600";
-}
-
-export default function TotalProfitCard({ data }: TotalProfitCardProps) {
+export default function TotalProfitCard({ data, onClick }: TotalProfitCardProps) {
   return (
-    <div className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 p-5">
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 p-5 text-left"
+    >
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1">
           <img
@@ -46,7 +37,7 @@ export default function TotalProfitCard({ data }: TotalProfitCardProps) {
           <span
             className={`text-heading-20-bd ${getProfitColorClass(data.amount)}`}
           >
-            {getSignedCurrency(data.amount)}
+            {formatSignedCurrency(data.amount)}
           </span>
           <ProfitRateBadge rate={data.rate} size="md" />
         </div>
@@ -59,6 +50,6 @@ export default function TotalProfitCard({ data }: TotalProfitCardProps) {
         className="h-6 w-6 object-contain"
         draggable={false}
       />
-    </div>
+    </button>
   );
 }

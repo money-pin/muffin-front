@@ -2,27 +2,13 @@ import rankingIcon from "@/assets/icon-20px/ranking.svg";
 import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
 import RankBadge from "@/pages/invest/stats/components/RankBadge";
 import type { TopSector } from "@/pages/invest/stats/types";
+import {
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface TopProfitSectorsCardProps {
   sectors: TopSector[];
-}
-
-function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
-}
-
-function getSignedCurrency(value: number) {
-  if (value > 0) return `+${formatCurrency(value)}`;
-  if (value < 0) return `-${formatCurrency(value)}`;
-
-  return formatCurrency(value);
-}
-
-function getProfitColorClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-
-  return "text-neutral-600";
 }
 
 export default function TopProfitSectorsCard({
@@ -60,7 +46,7 @@ export default function TopProfitSectorsCard({
                     sector.profitAmount,
                   )}`}
                 >
-                  {getSignedCurrency(sector.profitAmount)}
+                  {formatSignedCurrency(sector.profitAmount)}
                 </span>
                 <ProfitRateBadge rate={sector.profitRate} size="md" />
               </div>

@@ -5,25 +5,15 @@ import type {
   RecentPerformanceSummary,
   SectorPerformanceDetail,
 } from "@/pages/invest/stats/types";
+import {
+  formatCurrency,
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface RecentPerformanceSheetContentProps {
   summary: RecentPerformanceSummary;
   sectors: SectorPerformanceDetail[];
-}
-
-function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString()}원`;
-}
-
-function getSignedCurrency(value: number) {
-  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
-  return `${sign}${formatCurrency(value)}`;
-}
-
-function getProfitColorClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-  return "text-neutral-600";
 }
 
 export default function RecentPerformanceSheetContent({
@@ -61,7 +51,7 @@ export default function RecentPerformanceSheetContent({
                 summary.profitAmount,
               )}`}
             >
-              {getSignedCurrency(summary.profitAmount)}
+              {formatSignedCurrency(summary.profitAmount)}
             </strong>
             <ProfitRateBadge rate={summary.profitRate} size="md" />
           </div>
@@ -108,7 +98,7 @@ export default function RecentPerformanceSheetContent({
                       sector.profitAmount,
                     )}`}
                   >
-                    {getSignedCurrency(sector.profitAmount)}
+                    {formatSignedCurrency(sector.profitAmount)}
                   </strong>
                   <ProfitRateBadge rate={sector.profitRate} size="md" />
                 </div>
