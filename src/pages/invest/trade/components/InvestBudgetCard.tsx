@@ -1,3 +1,4 @@
+//오늘 남은 투자 예산 카드
 import walletIcon from "@/assets/icon-20px/wallet.svg";
 
 interface InvestBudgetCardProps {
@@ -21,7 +22,7 @@ function InvestBudgetCard({
   return (
     <section className="flex h-[128px] w-full flex-col rounded-[16px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-4 py-4">
       <div className="mb-3 flex items-center gap-[10px]">
-        <div className="ml-2 flex h-7 w-7 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)] p-[2px]">
+        <div className=" flex h-7 w-7 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)] p-[2px]">
           <img src={walletIcon} alt="" className="h-5 w-5" />
         </div>
 
@@ -37,7 +38,7 @@ function InvestBudgetCard({
         />
       </div>
 
-      <div className="mt-2 flex items-baseline justify-end gap-2">
+      <div className="mt-2 flex items-center justify-end gap-2">
         <span className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-neutral-400)]">
           {formatCurrency(totalBudget)}원 중
         </span>

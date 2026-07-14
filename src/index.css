@@ -160,6 +160,21 @@
 }
 
 @layer base {
+  /* Invest Asset Colors */
+  :root {
+    --color-invest-deposit: #ff7b00;
+    --color-invest-gold: #ff9900;
+    --color-invest-dollar: #009a64;
+    --color-invest-bonds: #00aef3;
+    --color-invest-coin: #ea4c4c;
+    --color-invest-biotech: #ff5a94;
+    --color-invest-semiconductor: #427eff;
+    --color-invest-technology: #9338d4;
+    --color-invest-energy: #ffbb00;
+    --color-invest-financials: #9d5e00;
+    --color-invest-automobile: #4048a2;
+    --color-invest-defense: #535353;
+  }
   *,
   *::before,
   *::after {
