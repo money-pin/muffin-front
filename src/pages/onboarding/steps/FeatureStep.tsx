@@ -11,7 +11,7 @@ interface FeatureStepProps {
 const FEATURES: { icon: IconType; label: string }[] = [
   { icon: TbNews, label: "뉴스 읽기" },
   { icon: TbCoins, label: "베팅하기" },
-  { icon: TbClock, label: "오전 9시 확인" },
+  { icon: TbClock, label: "오전 10시 확인" },
 ];
 
 export default function FeatureStep({ onNext }: FeatureStepProps) {
@@ -50,7 +50,7 @@ export default function FeatureStep({ onNext }: FeatureStepProps) {
             뉴스 보고 10만 원 단위로 베팅하면,
             <br />
             <span className="text-body-16-bd-tighter text-primary">
-              다음 날 아침 9시
+              다음 날 아침 10시
             </span>
             에 결과가 배달됩니다.
           </p>
