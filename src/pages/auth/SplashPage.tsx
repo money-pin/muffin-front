@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Logo from "@/components/common/Logo";
 
 // 스플래시: 로고+태그라인 중앙 정렬 후 로그인 화면으로 자동 이동
-const SPLASH_DURATION_MS = 1800;
+const SPLASH_DURATION_MS = 2200;
 
 function SplashPage() {
   const navigate = useNavigate();
