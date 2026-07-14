@@ -31,7 +31,7 @@ export default function QuizCompletedView({ onGoHome }: QuizCompletedViewProps) 
           오늘은 이미 퀴즈를 완료했어요!
         </p>
         <p className="mt-3 text-center text-body-14-md text-neutral-600">
-          <span className="text-body-14-bd text-primary">내일 아침 9시</span>에
+          <span className="text-body-14-bd text-primary">내일 아침 10시</span>에
           새로운 퀴즈로
           <br />
           다시 도전할 수 있어요.
