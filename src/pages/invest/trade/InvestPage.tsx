@@ -254,6 +254,9 @@ function InvestPage() {
         };
       });
 
+    // TODO: 구매 확정 API 연동 시 investmentPayload 전송 (현재는 mock 처리)
+    void investmentPayload;
+
     setConfirmedQuantities(assetQuantities);
     setIsConfirmSheetOpen(false);
     setIsCompleteModalOpen(true);
