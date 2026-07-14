@@ -240,19 +240,10 @@ function InvestPage() {
   };
 
   const handleConfirmPurchase = () => {
-    const investmentPayload = Object.entries(assetQuantities)
-      .filter(([, quantity]) => (quantity ?? 0) > 0)
-      .map(([assetId, quantity]) => {
-        const typedAssetId = assetId as InvestAssetId;
-        const unitPrice = MOCK_INVEST_MARKET_DATA.assetPrices[typedAssetId];
-
-        return {
-          assetId: typedAssetId,
-          quantity,
-          unitPrice,
-          totalAmount: unitPrice * (quantity ?? 0),
-        };
-      });
+  setConfirmedQuantities(assetQuantities);
+  setIsConfirmSheetOpen(false);
+  setIsCompleteModalOpen(true);
+};
 
     // TODO: 구매 확정 API 연동 시 investmentPayload 전송 (현재는 mock 처리)
     void investmentPayload;
