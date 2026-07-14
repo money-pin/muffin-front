@@ -1,5 +1,5 @@
-import Badge from "@/components/common/Badge";
 import Button from "@/components/common/Button";
+import giftIcon from "@/assets/bi_gift-fill.svg";
 
 interface QuizResultViewProps {
   correctCount: number;
@@ -77,10 +77,22 @@ export default function QuizResultView({
       </div>
 
       {reward > 0 && (
-        <div className="mt-8 flex flex-col items-start">
-          <Badge variant="orange">🎁 보상 획득!</Badge>
-          <div className="mt-2 flex h-[64px] w-full items-center justify-center rounded-[12px] border border-neutral-100 bg-white">
-            <p className="text-heading-24-md font-bold text-primary">
+        <div className="mt-8 flex flex-col">
+          {/* 보상 획득 탭: 카드 왼쪽에서 12px 들여쓰고 카드 상단에 붙는 라운드 탭 */}
+          <div className="flex px-3">
+            <div className="flex h-7 items-center justify-center gap-2 rounded-t-[8px] bg-secondary-100 px-2">
+              <img
+                src={giftIcon}
+                alt=""
+                aria-hidden="true"
+                className="h-4 w-4"
+              />
+              <span className="text-body-14-bd text-primary">보상 획득!</span>
+            </div>
+          </div>
+          {/* 보상 금액 카드 */}
+          <div className="flex w-full items-center justify-center rounded-[12px] border border-neutral-100 bg-white p-6">
+            <p className="text-heading-28-md text-primary">
               +{reward.toLocaleString("ko-KR")} 원
             </p>
           </div>
