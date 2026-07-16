@@ -1,17 +1,22 @@
-import { TbNews, TbCoins, TbClock } from "react-icons/tb";
+import { TbNews, TbCoins } from "react-icons/tb";
 import type { IconType } from "react-icons";
 
 import Button from "@/components/common/Button";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
+import clockIcon from "@/assets/tabler_clock.svg";
 
 interface FeatureStepProps {
   onNext: () => void;
 }
 
-const FEATURES: { icon: IconType; label: string }[] = [
+type Feature =
+  | { icon: IconType; label: string }
+  | { iconSrc: string; label: string };
+
+const FEATURES: Feature[] = [
   { icon: TbNews, label: "뉴스 읽기" },
   { icon: TbCoins, label: "베팅하기" },
-  { icon: TbClock, label: "오전 10시 확인" },
+  { iconSrc: clockIcon, label: "오전 10시 확인" },
 ];
 
 export default function FeatureStep({ onNext }: FeatureStepProps) {
@@ -23,7 +28,17 @@ export default function FeatureStep({ onNext }: FeatureStepProps) {
             <div key={feature.label} className="flex items-start gap-4">
               <div className="flex flex-col items-center gap-2">
                 <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[16px] bg-secondary-50">
-                  <feature.icon className="h-10 w-10 text-primary" />
+                  {"iconSrc" in feature ? (
+                    <img
+                      src={feature.iconSrc}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-10 w-10"
+                      draggable={false}
+                    />
+                  ) : (
+                    <feature.icon className="h-10 w-10 text-primary" />
+                  )}
                 </div>
                 <span className="whitespace-nowrap text-body-14-bd text-neutral-1000">
                   {feature.label}
