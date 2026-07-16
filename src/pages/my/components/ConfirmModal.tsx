@@ -50,7 +50,7 @@ export default function ConfirmModal({
             onClick={onConfirm}
             className={`h-[48px] flex-1 rounded-[12px] text-body-16-bd-tighter ${
               danger
-                ? "border border-positive-100 bg-positive-50 text-positive"
+                ? "bg-positive-50 text-positive"
                 : "bg-primary text-white"
             }`}
           >

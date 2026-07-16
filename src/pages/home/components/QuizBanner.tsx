@@ -1,5 +1,5 @@
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
-import muffinPlain from "@/assets/avatars/muffin-plain.png";
+import quizImage from "@/assets/quiz-image.svg";
 
 interface QuizBannerProps {
   onClick?: () => void;
@@ -15,15 +15,13 @@ export default function QuizBanner({ onClick }: QuizBannerProps) {
       className="flex w-full items-center justify-between rounded-[12px] border border-neutral-100 bg-white px-4 pb-3 pt-4"
     >
       <span className="flex items-center gap-4">
-        <span className="relative h-[45px] w-[45px] shrink-0 overflow-hidden rounded-[8px] bg-primary">
-          <img
-            src={muffinPlain}
-            alt=""
-            aria-hidden="true"
-            className="absolute -left-5 top-1.5 h-[100px] w-[104px] max-w-none"
-            draggable={false}
-          />
-        </span>
+        <img
+          src={quizImage}
+          alt=""
+          aria-hidden="true"
+          className="h-[45px] w-[45px] shrink-0"
+          draggable={false}
+        />
         <span className="flex flex-col items-start">
           <span className="text-body-16-bd-tighter text-neutral-900">
             오늘의 한 입 퀴즈

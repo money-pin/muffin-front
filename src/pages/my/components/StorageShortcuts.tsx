@@ -1,4 +1,4 @@
-import bookmarkIcon from "@/assets/icon-24px/bookmark-line-gray5.svg";
+import bookmarkIcon from "@/assets/icon-24px/bookmark-line-gray2.svg";
 import wordIcon from "@/assets/icon-20px/word.svg";
 import brainIcon from "@/assets/icon-20px/brain.svg";
 
@@ -15,7 +15,7 @@ const SHORTCUTS = [
 // Figma 학습 저장소: 카드 안 3개 진입 버튼, 세로 구분선
 export default function StorageShortcuts({ onNavigate }: StorageShortcutsProps) {
   return (
-    <div className="flex w-full rounded-[16px] border border-neutral-100 bg-white py-4">
+    <div className="flex w-full rounded-[16px] border border-neutral-100 bg-white py-5">
       {SHORTCUTS.map((shortcut, index) => (
         <button
           key={shortcut.key}
@@ -25,7 +25,7 @@ export default function StorageShortcuts({ onNavigate }: StorageShortcutsProps) 
             index > 0 ? "border-l border-neutral-100" : ""
           }`}
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-[8px] border border-neutral-100">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#f9f9f9]">
             <img
               src={shortcut.icon}
               alt=""

@@ -63,7 +63,7 @@ export default function EmailVerifyStep({ onComplete }: EmailVerifyStepProps) {
         />
 
         <p className="mt-5 text-body-14-md-tighter text-neutral-400">
-          인증 문자를 받지 못하셨나요?{" "}
+          인증 문자를 받지 못하셨나요?&nbsp;{" "}
           <button
             type="button"
             onClick={handleResend}
