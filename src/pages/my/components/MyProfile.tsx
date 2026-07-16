@@ -18,7 +18,7 @@ export default function MyProfile({
     <section className="flex flex-col items-center">
       <div className="relative">
         <CharacterAvatar size="large" variant={characterVariant} />
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[4px] bg-secondary-100 px-1.5 py-0.5 text-caption-12-md text-secondary">
+        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[4px] bg-secondary px-1.5 py-0.5 text-caption-12-bd text-white">
           {characterLabel}
         </span>
       </div>
