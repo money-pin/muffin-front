@@ -24,7 +24,7 @@ function MyPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <div className="bg-[linear-gradient(180deg,rgba(255,255,255,0.2)_0%,rgba(255,194,102,0.2)_100%),linear-gradient(#fff,#fff)] pb-6">
+      <div className="bg-white pb-6">
         <header className="flex h-[52px] items-center justify-end px-5">
           <button
             type="button"
@@ -64,7 +64,7 @@ function MyPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-9 bg-white px-5 pb-9 pt-6">
+      <div className="flex flex-1 flex-col gap-9 border-t border-neutral-100 bg-[#f9f9f9] px-5 pb-9 pt-6">
         <section className="flex flex-col gap-4">
           <SectionHeader title="학습 저장소" />
           <StorageShortcuts onNavigate={() => navigate("/my/storage")} />
