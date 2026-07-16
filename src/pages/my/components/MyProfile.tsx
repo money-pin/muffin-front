@@ -17,8 +17,8 @@ export default function MyProfile({
   return (
     <section className="flex flex-col items-center">
       <div className="relative">
-        <CharacterAvatar size="large" variant={characterVariant} />
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[4px] bg-secondary px-1.5 py-0.5 text-caption-12-bd text-white">
+        <CharacterAvatar size="medium" variant={characterVariant} />
+        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[4px] bg-secondary-100 px-1.5 py-0.5 text-caption-12-md text-secondary">
           {characterLabel}
         </span>
       </div>
@@ -32,8 +32,8 @@ export default function MyProfile({
         <span className="text-heading-20-bd text-neutral-900">{nickname}</span>
         <svg
           aria-hidden="true"
-          width="18"
-          height="18"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="var(--color-neutral-400)"
