@@ -49,7 +49,7 @@ export default function StreakWeekCard({
 
   return (
     <div className="flex w-full flex-col">
-      <div className="px-4">
+      <div className="px-4 leading-none">
         <span className="inline-flex h-7 items-center gap-1 rounded-t-[8px] bg-secondary-100 px-2">
           <img
             src={fireIcon}
