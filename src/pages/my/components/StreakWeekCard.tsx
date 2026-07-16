@@ -8,6 +8,10 @@ interface StreakWeekCardProps {
 
 const WEEK_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
+// Figma 스펙: 원 28px, 원 사이 간격 15px (고정), 가운데 정렬
+const CELL = 28;
+const GAP = 15;
+
 function CheckMark() {
   return (
     <svg
@@ -60,34 +64,38 @@ export default function StreakWeekCard({
         </span>
       </div>
 
-      <div className="w-full rounded-[16px] bg-white px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
-        <div className="grid grid-cols-7">
+      <div className="flex w-full flex-col items-center gap-1 rounded-[16px] bg-white px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
+        <div className="flex" style={{ gap: GAP }}>
           {WEEK_LABELS.map((label, index) => (
             <span
               key={label}
               className={`text-center text-caption-12-bd ${
                 index === todayIndex ? "text-primary" : "text-neutral-400"
               }`}
+              style={{ width: CELL }}
             >
               {label}
             </span>
           ))}
         </div>
 
-        <div className="mt-1 grid grid-cols-7">
+        <div className="flex" style={{ gap: GAP }}>
           {segments.map((segment) =>
             segment.checked ? (
               <div
                 key={segment.start}
-                style={{ gridColumn: `span ${segment.length}` }}
-                className={`flex h-8 items-center justify-center rounded-full bg-gradient-to-r from-secondary-400 to-primary ${
-                  segment.length === 1 ? "mx-auto w-8" : "w-full"
-                }`}
+                className="flex items-center rounded-full bg-gradient-to-r from-secondary-400 to-primary"
+                style={{
+                  height: CELL,
+                  width: segment.length * CELL + (segment.length - 1) * GAP,
+                  gap: GAP,
+                }}
               >
                 {Array.from({ length: segment.length }).map((_, offset) => (
                   <span
                     key={offset}
-                    className="flex flex-1 items-center justify-center"
+                    className="flex items-center justify-center"
+                    style={{ width: CELL }}
                   >
                     <CheckMark />
                   </span>
@@ -95,9 +103,11 @@ export default function StreakWeekCard({
               </div>
             ) : (
               Array.from({ length: segment.length }).map((_, offset) => (
-                <div key={segment.start + offset} className="flex justify-center">
-                  <div className="h-8 w-8 rounded-full bg-neutral-100" />
-                </div>
+                <div
+                  key={segment.start + offset}
+                  className="rounded-full bg-neutral-100"
+                  style={{ width: CELL, height: CELL }}
+                />
               ))
             ),
           )}
