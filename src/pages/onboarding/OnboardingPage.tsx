@@ -2,6 +2,7 @@ import { Fragment, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Indicator from "@/components/common/Indicator";
+import { saveCharacter } from "@/lib/character";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import muffinPlain from "@/assets/avatars/muffin-plain.png";
 import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
@@ -89,6 +90,8 @@ function OnboardingPage() {
     if (stepIndex < STEPS.length - 1) {
       setStepIndex((i) => i + 1);
     } else {
+      // 온보딩 완료 — 설문으로 정해진 캐릭터를 저장해 홈·마이·퀴즈에서 공유
+      saveCharacter(resolveOnboardingResult(answers));
       navigate("/home", { replace: true });
     }
   };
