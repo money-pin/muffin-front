@@ -1,5 +1,6 @@
 import Button from "@/components/common/Button";
 import CharacterAvatar from "@/components/common/CharacterAvatar";
+import { useCharacter } from "@/lib/character";
 
 interface QuizIntroProps {
   nickname: string;
@@ -13,10 +14,12 @@ export default function QuizIntro({
   onStart,
   onLater,
 }: QuizIntroProps) {
+  const character = useCharacter();
+
   return (
     <div className="flex min-h-[calc(100dvh-118px)] flex-col px-5 pb-12">
       <div className="flex flex-1 flex-col items-center justify-center gap-10">
-        <CharacterAvatar size="large" variant="plain" />
+        <CharacterAvatar size="large" variant={character} />
         <p className="whitespace-pre-line text-center text-heading-20-bd text-neutral-900">
           {`${nickname}님, 오늘 구운 뉴스들로\n반죽을 만들어볼까요?`}
         </p>
