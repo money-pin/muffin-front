@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 
-export default function ScrollToTopButton() {
+interface ScrollToTopButtonProps {
+  onClick?: () => void;
+}
+
+export default function ScrollToTopButton({ onClick }: ScrollToTopButtonProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -13,10 +17,16 @@ export default function ScrollToTopButton() {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (onClick) {
+      onClick();
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
-  if (!isVisible) return null;
+  // onClick props가 주어지면 부모가 직접 표시 상태를 제어하고 있으므로, 
+  // props가 없을 때만 자체 window 스크롤 상태(isVisible)를 기준으로 반환 처리를 합니다.
+  if (!onClick && !isVisible) return null;
 
   return (
     <button
