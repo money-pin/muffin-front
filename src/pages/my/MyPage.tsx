@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import SectionHeader from "@/components/common/SectionHeader";
+import { useCharacter, CHARACTER_LABELS } from "@/lib/character";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
 
 import MyProfile from "./components/MyProfile";
@@ -19,6 +20,7 @@ import {
 // Figma 마이: 프로필·스트릭 영역(주황빛 배경) + 학습 저장소·최근 읽은 뉴스(흰 배경)
 function MyPage() {
   const navigate = useNavigate();
+  const character = useCharacter();
   const [nickname, setNickname] = useState(MY_USER.nickname);
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
 
@@ -50,8 +52,8 @@ function MyPage() {
 
         <MyProfile
           nickname={nickname}
-          characterVariant={MY_USER.characterVariant}
-          characterLabel={MY_USER.characterLabel}
+          characterVariant={character}
+          characterLabel={CHARACTER_LABELS[character]}
           onEditNickname={() => setNicknameModalOpen(true)}
         />
 

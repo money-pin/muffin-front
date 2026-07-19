@@ -1,12 +1,15 @@
 import CharacterAvatar from "@/components/common/CharacterAvatar";
+import { useCharacter } from "@/lib/character";
 
 interface CharacterGreetingProps {
   message: string;
 }
 
 // Figma Character Info: 말풍선(170×40, 그림자) + 꼬리 + 머핀 캐릭터(large)
-// 페르소나 분기(스프링클·버터빛 머핀)는 온보딩과 동일하게 플레인으로 우선 구현
+// 캐릭터는 온보딩에서 정해진 값(홈·마이·퀴즈 공유)을 사용
 export default function CharacterGreeting({ message }: CharacterGreetingProps) {
+  const character = useCharacter();
+
   return (
     <div className="flex flex-col items-center">
       <div className="relative drop-shadow-[0px_1px_2.5px_rgba(0,0,0,0.14)]">
@@ -19,7 +22,7 @@ export default function CharacterGreeting({ message }: CharacterGreetingProps) {
         <div className="absolute -bottom-[5px] left-[61%] h-[10px] w-[10px] rotate-45 bg-white" />
       </div>
 
-      <CharacterAvatar size="large" variant="plain" className="mt-[13px]" />
+      <CharacterAvatar size="large" variant={character} className="mt-[13px]" />
     </div>
   );
 }

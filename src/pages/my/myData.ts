@@ -10,10 +10,9 @@ export interface MyRecentNews {
 }
 
 // 화면 구현 확인용 임시 값 — 실제 데이터는 추후 API 연동 시 반영
+// 캐릭터는 온보딩에서 정해진 값(@/lib/character)을 사용하므로 여기 두지 않음
 export const MY_USER = {
   nickname: "예은",
-  characterVariant: "butter" as const,
-  characterLabel: "버터빛 머핀",
   streakDays: 5,
 };
 
