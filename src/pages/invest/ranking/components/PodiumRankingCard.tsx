@@ -10,6 +10,7 @@ type PodiumRank = 1 | 2 | 3;
 interface PodiumRankingCardProps {
   rank: PodiumRank;
   item: WeeklyRankingItem;
+  onClick?: (item: WeeklyRankingItem) => void;
 }
 
 const rankStyleMap: Record<
@@ -56,11 +57,18 @@ const rankStyleMap: Record<
 export default function PodiumRankingCard({
   rank,
   item,
+  onClick,
 }: PodiumRankingCardProps) {
   const style = rankStyleMap[rank];
+  const isClickable = Boolean(onClick);
 
   return (
-    <article className={`relative min-w-0 ${style.wrapper}`}>
+    <button
+      type="button"
+      onClick={() => onClick?.(item)}
+      disabled={!isClickable}
+      className={`relative min-w-0 text-left disabled:cursor-default ${style.wrapper}`}
+    >
       <div
         className={`relative flex min-w-0 flex-col overflow-hidden rounded-xl ${style.card} ${style.contentTop}`}
       >
@@ -73,16 +81,16 @@ export default function PodiumRankingCard({
         />
 
         <div
-          className={`flex min-w-0 flex-col items-center px-1 pb-3 pt-4 ${style.details}`}
+          className={`flex min-w-0 flex-col items-center px-1 pt-4 pb-3 ${style.details}`}
         >
-          <h3 className="w-full truncate text-center text-body-16-md-tighter text-neutral-900">
+          <h3 className="text-body-16-md-tighter w-full truncate text-center text-neutral-900">
             {item.nickname}
           </h3>
-          <div className="mt-1 flex flex-col items-center text-positive">
+          <div className="text-positive mt-1 flex flex-col items-center">
             <p className="text-caption-12-bd">
               {formatSignedWon(item.weeklyProfit)}
             </p>
-            <p className="flex items-center gap-1 text-caption-12-bd">
+            <p className="text-caption-12-bd flex items-center gap-1">
               <span aria-hidden="true" className="text-[8px] leading-none">
                 ▲
               </span>
@@ -102,6 +110,6 @@ export default function PodiumRankingCard({
           draggable={false}
         />
       </div>
-    </article>
+    </button>
   );
 }
