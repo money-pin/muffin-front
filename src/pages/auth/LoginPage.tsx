@@ -131,7 +131,8 @@ function LoginPage() {
             />
 
             <p className="text-caption-12-md-tighter text-center text-neutral-400">
-              가입 시 이용약관 및 개인정보처리방침에 동의하는 것으로 간주됩니다.
+              구글 로그인 시 이용약관 및 개인정보처리방침에 동의하는 것으로
+              간주됩니다.
             </p>
 
             {errorMessage && (
