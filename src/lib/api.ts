@@ -26,6 +26,12 @@ interface RequestOptions {
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
+if (!BASE_URL) {
+  console.warn(
+    "VITE_API_BASE_URL이 비어 있어 요청이 현재 주소로 전송됩니다(404). .env를 확인해주세요.",
+  );
+}
+
 // 공통 요청 헬퍼. 응답 봉투를 벗겨 result만 반환하고, 실패 시 ApiError를 던진다.
 // credentials: "include" — refreshToken(httpOnly 쿠키) 수신·전송에 필요
 export async function apiRequest<T>(
