@@ -8,7 +8,8 @@ import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import { apiRequest } from "@/lib/api";
 import { saveAccessToken } from "@/lib/auth";
 
-interface GoogleAuthResult {
+// POST /api/auth/login, /api/auth/google 공통 응답 result
+interface AuthResult {
   accessToken: string;
 }
 
@@ -17,12 +18,36 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canSubmit = email.trim() !== "" && password.trim() !== "";
+  const canSubmit =
+    email.trim() !== "" && password.trim() !== "" && !isSubmitting;
 
-  const handleLogin = () => {
-    // TODO: 로그인 API 연결
-    navigate("/home");
+  // 이메일/비밀번호 로그인. accessToken은 응답 body, refreshToken은 httpOnly 쿠키.
+  // 실패 시 백엔드 메시지(코드별 문구)를 그대로 노출한다.
+  const handleLogin = async () => {
+    if (!canSubmit) return;
+
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const { accessToken } = await apiRequest<AuthResult>("/api/auth/login", {
+        method: "POST",
+        body: { email, password },
+      });
+
+      saveAccessToken(accessToken);
+      navigate("/home", { replace: true });
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "로그인에 실패했어요. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // 구글 ID 토큰을 백엔드에 넘겨 앱 accessToken으로 교환
@@ -31,10 +56,10 @@ function LoginPage() {
     setErrorMessage("");
 
     try {
-      const { accessToken } = await apiRequest<GoogleAuthResult>(
-        "/api/auth/google",
-        { method: "POST", body: { idToken, termsAgreed: true } },
-      );
+      const { accessToken } = await apiRequest<AuthResult>("/api/auth/google", {
+        method: "POST",
+        body: { idToken, termsAgreed: true },
+      });
 
       saveAccessToken(accessToken);
       navigate("/home", { replace: true });
