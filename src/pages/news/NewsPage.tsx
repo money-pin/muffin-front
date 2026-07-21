@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Carousel from "../../components/common/Carousel";
 import TabBar from "../../components/common/TabBar";
 import Badge from "../../components/common/Badge";
-import NewCard from "./components/NewCard";
+import NewCard from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
@@ -17,6 +18,7 @@ const CAROUSEL_IMAGES = {
 } as const;
 
 export default function NewsPage() {
+  const navigate = useNavigate();
   type NewsTabType = "all" | "economy" | "stock" | "world";
   const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
 
@@ -26,8 +28,9 @@ export default function NewsPage() {
     { id: 3, imageType: "world" as const, category: "세계", title: "美 연준 금리 동결, 신흥국 증시 안도 랠리" },
   ];
 
-  const todayNewsList: React.ComponentProps<typeof NewCard>[] = [
+  const todayNewsList: (React.ComponentProps<typeof NewCard> & { id: number })[] = [
     {
+      id: 1,
       title: "코인 시장 변동성 확대",
       category: "경제",
       date: "오늘",
@@ -35,6 +38,7 @@ export default function NewsPage() {
       imageType: "economy",
     },
     {
+      id: 2,
       title: "에너지 섹터 투자 포인트",
       category: "증권",
       date: "1일 전",
@@ -42,6 +46,7 @@ export default function NewsPage() {
       imageType: "IT",
     },
     {
+      id: 3,
       title: "미국 기준금리 동결, 증시 안도 랠리",
       category: "세계",
       date: "3일 전",
@@ -49,6 +54,7 @@ export default function NewsPage() {
       imageType: "world",
     },
     {
+      id: 4,
       title: "국내 증시 외국인 순매수세",
       category: "경제",
       date: "2026-04-21",
@@ -95,7 +101,8 @@ export default function NewsPage() {
           {trendingNewsList.map((news) => (
             <div 
               key={news.id} 
-              className="p-5 bg-white border border-neutral-100 rounded-[20px] flex flex-col gap-4 shadow-sm"
+              onClick={() => navigate("/news/detail")} 
+              className="p-5 bg-white border border-neutral-100 rounded-[20px] flex flex-col gap-4 shadow-sm cursor-pointer"
             >
               <div className="w-full h-[201px] rounded-[12px] overflow-hidden">
                 <img 
@@ -132,8 +139,8 @@ export default function NewsPage() {
         <h2 className="text-lg font-bold text-neutral-950">오늘의 뉴스</h2>
         
         <div className="flex flex-col gap-[12px]">
-          {filteredNewsList.map((news, index) => (
-            <NewCard key={index} {...news} />
+          {filteredNewsList.map((news) => (
+            <NewCard key={news.id} {...news} />
           ))}
         </div>
       </section>
