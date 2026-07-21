@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
+import { clearAccessToken } from "@/lib/auth";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 
 import SettingToggle from "./components/SettingToggle";
@@ -79,6 +80,13 @@ function MySettingsPage() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
 
+  // accessToken만 지운다. refreshToken은 httpOnly 쿠키라 FE에서 삭제 불가 —
+  // 완전한 세션 종료는 백엔드 로그아웃 API가 붙은 뒤 함께 호출해야 함
+  const handleLogout = () => {
+    clearAccessToken();
+    navigate("/login", { replace: true });
+  };
+
   useEffect(() => {
     setTopBar({ title: "설정", showBack: true });
     return resetTopBar;
@@ -89,7 +97,7 @@ function MySettingsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 bg-neutral-0 px-5 pb-12 pt-2">
+    <div className="bg-neutral-0 flex flex-col gap-6 px-5 pt-2 pb-12">
       <Section title="알림 설정">
         {NOTIFICATION_ROWS.map(({ key, label }) => (
           <div
@@ -138,7 +146,7 @@ function MySettingsPage() {
         title="로그아웃 하시겠어요?"
         confirmLabel="확인"
         onCancel={() => setLogoutModalOpen(false)}
-        onConfirm={() => navigate("/login")}
+        onConfirm={handleLogout}
       />
       <ConfirmModal
         isOpen={withdrawModalOpen}
@@ -147,7 +155,7 @@ function MySettingsPage() {
         confirmLabel="탈퇴하기"
         danger
         onCancel={() => setWithdrawModalOpen(false)}
-        onConfirm={() => navigate("/login")}
+        onConfirm={handleLogout}
       />
     </div>
   );
