@@ -45,11 +45,11 @@ function TopBarLayout() {
   return (
     <>
       <div
-        className={`fixed left-1/2 top-0 z-50 h-[62px] w-full max-w-[--max-width-app] -translate-x-1/2 ${bgClass}`}
+        className={`fixed left-1/2 top-0 z-50 h-[62px] w-full max-w-[var(--max-width-app)] -translate-x-1/2 ${bgClass}`}
       />
 
       <div
-        className={`fixed left-1/2 top-[62px] z-50 w-full max-w-[--max-width-app] -translate-x-1/2 ${bgClass}`}
+        className={`fixed left-1/2 top-[62px] z-50 w-full max-w-[var(--max-width-app)] -translate-x-1/2 ${bgClass}`}
       >
         <TopBar
           title={topBar.title}
