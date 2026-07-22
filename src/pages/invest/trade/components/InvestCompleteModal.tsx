@@ -1,5 +1,5 @@
 // 구매 확정 안내 모달
-import Modal from "@/components/common/Modal2";
+import Modal from "@/components/common/Modal";
 
 import checkConfirmIcon from "@/assets/check-confirm.svg";
 
