@@ -38,7 +38,7 @@ function Modal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex justify-center">
-      <div className="relative h-full w-full max-w-[450px]">
+      <div className="relative h-full w-full max-w-[--max-width-app]">
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-[var(--color-neutral-1000)]/50"
