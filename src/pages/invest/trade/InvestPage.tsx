@@ -300,7 +300,7 @@ function InvestPage() {
                 {section.title}
               </h2>
 
-              <div className="flex justify-between">
+              <div className="grid grid-cols-4 gap-[10px]">
                 {section.items.map((asset) => {
                   const quantity = assetQuantities[asset.id] ?? 0;
                   const isSelected =
