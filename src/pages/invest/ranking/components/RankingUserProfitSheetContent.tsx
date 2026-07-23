@@ -31,7 +31,7 @@ export default function RankingUserProfitSheetContent({
       : (totalProfitAmount / totalInvestmentAmount) * 100;
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-10">
+    <div className="flex flex-col px-5 pb-10">
       <section className="flex flex-col gap-5">
         <div className="flex items-center gap-1">
           <RankingBadge rank={user.rank} size="sm" variant="rank" />

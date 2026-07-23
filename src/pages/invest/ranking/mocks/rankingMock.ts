@@ -1,11 +1,17 @@
 import muffinButter from "@/assets/avatars/muffin-butter.png";
 import muffinCream from "@/assets/avatars/muffin-cream.png";
 import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
+import automobileIcon from "@/assets/investment/investment-automobile.svg";
 import biotechIcon from "@/assets/investment/investment-biotech.svg";
 import bondsIcon from "@/assets/investment/investment-bonds.svg";
+import coinIcon from "@/assets/investment/investment-coin.svg";
+import defenseIcon from "@/assets/investment/investment-defense.svg";
 import dollarIcon from "@/assets/investment/investment-dollar.svg";
+import energyIcon from "@/assets/investment/investment-energy.svg";
+import financialsIcon from "@/assets/investment/investment-financials.svg";
 import goldIcon from "@/assets/investment/investment-gold.svg";
 import semiconductorIcon from "@/assets/investment/investment-semiconductor.svg";
+import technologyIcon from "@/assets/investment/investment-technology.svg";
 import type {
   MyRankingData,
   WeeklyRankingItem,
@@ -51,6 +57,54 @@ const rankingUserSectors: WeeklyRankingItem["sectors"] = [
     iconSrc: biotechIcon,
     profitAmount: 16000,
     profitRate: 8.0,
+    investmentAmount: 200000,
+  },
+  {
+    id: "technology",
+    name: "테크",
+    iconSrc: technologyIcon,
+    profitAmount: 11000,
+    profitRate: 3.8,
+    investmentAmount: 290000,
+  },
+  {
+    id: "energy",
+    name: "에너지",
+    iconSrc: energyIcon,
+    profitAmount: 9000,
+    profitRate: 3.0,
+    investmentAmount: 300000,
+  },
+  {
+    id: "financials",
+    name: "금융",
+    iconSrc: financialsIcon,
+    profitAmount: 7000,
+    profitRate: 2.8,
+    investmentAmount: 250000,
+  },
+  {
+    id: "automobile",
+    name: "자동차",
+    iconSrc: automobileIcon,
+    profitAmount: 6000,
+    profitRate: 2.4,
+    investmentAmount: 250000,
+  },
+  {
+    id: "coin",
+    name: "코인",
+    iconSrc: coinIcon,
+    profitAmount: 5000,
+    profitRate: 2.5,
+    investmentAmount: 200000,
+  },
+  {
+    id: "defense",
+    name: "방산",
+    iconSrc: defenseIcon,
+    profitAmount: 3000,
+    profitRate: 1.5,
     investmentAmount: 200000,
   },
 ];

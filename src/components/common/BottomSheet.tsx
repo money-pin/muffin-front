@@ -10,7 +10,7 @@ import { createPortal } from "react-dom";
 const ANIMATION_DURATION_MS = 300;
 const HALF_SNAP_RATIO = 0.46;
 const EXPANDED_SNAP_RATIO = 0.08;
-const CLOSE_DRAG_THRESHOLD = 120;
+const CLOSE_DRAG_THRESHOLD = 80;
 const EXPAND_DRAG_THRESHOLD = 80;
 
 interface BottomSheetProps {
@@ -125,23 +125,26 @@ export default function BottomSheet({
     return () => previousFocusRef.current?.focus();
   }, []);
 
-  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const startSheetDrag = (
+    event: ReactPointerEvent<HTMLDivElement>,
+    startY = event.clientY,
+  ) => {
     if (snapMode !== "half-full") return;
 
-    dragStartYRef.current = event.clientY;
+    dragStartYRef.current = startY;
     dragStartExpandedRef.current = isExpanded;
     setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const moveSheetDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (snapMode !== "half-full" || !isDragging) return;
 
     const deltaY = event.clientY - dragStartYRef.current;
     setDragOffset(Math.max(0, deltaY));
   };
 
-  const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const endSheetDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (snapMode !== "half-full" || !isDragging) return;
 
     const deltaY = event.clientY - dragStartYRef.current;
@@ -161,6 +164,12 @@ export default function BottomSheet({
     }
 
     if (deltaY > CLOSE_DRAG_THRESHOLD) onClose();
+  };
+
+  const handleHandlePointerDown = (
+    event: ReactPointerEvent<HTMLDivElement>,
+  ) => {
+    startSheetDrag(event);
   };
 
   if (!isMounted || typeof document === "undefined") return null;
@@ -222,15 +231,21 @@ export default function BottomSheet({
               ? "from-neutral-0 to-neutral-0/0 bg-gradient-to-b from-[39%] to-[85%] pb-8"
               : ""
           }`}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
+          onPointerDown={handleHandlePointerDown}
+          onPointerMove={moveSheetDrag}
+          onPointerUp={endSheetDrag}
+          onPointerCancel={endSheetDrag}
         >
           <div className="h-1 w-12 rounded-full bg-neutral-100" />
         </div>
 
-        {children}
+        {snapMode === "half-full" ? (
+          <div className="min-h-0 flex-1 touch-pan-y overflow-y-scroll overscroll-contain [-webkit-overflow-scrolling:touch]">
+            {children}
+          </div>
+        ) : (
+          children
+        )}
       </section>
     </div>,
     document.body,

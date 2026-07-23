@@ -21,7 +21,7 @@ export default function RecentPerformanceSheetContent({
   sectors,
 }: RecentPerformanceSheetContentProps) {
   return (
-    <div className="flex max-h-[calc(100dvh-52px)] flex-col overflow-y-auto px-5 pb-8 pt-8">
+    <div className="flex flex-col px-5 pt-8 pb-8">
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1">
           <img
@@ -40,7 +40,7 @@ export default function RecentPerformanceSheetContent({
         </Badge>
       </div>
 
-      <section className="mt-5 flex flex-col gap-2 rounded-2xl border border-neutral-100 bg-neutral-0 p-4">
+      <section className="bg-neutral-0 mt-5 flex flex-col gap-2 rounded-2xl border border-neutral-100 p-4">
         <div className="flex items-center justify-between">
           <span className="text-body-16-md-tighter leading-[1.6] text-neutral-600">
             총 수익
@@ -76,7 +76,7 @@ export default function RecentPerformanceSheetContent({
           {sectors.map((sector) => (
             <article
               key={sector.id}
-              className="flex h-[84px] items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 px-4"
+              className="bg-neutral-0 flex h-[84px] items-center justify-between rounded-2xl border border-neutral-100 px-4"
             >
               <div className="flex items-center gap-3">
                 <img
