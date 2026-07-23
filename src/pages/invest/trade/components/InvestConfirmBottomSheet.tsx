@@ -86,22 +86,22 @@ function InvestConfirmBottomSheet({
         </div>
 
         <div className="mt-8 flex w-full gap-2">
-  <button
-    type="button"
-    onClick={onClose}
-    className="h-[52px] w-[88px] shrink-0 rounded-[14px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-600)]"
-  >
-    취소
-  </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-[52px] w-[88px] shrink-0 rounded-[14px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-600)]"
+          >
+            취소
+          </button>
 
-  <button
-    type="button"
-    onClick={onConfirm}
-    className="h-[52px] min-w-0 flex-1 rounded-[14px] bg-[var(--color-primary)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-0)]"
-  >
-    구매 확정하기
-  </button>
-</div>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="h-[52px] min-w-0 flex-1 rounded-[14px] bg-[var(--color-primary)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-0)]"
+          >
+            구매 확정하기
+          </button>
+        </div>
       </div>
     </BottomSheet>
   );

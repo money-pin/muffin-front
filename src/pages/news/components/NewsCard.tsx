@@ -22,7 +22,13 @@ interface NewCardProps {
   imageType: "economy" | "IT" | "world";
 }
 
-export default function NewCard({ title, category, date, views, imageType }: NewCardProps) {
+export default function NewCard({
+  title,
+  category,
+  date,
+  views,
+  imageType,
+}: NewCardProps) {
   const navigate = useNavigate();
   const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -32,11 +38,11 @@ export default function NewCard({ title, category, date, views, imageType }: New
   };
 
   return (
-    <div 
+    <div
       onClick={() => navigate("/news/detail")}
-      className="w-full flex items-center gap-[12px] pt-[8px] pb-[16px] px-[16px] bg-neutral-0 border border-neutral-100 rounded-[16px] shadow-sm cursor-pointer"
+      className="bg-neutral-0 flex w-full cursor-pointer items-center gap-[12px] rounded-[16px] border border-neutral-100 px-[16px] pt-[8px] pb-[16px] shadow-sm"
     >
-      <div className="w-[56px] h-[56px] rounded-[4px] overflow-hidden flex-shrink-0">
+      <div className="h-[56px] w-[56px] flex-shrink-0 overflow-hidden rounded-[4px]">
         <img
           src={NEWS_IMAGES[imageType]}
           alt=""
@@ -46,33 +52,33 @@ export default function NewCard({ title, category, date, views, imageType }: New
         />
       </div>
 
-      <div className="flex-1 flex flex-col gap-[6px]">
-        <div className="flex justify-between items-start gap-2">
-          <h3 className="line-clamp-2 text-[14px] font-medium text-neutral-900 leading-[160%]">
+      <div className="flex flex-1 flex-col gap-[6px]">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 text-[14px] leading-[160%] font-medium text-neutral-900">
             {title}
           </h3>
           <button
             type="button"
             onClick={handleBookmarkClick}
-            className="w-[24px] h-[24px] flex items-center justify-center flex-shrink-0"
+            className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center"
           >
             <img
               src={isBookmarked ? bookmarkFill : bookmarkLine}
               alt="북마크"
-              className="w-full h-full object-contain"
+              className="h-full w-full object-contain"
             />
           </button>
         </div>
 
-        <div className="flex items-center justify-between w-full h-[22px]">
+        <div className="flex h-[22px] w-full items-center justify-between">
           <div className="flex items-center gap-[4px]">
             <Badge variant="orange">{category}</Badge>
-            <span className="text-[12px] font-medium text-neutral-400 leading-[160%]">
+            <span className="text-[12px] leading-[160%] font-medium text-neutral-400">
               {date}
             </span>
           </div>
 
-          <span className="text-[12px] font-medium text-neutral-400 leading-[160%]">
+          <span className="text-[12px] leading-[160%] font-medium text-neutral-400">
             조회수 {views}
           </span>
         </div>
