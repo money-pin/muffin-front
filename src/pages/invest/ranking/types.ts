@@ -1,3 +1,5 @@
+import type { SectorPerformanceDetail } from "@/pages/invest/stats/types";
+
 export interface ParticipatedMyRanking {
   participated: true;
   rank: number;
@@ -22,6 +24,7 @@ export interface WeeklyRankingItem {
   weeklyProfit: number;
   weeklyProfitRate: number;
   characterImageUrl?: string;
+  sectors?: SectorPerformanceDetail[];
 }
 
 export interface WeeklyRankingData {
