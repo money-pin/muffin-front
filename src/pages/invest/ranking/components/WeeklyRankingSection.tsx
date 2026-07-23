@@ -7,10 +7,12 @@ import type { WeeklyRankingItem } from "@/pages/invest/ranking/types";
 interface WeeklyRankingSectionProps {
   weekLabel: string;
   rankings: WeeklyRankingItem[];
+  onRankingClick?: (item: WeeklyRankingItem) => void;
 }
 export default function WeeklyRankingSection({
   weekLabel,
   rankings,
+  onRankingClick,
 }: WeeklyRankingSectionProps) {
   return (
     <section className="flex w-full flex-col">
@@ -20,7 +22,8 @@ export default function WeeklyRankingSection({
         weekLabel={weekLabel}
       />
       <div className="flex w-full flex-col gap-1">
-        <RankingPodium items={rankings} /> <RankingList items={rankings} />{" "}
+        <RankingPodium items={rankings} onRankingClick={onRankingClick} />
+        <RankingList items={rankings} onRankingClick={onRankingClick} />
       </div>
     </section>
   );
