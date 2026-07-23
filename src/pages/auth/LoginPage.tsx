@@ -4,22 +4,72 @@ import { useNavigate } from "react-router-dom";
 import Logo from "@/components/common/Logo";
 import TextField from "@/components/common/TextField";
 import Button from "@/components/common/Button";
-import SocialLoginButton from "@/components/common/SocialLoginButton";
+import GoogleLoginButton from "@/components/common/GoogleLoginButton";
+import { apiRequest } from "@/lib/api";
+import { saveAccessToken } from "@/lib/auth";
+
+// POST /api/auth/login, /api/auth/google 공통 응답 result
+interface AuthResult {
+  accessToken: string;
+}
 
 function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canSubmit = email.trim() !== "" && password.trim() !== "";
+  const canSubmit =
+    email.trim() !== "" && password.trim() !== "" && !isSubmitting;
 
-  const handleLogin = () => {
-    // TODO: 로그인 API 연결
-    navigate("/home");
+  // 이메일/비밀번호 로그인. accessToken은 응답 body, refreshToken은 httpOnly 쿠키.
+  // 실패 시 백엔드 메시지(코드별 문구)를 그대로 노출한다.
+  const handleLogin = async () => {
+    if (!canSubmit) return;
+
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const { accessToken } = await apiRequest<AuthResult>("/api/auth/login", {
+        method: "POST",
+        body: { email, password },
+      });
+
+      saveAccessToken(accessToken);
+      navigate("/home", { replace: true });
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "로그인에 실패했어요. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // TODO: 구글 소셜 로그인 연결
+  // 구글 ID 토큰을 백엔드에 넘겨 앱 accessToken으로 교환
+  // (refreshToken은 백엔드가 httpOnly 쿠키로 내려줌)
+  const handleGoogleCredential = async (idToken: string) => {
+    setErrorMessage("");
+
+    try {
+      const { accessToken } = await apiRequest<AuthResult>("/api/auth/google", {
+        method: "POST",
+        body: { idToken, termsAgreed: true },
+      });
+
+      saveAccessToken(accessToken);
+      navigate("/home", { replace: true });
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "구글 로그인에 실패했어요. 잠시 후 다시 시도해주세요.",
+      );
+    }
   };
 
   return (
@@ -55,7 +105,7 @@ function LoginPage() {
                 </Button>
               </div>
 
-              <div className="flex items-center justify-center gap-4 px-5 text-body-14-md-tighter text-neutral-700">
+              <div className="text-body-14-md-tighter flex items-center justify-center gap-4 px-5 text-neutral-700">
                 <button type="button" className="flex-1 text-right">
                   계정 찾기
                 </button>
@@ -75,7 +125,21 @@ function LoginPage() {
               </span>
               <div className="h-px flex-1 bg-neutral-100" />
             </div>
-            <SocialLoginButton onClick={handleGoogleLogin} />
+            <GoogleLoginButton
+              onCredential={handleGoogleCredential}
+              onError={setErrorMessage}
+            />
+
+            <p className="text-caption-12-md-tighter text-center text-neutral-400">
+              구글 로그인 시 이용약관 및 개인정보처리방침에 동의하는 것으로
+              간주됩니다.
+            </p>
+
+            {errorMessage && (
+              <p className="text-caption-12-md-tighter text-positive text-center">
+                {errorMessage}
+              </p>
+            )}
           </div>
         </div>
       </div>

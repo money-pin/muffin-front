@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
+import { clearAccessToken } from "@/lib/auth";
+import { logout, withdraw } from "@/lib/authApi";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 
 import SettingToggle from "./components/SettingToggle";
@@ -79,6 +81,29 @@ function MySettingsPage() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
 
+  // 로그아웃: 백엔드에서 토큰 무효화 후 로컬 토큰 삭제.
+  // API가 실패해도 로컬은 비우고 로그인 화면으로 보낸다(세션 종료 보장).
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // 무시 — 로컬 세션은 아래에서 정리
+    }
+    clearAccessToken();
+    navigate("/login", { replace: true });
+  };
+
+  // 회원 탈퇴: 소프트 딜리트 처리 후 로컬 토큰 삭제
+  const handleWithdraw = async () => {
+    try {
+      await withdraw();
+    } catch {
+      // 무시 — 로컬 세션은 아래에서 정리
+    }
+    clearAccessToken();
+    navigate("/login", { replace: true });
+  };
+
   useEffect(() => {
     setTopBar({ title: "설정", showBack: true });
     return resetTopBar;
@@ -89,7 +114,7 @@ function MySettingsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 bg-neutral-0 px-5 pb-12 pt-2">
+    <div className="bg-neutral-0 flex flex-col gap-6 px-5 pt-2 pb-12">
       <Section title="알림 설정">
         {NOTIFICATION_ROWS.map(({ key, label }) => (
           <div
@@ -138,7 +163,7 @@ function MySettingsPage() {
         title="로그아웃 하시겠어요?"
         confirmLabel="확인"
         onCancel={() => setLogoutModalOpen(false)}
-        onConfirm={() => navigate("/login")}
+        onConfirm={handleLogout}
       />
       <ConfirmModal
         isOpen={withdrawModalOpen}
@@ -147,7 +172,7 @@ function MySettingsPage() {
         confirmLabel="탈퇴하기"
         danger
         onCancel={() => setWithdrawModalOpen(false)}
-        onConfirm={() => navigate("/login")}
+        onConfirm={handleWithdraw}
       />
     </div>
   );

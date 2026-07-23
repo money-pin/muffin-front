@@ -158,6 +158,8 @@
   --text-caption-12-md-tighter--line-height: 1.6;
   --text-caption-12-md-tighter--font-weight: 500;
   --text-caption-12-md-tighter--letter-spacing: -0.4px;
+
+  --max-width-app: 450px;
 }
 
 @layer base {

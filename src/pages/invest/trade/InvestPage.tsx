@@ -168,15 +168,11 @@ function InvestPage() {
 
     setAssetQuantities((prev) => {
       const currentQuantity = prev[assetId] ?? 0;
-
-      if (currentQuantity > 0) {
-        return prev;
-      }
-
       const assetPrice = MOCK_INVEST_MARKET_DATA.assetPrices[assetId];
+      const currentTotalAmount = getTotalInvestAmount(prev);
 
       if (
-        totalInvestAmount + assetPrice >
+        currentTotalAmount + assetPrice >
         MOCK_INVEST_MARKET_DATA.totalBudget
       ) {
         return prev;
@@ -184,7 +180,7 @@ function InvestPage() {
 
       return {
         ...prev,
-        [assetId]: 1,
+        [assetId]: currentQuantity + 1,
       };
     });
   };
@@ -304,7 +300,7 @@ function InvestPage() {
                 {section.title}
               </h2>
 
-              <div className="flex justify-between">
+              <div className="grid grid-cols-4 gap-[10px]">
                 {section.items.map((asset) => {
                   const quantity = assetQuantities[asset.id] ?? 0;
                   const isSelected =

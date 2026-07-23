@@ -14,6 +14,8 @@ interface SignupFormStepProps {
   values: SignupFormValues;
   onChange: (patch: Partial<SignupFormValues>) => void;
   onNext: () => void;
+  submitting?: boolean;
+  error?: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,6 +27,8 @@ export default function SignupFormStep({
   values,
   onChange,
   onNext,
+  submitting = false,
+  error,
 }: SignupFormStepProps) {
   const { name, email, password, passwordConfirm, agreed } = values;
 
@@ -55,7 +59,7 @@ export default function SignupFormStep({
     agreed;
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-8 pt-4">
+    <div className="flex flex-1 flex-col px-5 pt-4 pb-8">
       <div className="flex flex-col gap-6">
         <TextField
           label="이름"
@@ -121,7 +125,7 @@ export default function SignupFormStep({
               </svg>
             )}
           </span>
-          <span className="flex-1 text-left text-body-14-md-tighter text-neutral-700">
+          <span className="text-body-14-md-tighter flex-1 text-left text-neutral-700">
             개인정보처리방침 동의 <span className="text-primary">(필수)</span>
           </span>
           <img
@@ -133,7 +137,13 @@ export default function SignupFormStep({
           />
         </button>
 
-        <Button onClick={onNext} disabled={!canNext}>
+        {error && (
+          <p className="text-body-14-md-tighter text-positive text-center">
+            {error}
+          </p>
+        )}
+
+        <Button onClick={onNext} disabled={!canNext || submitting}>
           다음
         </Button>
       </div>

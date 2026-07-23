@@ -61,7 +61,7 @@ function InvestBottomAction({
   return (
     <div
       className={[
-        "fixed bottom-[80px] left-1/2 z-30 flex h-[76px] w-[390px] -translate-x-1/2 items-center gap-2 bg-[var(--color-neutral-0)] py-3 pl-5 pr-[17px]",
+        "fixed bottom-[80px] left-1/2 z-30 flex h-[76px] w-full max-w-[var(--max-width-app)] -translate-x-1/2 items-center gap-2 bg-[var(--color-neutral-0)] py-3 pr-[17px] pl-5",
         showTopShadow ? "shadow-[0_-1px_6.6px_rgba(0,0,0,0.07)]" : "",
       ].join(" ")}
     >
@@ -78,7 +78,7 @@ function InvestBottomAction({
         type="button"
         onClick={handleButtonClick}
         className={[
-          "h-[52px] w-[293px] shrink-0 rounded-[12px]",
+          "h-[52px] min-w-0 flex-1 shrink-0 rounded-[12px]",
           "text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)]",
           buttonClass,
         ].join(" ")}

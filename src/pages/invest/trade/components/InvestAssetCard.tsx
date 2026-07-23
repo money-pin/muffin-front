@@ -27,14 +27,14 @@ function InvestAssetCard({
       type="button"
       onClick={onClick}
       className={[
-        "relative flex h-[98px] w-[80px] flex-col items-center justify-center gap-1 rounded-[12px] border-2 bg-[var(--color-neutral-0)]",
+        "relative flex h-[98px] w-full max-w-[88px] min-w-0 flex-col items-center justify-center gap-1 justify-self-center rounded-[12px] border-2 bg-[var(--color-neutral-0)]",
         isSelected
           ? "border-[var(--color-primary)]"
           : "border-[var(--color-neutral-0)]",
       ].join(" ")}
     >
       {showBadge && (
-        <span className="text-body-14-bd absolute right-[6px] top-[6px] flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary)] text-center leading-none text-[var(--color-neutral-0)]">
+        <span className="text-body-14-bd absolute top-[6px] right-[6px] flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary)] text-center leading-none text-[var(--color-neutral-0)]">
           {quantity}
         </span>
       )}

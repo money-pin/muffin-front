@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Carousel from "../../components/common/Carousel";
 import TabBar from "../../components/common/TabBar";
 import Badge from "../../components/common/Badge";
-import NewCard from "./components/NewCard";
+import NewCard from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
@@ -17,17 +18,36 @@ const CAROUSEL_IMAGES = {
 } as const;
 
 export default function NewsPage() {
+  const navigate = useNavigate();
   type NewsTabType = "all" | "economy" | "stock" | "world";
   const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
 
   const trendingNewsList = [
-    { id: 1, imageType: "economy" as const, category: "경제", title: "엔비디아 실적 발표 대기, 국내 반도체 자산 시장에 미칠 영향은?" },
-    { id: 2, imageType: "IT" as const, category: "IT", title: "AI 반도체 수요 폭증, 삼성전자 HBM 증설 나선다" },
-    { id: 3, imageType: "world" as const, category: "세계", title: "美 연준 금리 동결, 신흥국 증시 안도 랠리" },
+    {
+      id: 1,
+      imageType: "economy" as const,
+      category: "경제",
+      title: "엔비디아 실적 발표 대기, 국내 반도체 자산 시장에 미칠 영향은?",
+    },
+    {
+      id: 2,
+      imageType: "IT" as const,
+      category: "IT",
+      title: "AI 반도체 수요 폭증, 삼성전자 HBM 증설 나선다",
+    },
+    {
+      id: 3,
+      imageType: "world" as const,
+      category: "세계",
+      title: "美 연준 금리 동결, 신흥국 증시 안도 랠리",
+    },
   ];
 
-  const todayNewsList: React.ComponentProps<typeof NewCard>[] = [
+  const todayNewsList: (React.ComponentProps<typeof NewCard> & {
+    id: number;
+  })[] = [
     {
+      id: 1,
       title: "코인 시장 변동성 확대",
       category: "경제",
       date: "오늘",
@@ -35,6 +55,7 @@ export default function NewsPage() {
       imageType: "economy",
     },
     {
+      id: 2,
       title: "에너지 섹터 투자 포인트",
       category: "증권",
       date: "1일 전",
@@ -42,6 +63,7 @@ export default function NewsPage() {
       imageType: "IT",
     },
     {
+      id: 3,
       title: "미국 기준금리 동결, 증시 안도 랠리",
       category: "세계",
       date: "3일 전",
@@ -49,6 +71,7 @@ export default function NewsPage() {
       imageType: "world",
     },
     {
+      id: 4,
       title: "국내 증시 외국인 순매수세",
       category: "경제",
       date: "2026-04-21",
@@ -76,42 +99,43 @@ export default function NewsPage() {
   });
 
   return (
-    <div className="w-full min-h-dvh bg-[#F5F5F5] flex flex-col text-black relative pt-5">
-      <section className="w-full flex flex-col gap-3">
-        <div className="px-5 flex items-center gap-[4px] h-[26px]">
-          <img 
-            src={megaphoneIcon} 
-            alt="" 
-            aria-hidden="true" 
-            className="w-[20px] h-[20px] object-contain"
+    <div className="relative flex min-h-dvh w-full flex-col bg-[#F5F5F5] pt-5 text-black">
+      <section className="flex w-full flex-col gap-3">
+        <div className="flex h-[26px] items-center gap-[4px] px-5">
+          <img
+            src={megaphoneIcon}
+            alt=""
+            aria-hidden="true"
+            className="h-[20px] w-[20px] object-contain"
             draggable={false}
           />
-          <h2 className="text-[16px] font-bold text-[#1B1B1B] leading-[160%]">
+          <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
             따끈한 금융 소식
           </h2>
         </div>
-        
+
         <Carousel>
           {trendingNewsList.map((news) => (
-            <div 
-              key={news.id} 
-              className="p-5 bg-white border border-neutral-100 rounded-[20px] flex flex-col gap-4 shadow-sm"
+            <div
+              key={news.id}
+              onClick={() => navigate("/news/detail")}
+              className="flex cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
             >
-              <div className="w-full h-[201px] rounded-[12px] overflow-hidden">
-                <img 
-                  src={CAROUSEL_IMAGES[news.imageType]} 
-                  alt="" 
+              <div className="h-[201px] w-full overflow-hidden rounded-[12px]">
+                <img
+                  src={CAROUSEL_IMAGES[news.imageType]}
+                  alt=""
                   aria-hidden="true"
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                   draggable={false}
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <div className="flex gap-[6px] items-center">
+                <div className="flex items-center gap-[6px]">
                   <Badge>{news.category}</Badge>
                   <span className="text-xs text-neutral-400">2시간 전</span>
                 </div>
-                <h3 className="font-bold text-base text-[#1B1B1B] leading-snug line-clamp-2">
+                <h3 className="line-clamp-2 text-base leading-snug font-bold text-[#1B1B1B]">
                   {news.title}
                 </h3>
               </div>
@@ -120,20 +144,20 @@ export default function NewsPage() {
         </Carousel>
       </section>
 
-      <div className="w-full sticky top-0 z-10 bg-[#F5F5F5] mt-8">
-        <TabBar 
-          tabs={newsTabs} 
-          currentTab={currentTab} 
-          onTabChange={(value) => setCurrentTab(value as NewsTabType)} 
+      <div className="sticky top-0 z-10 mt-8 w-full bg-[#F5F5F5]">
+        <TabBar
+          tabs={newsTabs}
+          currentTab={currentTab}
+          onTabChange={(value) => setCurrentTab(value as NewsTabType)}
         />
       </div>
 
-      <section className="mt-6 px-5 flex flex-col gap-[12px] pb-24">
+      <section className="mt-6 flex flex-col gap-[12px] px-5 pb-24">
         <h2 className="text-lg font-bold text-neutral-950">오늘의 뉴스</h2>
-        
+
         <div className="flex flex-col gap-[12px]">
-          {filteredNewsList.map((news, index) => (
-            <NewCard key={index} {...news} />
+          {filteredNewsList.map((news) => (
+            <NewCard key={news.id} {...news} />
           ))}
         </div>
       </section>

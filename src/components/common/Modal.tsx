@@ -1,46 +1,81 @@
-import React, { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+
+import closeIcon from "@/assets/icon-24px/close.svg";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
-  children: React.ReactNode;
+  children: ReactNode;
+
+  showCloseButton?: boolean;
+  sideOffsetClassName?: string;
+  className?: string;
+  contentClassName?: string;
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+function Modal({
+  isOpen,
+  onClose,
+  children,
+  showCloseButton = false,
+  sideOffsetClassName = "px-5",
+  className = "rounded-[20px] px-6 py-8",
+  contentClassName = "flex flex-col items-center text-center",
+}: ModalProps) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex justify-center items-end bg-transparent">
-      <div 
-        className="absolute inset-0 max-w-[391px] mx-auto bg-neutral-1000/45 transition-opacity duration-300"
-        onClick={onClose}
-      />
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex justify-center">
+      <div className="relative h-full w-full max-w-[var(--max-width-app)]">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[var(--color-neutral-1000)]/50"
+        />
 
-      <div className="relative z-10 w-[390px] max-h-[85vh] bg-white rounded-t-[20px] pt-4 pb-[60px] px-4 shadow-xl flex flex-col transform translate-y-0 transition-transform duration-300 ease-out">
-        <div className="w-9 h-1 bg-neutral-100 rounded-full mx-auto mb-4" />
+        <div
+          className={[
+            "relative z-10 flex h-full w-full items-center justify-center",
+            sideOffsetClassName,
+          ].join(" ")}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            className={[
+              "relative w-full bg-[var(--color-neutral-0)]",
+              className,
+            ].join(" ")}
+          >
+            {showCloseButton && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="absolute top-5 right-5 flex h-6 w-6 items-center justify-center"
+                aria-label="모달 닫기"
+              >
+                <img src={closeIcon} alt="" className="h-6 w-6" />
+              </button>
+            )}
 
-        {title && (
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-heading-18-bd text-neutral-900">{title}</h3>
-          </div>
-        )}
-
-        <div className="overflow-y-auto flex-1 text-body-14-rg text-neutral-700">
-          {children}
+            <div className={contentClassName}>{children}</div>
+          </section>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
+
+export default Modal;

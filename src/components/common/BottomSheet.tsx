@@ -212,7 +212,7 @@ export default function BottomSheet({
               }
             : undefined
         }
-        className={`bg-neutral-0 relative z-10 flex max-h-[100dvh] w-full max-w-[390px] flex-col overflow-hidden rounded-t-[20px] outline-none ${
+        className={`bg-neutral-0 relative z-10 flex max-h-[100dvh] w-full max-w-[var(--max-width-app)] flex-col overflow-hidden rounded-t-[20px] outline-none ${
           isDragging
             ? ""
             : "transition-[height,transform] duration-300 ease-out"
