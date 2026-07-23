@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Carousel from "../../components/common/Carousel";
-import TabBar from "../../components/common/TabBar";
-import Badge from "../../components/common/Badge";
-import NewCard from "./components/NewsCard";
+import Carousel from "@/components/common/Carousel";
+import TabBar from "@/components/common/TabBar";
+import Badge from "@/components/common/Badge";
+import NewsCard, { type NewsCardProps } from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
@@ -23,12 +23,27 @@ export default function NewsPage() {
   const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
 
   const trendingNewsList = [
-    { id: 1, imageType: "economy" as const, category: "경제", title: "엔비디아 실적 발표 대기, 국내 반도체 자산 시장에 미칠 영향은?" },
-    { id: 2, imageType: "IT" as const, category: "IT", title: "AI 반도체 수요 폭증, 삼성전자 HBM 증설 나선다" },
-    { id: 3, imageType: "world" as const, category: "세계", title: "美 연준 금리 동결, 신흥국 증시 안도 랠리" },
+    {
+      id: 1,
+      imageType: "economy" as const,
+      category: "경제",
+      title: "엔비디아 실적 발표 대기, 국내 반도체 자산 시장에 미칠 영향은?",
+    },
+    {
+      id: 2,
+      imageType: "IT" as const,
+      category: "IT",
+      title: "AI 반도체 수요 폭증, 삼성전자 HBM 증설 나선다",
+    },
+    {
+      id: 3,
+      imageType: "world" as const,
+      category: "세계",
+      title: "美 연준 금리 동결, 신흥국 증시 안도 랠리",
+    },
   ];
 
-  const todayNewsList: (React.ComponentProps<typeof NewCard> & { id: number })[] = [
+  const todayNewsList: NewsCardProps[] = [
     {
       id: 1,
       title: "코인 시장 변동성 확대",
@@ -82,43 +97,43 @@ export default function NewsPage() {
   });
 
   return (
-    <div className="w-full min-h-dvh bg-[#F5F5F5] flex flex-col text-black relative pt-5">
-      <section className="w-full flex flex-col gap-3">
-        <div className="px-5 flex items-center gap-[4px] h-[26px]">
-          <img 
-            src={megaphoneIcon} 
-            alt="" 
-            aria-hidden="true" 
-            className="w-[20px] h-[20px] object-contain"
+    <div className="relative flex min-h-dvh w-full flex-col bg-[#F5F5F5] pt-5 text-black">
+      <section className="flex w-full flex-col gap-3">
+        <div className="flex h-[26px] items-center gap-[4px] px-5">
+          <img
+            src={megaphoneIcon}
+            alt=""
+            aria-hidden="true"
+            className="h-[20px] w-[20px] object-contain"
             draggable={false}
           />
-          <h2 className="text-[16px] font-bold text-[#1B1B1B] leading-[160%]">
+          <h2 className="text-[16px] font-bold leading-[160%] text-[#1B1B1B]">
             따끈한 금융 소식
           </h2>
         </div>
-        
+
         <Carousel>
           {trendingNewsList.map((news) => (
-            <div 
-              key={news.id} 
-              onClick={() => navigate("/news/detail")} 
-              className="p-5 bg-white border border-neutral-100 rounded-[20px] flex flex-col gap-4 shadow-sm cursor-pointer"
+            <div
+              key={news.id}
+              onClick={() => navigate(`/news/${news.id}`)}
+              className="flex cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
             >
-              <div className="w-full h-[201px] rounded-[12px] overflow-hidden">
-                <img 
-                  src={CAROUSEL_IMAGES[news.imageType]} 
-                  alt="" 
+              <div className="h-[201px] w-full overflow-hidden rounded-[12px]">
+                <img
+                  src={CAROUSEL_IMAGES[news.imageType]}
+                  alt=""
                   aria-hidden="true"
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                   draggable={false}
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <div className="flex gap-[6px] items-center">
+                <div className="flex items-center gap-[6px]">
                   <Badge>{news.category}</Badge>
                   <span className="text-xs text-neutral-400">2시간 전</span>
                 </div>
-                <h3 className="font-bold text-base text-[#1B1B1B] leading-snug line-clamp-2">
+                <h3 className="line-clamp-2 text-base font-bold leading-snug text-[#1B1B1B]">
                   {news.title}
                 </h3>
               </div>
@@ -127,20 +142,20 @@ export default function NewsPage() {
         </Carousel>
       </section>
 
-      <div className="w-full sticky top-0 z-10 bg-[#F5F5F5] mt-8">
-        <TabBar 
-          tabs={newsTabs} 
-          currentTab={currentTab} 
-          onTabChange={(value) => setCurrentTab(value as NewsTabType)} 
+      <div className="sticky top-0 z-10 mt-8 w-full bg-[#F5F5F5]">
+        <TabBar
+          tabs={newsTabs}
+          currentTab={currentTab}
+          onTabChange={(value) => setCurrentTab(value as NewsTabType)}
         />
       </div>
 
-      <section className="mt-6 px-5 flex flex-col gap-[12px] pb-24">
+      <section className="mt-6 flex flex-col gap-[12px] px-5 pb-24">
         <h2 className="text-lg font-bold text-neutral-950">오늘의 뉴스</h2>
-        
+
         <div className="flex flex-col gap-[12px]">
           {filteredNewsList.map((news) => (
-            <NewCard key={news.id} {...news} />
+            <NewsCard key={news.id} {...news} />
           ))}
         </div>
       </section>
