@@ -69,7 +69,10 @@ function MyPage() {
       <div className="flex flex-1 flex-col gap-9 border-t border-neutral-100 bg-[#f9f9f9] px-5 pb-9 pt-6">
         <section className="flex flex-col gap-4">
           <SectionHeader title="학습 저장소" />
-          <StorageShortcuts onNavigate={() => navigate("/my/storage")} />
+          {/* 이 부분만 탭 클릭 시 파라미터(?tab=menu)를 포함해 이동하도록 수정했습니다 */}
+          <StorageShortcuts
+            onNavigate={(menu) => navigate(`/my/storage?tab=${menu}`)}
+          />
         </section>
 
         <section className="flex flex-col gap-4">
