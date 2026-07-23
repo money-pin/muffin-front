@@ -132,7 +132,7 @@ export default function BottomSheet({
             setIsMounted(false);
           }
         }}
-        className={`relative z-10 flex max-h-[100dvh] w-full max-w-[--max-width-app] flex-col overflow-hidden rounded-t-[20px] bg-neutral-0 outline-none transition-transform duration-300 ease-out ${
+        className={`relative z-10 flex max-h-[100dvh] w-full max-w-[var(--max-width-app)] flex-col overflow-hidden rounded-t-[20px] bg-neutral-0 outline-none transition-transform duration-300 ease-out ${
           isVisible ? "translate-y-0" : "translate-y-full"
         }`}
       >

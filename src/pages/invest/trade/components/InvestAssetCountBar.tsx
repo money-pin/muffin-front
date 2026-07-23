@@ -27,7 +27,7 @@ function InvestAssetCountBar({
   onIncrease,
 }: InvestAssetCountBarProps) {
   return (
-    <div className="fixed bottom-[156px] left-1/2 z-40 flex h-[64px] w-[390px] -translate-x-1/2 items-center justify-between rounded-t-[16px] bg-[var(--color-secondary-100)] px-5 py-3 shadow-[0_-4px_10px_-2px_rgba(0,0,0,0.07)]">
+    <div className="fixed bottom-[156px] left-1/2 z-40 flex h-[64px] w-full max-w-[var(--max-width-app)] -translate-x-1/2 items-center justify-between rounded-t-[16px] bg-[var(--color-secondary-100)] px-5 py-3 shadow-[0_-4px_10px_-2px_rgba(0,0,0,0.07)]">
       <div className="flex items-baseline gap-2">
         <strong className="text-[length:var(--text-heading-18-bd)] leading-[var(--text-heading-18-bd--line-height)] font-[var(--text-heading-18-bd--font-weight)] tracking-[var(--text-heading-18-bd--letter-spacing)] text-[var(--color-neutral-1000)]">
           {name}

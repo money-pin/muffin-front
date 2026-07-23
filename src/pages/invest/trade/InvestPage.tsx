@@ -164,30 +164,26 @@ function InvestPage() {
   const tradePageBottomPadding = hasAssetCountBar ? "pb-[240px]" : "pb-[176px]";
 
   const handleAssetClick = (assetId: InvestAssetId) => {
-    setSelectedAssetId(assetId);
+  setSelectedAssetId(assetId);
 
-    setAssetQuantities((prev) => {
-      const currentQuantity = prev[assetId] ?? 0;
+  setAssetQuantities((prev) => {
+    const currentQuantity = prev[assetId] ?? 0;
+    const assetPrice = MOCK_INVEST_MARKET_DATA.assetPrices[assetId];
+    const currentTotalAmount = getTotalInvestAmount(prev);
 
-      if (currentQuantity > 0) {
-        return prev;
-      }
+    if (
+      currentTotalAmount + assetPrice >
+      MOCK_INVEST_MARKET_DATA.totalBudget
+    ) {
+      return prev;
+    }
 
-      const assetPrice = MOCK_INVEST_MARKET_DATA.assetPrices[assetId];
-
-      if (
-        totalInvestAmount + assetPrice >
-        MOCK_INVEST_MARKET_DATA.totalBudget
-      ) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        [assetId]: 1,
-      };
-    });
-  };
+    return {
+      ...prev,
+      [assetId]: currentQuantity + 1,
+    };
+  });
+};
 
   //수량 감소
   const handleDecrease = () => {
@@ -304,7 +300,7 @@ function InvestPage() {
                 {section.title}
               </h2>
 
-              <div className="flex justify-between">
+              <div className="grid grid-cols-4 gap-[10px]">
                 {section.items.map((asset) => {
                   const quantity = assetQuantities[asset.id] ?? 0;
                   const isSelected =
