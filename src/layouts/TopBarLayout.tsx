@@ -10,7 +10,6 @@ import {
 
 import TopBar from "@/components/common/TopBar";
 
-// 상단 고정 영역: 상태바 세이프에어리어(62px) + 탑바(56px) = 본문 pt-[118px]
 export interface TopBarOptions {
   title?: string;
   showBack?: boolean;
@@ -45,11 +44,7 @@ function TopBarLayout() {
   return (
     <>
       <div
-        className={`fixed left-1/2 top-0 z-50 h-[62px] w-full max-w-[var(--max-width-app)] -translate-x-1/2 ${bgClass}`}
-      />
-
-      <div
-        className={`fixed left-1/2 top-[62px] z-50 w-full max-w-[var(--max-width-app)] -translate-x-1/2 ${bgClass}`}
+        className={`fixed top-0 left-1/2 z-50 w-full max-w-[var(--max-width-app)] -translate-x-1/2 ${bgClass}`}
       >
         <TopBar
           title={topBar.title}
@@ -60,7 +55,7 @@ function TopBarLayout() {
         />
       </div>
 
-      <main className="min-h-dvh pt-[118px]">
+      <main className="min-h-dvh pt-14">
         <Outlet context={outletContext} />
       </main>
     </>

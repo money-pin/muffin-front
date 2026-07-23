@@ -37,7 +37,7 @@ export default function QuizResultView({
   }, []);
 
   return (
-    <div className="flex min-h-[calc(100dvh-118px)] flex-col px-5 pb-12">
+    <div className="flex min-h-[calc(100dvh-56px)] flex-col px-5 pb-12">
       <div className="flex flex-col items-center pt-10">
         <div className="relative" style={{ width: size, height: size }}>
           <svg width={size} height={size} className="-rotate-90">
@@ -64,19 +64,21 @@ export default function QuizResultView({
               strokeWidth={strokeWidth}
               strokeLinecap="round"
               strokeDasharray={circumference}
-              strokeDashoffset={filled ? circumference - progress : circumference}
+              strokeDashoffset={
+                filled ? circumference - progress : circumference
+              }
               style={{ transition: "stroke-dashoffset 1s ease-out" }}
             />
           </svg>
-          <p className="absolute inset-0 flex items-center justify-center text-heading-28-md font-bold text-primary">
+          <p className="text-heading-28-md text-primary absolute inset-0 flex items-center justify-center font-bold">
             {correctCount}/{total}
           </p>
         </div>
 
-        <p className="mt-6 text-heading-20-bd text-neutral-900">
+        <p className="text-heading-20-bd mt-6 text-neutral-900">
           {getResultMessage(correctCount, total)}
         </p>
-        <p className="mt-2 text-center text-body-14-md text-neutral-400">
+        <p className="text-body-14-md mt-2 text-center text-neutral-400">
           {total}문제 중 {correctCount}문제를 맞히셨어요.
           {reward > 0 && (
             <>
@@ -91,7 +93,7 @@ export default function QuizResultView({
         <div className="mt-8 flex flex-col">
           {/* 보상 획득 탭: 카드 왼쪽에서 12px 들여쓰고 카드 상단에 붙는 라운드 탭 */}
           <div className="flex px-3">
-            <div className="flex h-7 items-center justify-center gap-2 rounded-t-[8px] bg-secondary-100 px-2">
+            <div className="bg-secondary-100 flex h-7 items-center justify-center gap-2 rounded-t-[8px] px-2">
               <img
                 src={giftIcon}
                 alt=""
