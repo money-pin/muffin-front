@@ -17,7 +17,7 @@ export default function StatsPage() {
 
   return (
     <>
-      <main className="flex flex-col gap-3 bg-neutral-50 px-5 pb-24 pt-6">
+      <main className="flex flex-col gap-3 bg-neutral-50 px-5 pt-6 pb-24">
         <RecentPerformanceCard
           date={statsMock.recentPerformance.date}
           onClick={() => setIsRecentPerformanceOpen(true)}
@@ -35,6 +35,7 @@ export default function StatsPage() {
         isOpen={isRecentPerformanceOpen}
         onClose={() => setIsRecentPerformanceOpen(false)}
         ariaLabel="최근 투자 성과 상세"
+        snapMode="half-full"
       >
         <RecentPerformanceSheetContent
           summary={statsMock.recentPerformance}

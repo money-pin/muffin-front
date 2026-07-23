@@ -62,7 +62,7 @@ function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                className="absolute right-5 top-5 flex h-6 w-6 items-center justify-center"
+                className="absolute top-5 right-5 flex h-6 w-6 items-center justify-center"
                 aria-label="모달 닫기"
               >
                 <img src={closeIcon} alt="" className="h-6 w-6" />
