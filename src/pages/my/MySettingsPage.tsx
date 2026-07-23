@@ -3,6 +3,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { clearAccessToken } from "@/lib/auth";
+import { logout, withdraw } from "@/lib/authApi";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 
 import SettingToggle from "./components/SettingToggle";
@@ -80,9 +81,25 @@ function MySettingsPage() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
 
-  // accessToken만 지운다. refreshToken은 httpOnly 쿠키라 FE에서 삭제 불가 —
-  // 완전한 세션 종료는 백엔드 로그아웃 API가 붙은 뒤 함께 호출해야 함
-  const handleLogout = () => {
+  // 로그아웃: 백엔드에서 토큰 무효화 후 로컬 토큰 삭제.
+  // API가 실패해도 로컬은 비우고 로그인 화면으로 보낸다(세션 종료 보장).
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // 무시 — 로컬 세션은 아래에서 정리
+    }
+    clearAccessToken();
+    navigate("/login", { replace: true });
+  };
+
+  // 회원 탈퇴: 소프트 딜리트 처리 후 로컬 토큰 삭제
+  const handleWithdraw = async () => {
+    try {
+      await withdraw();
+    } catch {
+      // 무시 — 로컬 세션은 아래에서 정리
+    }
     clearAccessToken();
     navigate("/login", { replace: true });
   };
@@ -155,7 +172,7 @@ function MySettingsPage() {
         confirmLabel="탈퇴하기"
         danger
         onCancel={() => setWithdrawModalOpen(false)}
-        onConfirm={handleLogout}
+        onConfirm={handleWithdraw}
       />
     </div>
   );

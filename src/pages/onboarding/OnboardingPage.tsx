@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import Indicator from "@/components/common/Indicator";
 import { saveCharacter } from "@/lib/character";
+import { completeOnboarding } from "@/lib/authApi";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import muffinPlain from "@/assets/avatars/muffin-plain.png";
 import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
@@ -89,11 +90,14 @@ function OnboardingPage() {
   const goNext = () => {
     if (stepIndex < STEPS.length - 1) {
       setStepIndex((i) => i + 1);
-    } else {
-      // 온보딩 완료 — 설문으로 정해진 캐릭터를 저장해 홈·마이·퀴즈에서 공유
-      saveCharacter(resolveOnboardingResult(answers));
-      navigate("/home", { replace: true });
+      return;
     }
+
+    // 온보딩 완료 — 설문으로 정해진 캐릭터를 저장해 홈·마이·퀴즈에서 공유
+    saveCharacter(resolveOnboardingResult(answers));
+    // 초기 투자금 지급(멱등). 실패해도 홈 진입은 막지 않음
+    void completeOnboarding().catch(() => {});
+    navigate("/home", { replace: true });
   };
 
   const goBack = () => {
@@ -129,14 +133,14 @@ function OnboardingPage() {
           </button>
         )}
         {step === "nickname" && (
-          <h1 className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-heading-18-bd text-neutral-900">
+          <h1 className="text-heading-18-bd pointer-events-none absolute left-1/2 -translate-x-1/2 text-neutral-900">
             닉네임 설정
           </h1>
         )}
       </header>
 
       {progress && (
-        <div className="px-5 pb-2 pt-1">
+        <div className="px-5 pt-1 pb-2">
           <Indicator total={PROGRESS_TOTAL} current={progress} />
         </div>
       )}
@@ -226,7 +230,7 @@ function OnboardingPage() {
                   {result.sectors.map((sector) => (
                     <span
                       key={sector}
-                      className="inline-flex min-w-[28px] items-center justify-center rounded-[4px] bg-secondary-100 px-1 text-body-14-md-tighter text-primary"
+                      className="bg-secondary-100 text-body-14-md-tighter text-primary inline-flex min-w-[28px] items-center justify-center rounded-[4px] px-1"
                     >
                       {sector}
                     </span>
