@@ -5,7 +5,6 @@ import NewCard from "../../news/components/NewsCard";
 type SortValue = "recent" | "upload" | "views";
 
 export default function ScrappedNewsTab() {
-  // 📌 setSetSortValue -> setSortValue 중복 오타 수정
   const [sortValue, setSortValue] = useState<SortValue>("recent");
 
   const sortOptions = [
@@ -80,7 +79,6 @@ export default function ScrappedNewsTab() {
         <SortDropdown
           options={sortOptions}
           value={sortValue}
-          /* 📌 setSortValue 호출로 변경 */
           onChange={(val) => setSortValue(val as SortValue)}
           align="end"
         />
@@ -90,6 +88,7 @@ export default function ScrappedNewsTab() {
         {sortedNewsList.map((news) => (
           <NewCard
             key={news.id}
+            id={news.id}
             title={news.title}
             category={news.category}
             date={news.date}

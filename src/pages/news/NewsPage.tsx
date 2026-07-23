@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Carousel from "../../components/common/Carousel";
-import TabBar from "../../components/common/TabBar";
-import Badge from "../../components/common/Badge";
-import NewCard from "./components/NewsCard";
+import Carousel from "@/components/common/Carousel";
+import TabBar from "@/components/common/TabBar";
+import Badge from "@/components/common/Badge";
+import NewsCard, { type NewsCardProps } from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
@@ -43,9 +43,7 @@ export default function NewsPage() {
     },
   ];
 
-  const todayNewsList: (React.ComponentProps<typeof NewCard> & {
-    id: number;
-  })[] = [
+  const todayNewsList: NewsCardProps[] = [
     {
       id: 1,
       title: "코인 시장 변동성 확대",
@@ -109,7 +107,7 @@ export default function NewsPage() {
             className="h-[20px] w-[20px] object-contain"
             draggable={false}
           />
-          <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
+          <h2 className="text-[16px] font-bold leading-[160%] text-[#1B1B1B]">
             따끈한 금융 소식
           </h2>
         </div>
@@ -118,7 +116,7 @@ export default function NewsPage() {
           {trendingNewsList.map((news) => (
             <div
               key={news.id}
-              onClick={() => navigate("/news/detail")}
+              onClick={() => navigate(`/news/${news.id}`)}
               className="flex cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
             >
               <div className="h-[201px] w-full overflow-hidden rounded-[12px]">
@@ -135,7 +133,7 @@ export default function NewsPage() {
                   <Badge>{news.category}</Badge>
                   <span className="text-xs text-neutral-400">2시간 전</span>
                 </div>
-                <h3 className="line-clamp-2 text-base leading-snug font-bold text-[#1B1B1B]">
+                <h3 className="line-clamp-2 text-base font-bold leading-snug text-[#1B1B1B]">
                   {news.title}
                 </h3>
               </div>
@@ -157,7 +155,7 @@ export default function NewsPage() {
 
         <div className="flex flex-col gap-[12px]">
           {filteredNewsList.map((news) => (
-            <NewCard key={news.id} {...news} />
+            <NewsCard key={news.id} {...news} />
           ))}
         </div>
       </section>
