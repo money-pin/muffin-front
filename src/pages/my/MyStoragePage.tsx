@@ -22,7 +22,6 @@ export default function MyStoragePage() {
     quiz: "퀴즈 복습",
   };
 
-  // 📌 기획 의도 반영 TopBar 타이틀
   const getTitle = () => {
     if (currentTab === "quiz" && selectedQuizHistory) {
       return `${selectedQuizHistory.date} 퀴즈 복습`;
@@ -30,20 +29,18 @@ export default function MyStoragePage() {
     return tabTitleMap[currentTab] || "학습 저장소";
   };
 
-  // 📌 기획 의도 반영 뒤로가기 동작
   const handleBack = () => {
-    // 퀴즈 복습 상세 화면을 보고 있다면 -> 퀴즈 복습 목록으로 복귀
     if (currentTab === "quiz" && selectedQuizHistory) {
       setSelectedQuizHistory(null);
       return;
     }
-    // 그 외 기본 화면에서는 이전 페이지(마이페이지)로 이동
     navigate(-1);
   };
 
   return (
-    <div className="w-[390px] h-[844px] bg-[#F5F5F5] flex flex-col text-black overflow-hidden relative mx-auto">
-      {/* 고정 TopBar (타이틀 및 뒤로가기가 상태에 따라 동적 변경) */}
+    /* 📌 bg-[#F5F5F5] -> bg-white 변경으로 전체 흰색 배경 통일 */
+    <div className="w-full max-w-[var(--max-width-app,390px)] min-h-full bg-white flex flex-col text-black relative mx-auto">
+      {/* 고정 TopBar */}
       <div className="w-full bg-white border-b border-neutral-100 z-50 shrink-0">
         <TopBar 
           title={getTitle()} 
