@@ -1,5 +1,5 @@
 // 구매 확정 안내 모달
-import Modal from "@/components/common/Modal2";
+import Modal from "@/components/common/Modal";
 
 import checkConfirmIcon from "@/assets/check-confirm.svg";
 
@@ -16,11 +16,12 @@ function InvestCompleteModal({
 }: InvestCompleteModalProps) {
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      className="h-[286px] w-[332px] rounded-[20px] px-5 pb-5 pt-6"
-      contentClassName="flex h-full flex-col items-center text-center"
-    >
+  isOpen={isOpen}
+  onClose={onClose}
+  sideOffsetClassName="px-[29px]"
+  className="h-[286px] rounded-[20px] px-5 pb-5 pt-6"
+  contentClassName="flex h-full flex-col items-center text-center"
+>
       <img src={checkConfirmIcon} alt="" />
 
       <h2 className="mt-5 text-[length:var(--text-heading-20-bd)] leading-[var(--text-heading-20-bd--line-height)] font-[var(--text-heading-20-bd--font-weight)] text-[var(--color-neutral-900)]">
