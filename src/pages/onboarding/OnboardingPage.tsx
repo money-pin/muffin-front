@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import Indicator from "@/components/common/Indicator";
 import { saveCharacter } from "@/lib/character";
-import { completeOnboarding } from "@/lib/authApi";
+import { completeOnboarding, saveOnboardingCharacter } from "@/lib/authApi";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import muffinPlain from "@/assets/avatars/muffin-plain.png";
 import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
@@ -93,10 +93,32 @@ function OnboardingPage() {
       return;
     }
 
-    // 온보딩 완료 — 설문으로 정해진 캐릭터를 저장해 홈·마이·퀴즈에서 공유
-    saveCharacter(resolveOnboardingResult(answers));
-    // 초기 투자금 지급(멱등). 실패해도 홈 진입은 막지 않음
-    void completeOnboarding().catch(() => {});
+    // 온보딩 완료 — 설문으로 정해진 캐릭터를 로컬에 저장해 홈·마이·퀴즈에서 공유
+    const muffin = resolveOnboardingResult(answers);
+    saveCharacter(muffin);
+
+    // 각 질문에서 선택한 보기 번호(1-based)
+    const answerNumber = (questionId: string) => {
+      const question = ONBOARDING_QUESTIONS.find((q) => q.id === questionId);
+      return question ? question.options.indexOf(answers[questionId]) + 1 : 0;
+    };
+
+    // 서버에 캐릭터 저장(재로그인·타 기기 동기화) → 초기 투자금 지급(멱등).
+    // 순서 보장하되 홈 진입은 막지 않음. 백엔드 미배포/실패 시 조용히 넘어감
+    void (async () => {
+      try {
+        await saveOnboardingCharacter({
+          muffin,
+          firstQuestion: answerNumber("news"),
+          secondQuestion: answerNumber("invest"),
+          thirdQuestion: answerNumber("goal"),
+        });
+        await completeOnboarding();
+      } catch {
+        // 온보딩은 멱등이라 다음 진입 시 재시도 가능
+      }
+    })();
+
     navigate("/home", { replace: true });
   };
 
