@@ -1,21 +1,8 @@
-import { useState, useEffect } from "react";
-
 interface ScrollToTopButtonProps {
   onClick?: () => void;
 }
 
 export default function ScrollToTopButton({ onClick }: ScrollToTopButtonProps) {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const toggleVisibility = () => {
-      setIsVisible(window.scrollY > 300);
-    };
-
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
-  }, []);
-
   const scrollToTop = () => {
     if (onClick) {
       onClick();
@@ -24,15 +11,11 @@ export default function ScrollToTopButton({ onClick }: ScrollToTopButtonProps) {
     }
   };
 
-  // onClick props가 주어지면 부모가 직접 표시 상태를 제어하고 있으므로,
-  // props가 없을 때만 자체 window 스크롤 상태(isVisible)를 기준으로 반환 처리를 합니다.
-  if (!onClick && !isVisible) return null;
-
   return (
     <button
       type="button"
       onClick={scrollToTop}
-      className="fixed right-5 bottom-[100px] z-50 flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white shadow-[0_0_4px_0_rgba(0,0,0,0.25)] transition-opacity duration-200 hover:opacity-90"
+      className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white shadow-[0_0_8px_0_rgba(0,0,0,0.2)] transition-opacity duration-200 hover:opacity-90"
       aria-label="맨 위로 이동"
     >
       <svg
