@@ -43,17 +43,15 @@
 
 ## 4. 폴더 구조
 
-| 폴더         | 설명                                 |
-| ------------ | ------------------------------------ |
-| `apis`       | API 요청 함수 및 axios 인스턴스 관리 |
-| `assets`     | 이미지, 아이콘 등 정적 리소스 관리   |
-| `components` | 공통 재사용 컴포넌트 관리            |
-| `hooks`      | 커스텀 훅 관리                       |
-| `layouts`    | 공통 레이아웃 관리                   |
-| `pages`      | 페이지 단위 컴포넌트 관리            |
-| `routes`     | 라우팅 설정 관리                     |
-| `types`      | TypeScript 타입 관리                 |
-| `utils`      | 공통 유틸 함수 관리                  |
+| 폴더         | 설명                                                    |
+| ------------ | ------------------------------------------------------- |
+| `assets`     | 이미지, 아이콘 등 정적 리소스 관리                      |
+| `components` | 공통 재사용 컴포넌트 관리                               |
+| `layouts`    | 공통 레이아웃 관리 (MobileLayout, NavLayout, TopBarLayout) |
+| `lib`        | API 요청·인증·캐릭터 등 도메인 로직 및 유틸 관리        |
+| `pages`      | 페이지 단위 컴포넌트 관리 (도메인별 하위 폴더로 구성)   |
+| `routes`     | 라우팅 설정 관리 (`router.tsx`)                         |
+| `types`      | TypeScript 타입 관리                                    |
 
 <br />
 
@@ -191,22 +189,24 @@ http://localhost:5173/
 
 ## 8. 화면 목록 및 라우팅 구조
 
-| 화면 이름   | 페이지 ID        | 진입 경로       |
-| ----------- | ---------------- | --------------- |
-| 로그인      | `LoginPage`      | `/login`        |
-| 회원가입    | `SignupPage`     | `/signup`       |
-| 온보딩      | `OnboardingPage` | `/onboarding`   |
-| 홈          | `HomePage`       | `/home`         |
-| 퀴즈        | `QuizPage`       | `/quiz`         |
-| 뉴스 목록   | `NewsPage`       | `/news`         |
-| 뉴스 상세   | `NewsDetailPage` | `/news/:newsId` |
-| 학습 저장소 | `MyStoragePage`  | `/my/storage`   |
-| 모의투자    | `InvestPage`     | `/invest`       |
-| 수익 통계   | `StatsPage`      | `/stats`        |
-| 랭킹        | `RankingPage`    | `/ranking`      |
-| 마이페이지  | `MyPage`         | `/my`           |
-| 설정        | `MySettingsPage` | `/my/settings`  |
-| Not Found   | `NotFoundPage`   | `*`             |
+| 화면 이름   | 페이지 ID           | 진입 경로                 |
+| ----------- | ------------------- | ------------------------- |
+| 스플래시    | `SplashPage`        | `/splash`                 |
+| 로그인      | `LoginPage`         | `/login`                  |
+| 회원가입    | `SignupPage`        | `/signup`                 |
+| 온보딩      | `OnboardingPage`    | `/onboarding`             |
+| 홈          | `HomePage`          | `/home`                   |
+| 퀴즈        | `QuizPage`          | `/quiz`                   |
+| 뉴스 목록   | `NewsPage`          | `/news`                   |
+| 뉴스 상세   | `NewsDetailPage`    | `/news/:newsId`           |
+| 학습 저장소 | `MyStoragePage`     | `/my/storage`             |
+| 모의투자    | `InvestPage`        | `/invest`                 |
+| 수익 통계   | `StatsPage`         | `/invest/stats`           |
+| 수익 내역   | `ProfitHistoryPage` | `/invest/profit-history`  |
+| 랭킹        | `RankingPage`       | `/invest/ranking`         |
+| 마이페이지  | `MyPage`            | `/my`                     |
+| 설정        | `MySettingsPage`    | `/my/settings`            |
+| Not Found   | `NotFoundPage`      | `*`                       |
 
 <br />
 
