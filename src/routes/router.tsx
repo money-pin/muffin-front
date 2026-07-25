@@ -47,7 +47,14 @@ export const router = createBrowserRouter([
         path: "onboarding",
         element: <OnboardingPage />,
       },
-
+      {
+        path: "news/:newsId",
+        element: <NewsDetailPage />,
+      },
+      {
+        path: "my/storage",
+        element: <MyStoragePage />,
+      },
       {
         element: <NavLayout />,
         children: [
@@ -83,14 +90,9 @@ export const router = createBrowserRouter([
           },
         ],
       },
-
       {
         element: <TopBarLayout />,
         children: [
-          {
-            path: "news/:newsId",
-            element: <NewsDetailPage />,
-          },
           {
             path: "quiz",
             element: <QuizPage />,
@@ -103,13 +105,8 @@ export const router = createBrowserRouter([
             path: "my/settings",
             element: <MySettingsPage />,
           },
-          {
-            path: "my/storage",
-            element: <MyStoragePage />,
-          },
         ],
       },
-
       {
         path: "showcase",
         element: <ShowcasePage />,

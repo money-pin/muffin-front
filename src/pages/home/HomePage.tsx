@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Logo from "@/components/common/Logo";
@@ -13,6 +13,9 @@ import QuizBanner from "./components/QuizBanner";
 import NewsCard from "./components/NewsCard";
 import TopSectorList from "./components/TopSectorList";
 import InvestResultSheet from "./components/InvestResultSheet";
+import BottomSheet from "@/components/common/BottomSheet";
+import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
+import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
 import {
   HOME_USER,
   HOME_ASSETS,
@@ -21,12 +24,29 @@ import {
   HOME_INVEST_RESULT,
 } from "./homeData";
 
+const INVEST_RESULT_SEEN_KEY = "muffin:investResultSeenDate";
+
 // Figma Home: 위 흰색 → 아래 주황빛(secondary-300 20%) 그라데이션 위에
 // 캐릭터·총자산 카드, 그 아래 흰색 라운드 시트(퀴즈·뉴스·TOP3)가 얹히는 구조
 function HomePage() {
   const navigate = useNavigate();
-  // 최근 투자 성과 클릭 시 어제 투자 결과 바텀시트 노출
-  const [resultOpen, setResultOpen] = useState(false);
+  // 최근 투자 성과 클릭 시 수익 통계와 동일한 상세 바텀시트 노출
+  const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
+
+  // 투자결과 모달 자동 노출: 오전 10시 이후 & 아직 확인 안 한 전날 정산 결과일 때만 열림
+  const [investResultOpen, setInvestResultOpen] = useState(
+    () =>
+      new Date().getHours() >= 10 &&
+      localStorage.getItem(INVEST_RESULT_SEEN_KEY) !== HOME_INVEST_RESULT.date,
+  );
+
+  // 자동 노출되면 '확인함'으로 기록 → 같은 결과는 하루 1회만
+  // TODO: 서버가 '어제 정산 결과 + 미확인 여부'를 내려주면 그 값으로 교체
+  useEffect(() => {
+    if (investResultOpen) {
+      localStorage.setItem(INVEST_RESULT_SEEN_KEY, HOME_INVEST_RESULT.date);
+    }
+  }, [investResultOpen]);
 
   return (
     <div className="flex min-h-full flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.2)_23.6%,rgba(255,194,102,0.2)_36.4%),linear-gradient(#fff,#fff)]">
@@ -43,20 +63,34 @@ function HomePage() {
           nickname={HOME_USER.nickname}
           streakDays={HOME_USER.streakDays}
           assets={HOME_ASSETS}
-          onRecentClick={() => setResultOpen(true)}
+          onRecentClick={() => setRecentPerformanceOpen(true)}
         />
       </div>
 
+      {/* 수익 통계(StatsPage)와 동일한 최근 투자 성과 상세 바텀시트 재사용 */}
+      <BottomSheet
+        isOpen={recentPerformanceOpen}
+        onClose={() => setRecentPerformanceOpen(false)}
+        ariaLabel="최근 투자 성과 상세"
+        snapMode="half-full"
+      >
+        <RecentPerformanceSheetContent
+          summary={statsMock.recentPerformance}
+          sectors={statsMock.sectorDetails}
+        />
+      </BottomSheet>
+
+      {/* 전날 투자 결과 모달: 오전 10시 이후 첫 접속 시 1회 자동 노출 */}
       <InvestResultSheet
-        isOpen={resultOpen}
-        onClose={() => setResultOpen(false)}
+        isOpen={investResultOpen}
+        onClose={() => setInvestResultOpen(false)}
         result={HOME_INVEST_RESULT}
         onDetailClick={() => navigate("/invest/stats")}
         onInvestClick={() => navigate("/invest")}
       />
 
       {/* 흰색 라운드 시트: 퀴즈·금융 소식·수익 TOP3 */}
-      <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pb-9 pt-6 shadow-[0px_-3px_7px_rgba(0,0,0,0.1)]">
+      <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0px_-3px_7px_rgba(0,0,0,0.1)]">
         <div className="px-5">
           <QuizBanner onClick={() => navigate("/quiz")} />
         </div>
