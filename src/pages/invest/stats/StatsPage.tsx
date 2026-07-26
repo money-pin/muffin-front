@@ -10,12 +10,20 @@ import RecentPerformanceSheetContent from "@/pages/invest/stats/components/Recen
 import TopProfitSectorsCard from "@/pages/invest/stats/components/TopProfitSectorsCard";
 import TotalProfitCard from "@/pages/invest/stats/components/TotalProfitCard";
 import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
-import { useStatsSummaryQuery } from "@/pages/invest/stats/queries";
+import {
+  useStatsRecentDetailQuery,
+  useStatsSummaryQuery,
+} from "@/pages/invest/stats/queries";
 
 export default function StatsPage() {
   const navigate = useNavigate();
   const [isRecentPerformanceOpen, setIsRecentPerformanceOpen] = useState(false);
   const { data: statsSummary } = useStatsSummaryQuery();
+  const {
+    data: recentPerformanceDetail,
+    isError: isRecentPerformanceError,
+    isLoading: isRecentPerformanceLoading,
+  } = useStatsRecentDetailQuery(isRecentPerformanceOpen);
   const statsData = statsSummary ?? {
     investDate: statsMock.recentPerformance.date,
     cumulativeProfit: statsMock.cumulativeProfit,
@@ -28,7 +36,7 @@ export default function StatsPage() {
     <>
       <main className="flex flex-col gap-3 bg-neutral-50 px-5 pt-6 pb-24">
         <RecentPerformanceCard
-          date={statsData.investDate ?? statsMock.recentPerformance.date}
+          date={statsData.investDate}
           onClick={() => setIsRecentPerformanceOpen(true)}
         />
         <TotalProfitCard
@@ -47,8 +55,10 @@ export default function StatsPage() {
         snapMode="half-full"
       >
         <RecentPerformanceSheetContent
-          summary={statsMock.recentPerformance}
-          sectors={statsMock.sectorDetails}
+          summary={recentPerformanceDetail?.summary}
+          sectors={recentPerformanceDetail?.sectors ?? []}
+          isLoading={isRecentPerformanceLoading}
+          isError={isRecentPerformanceError}
         />
       </BottomSheet>
     </>

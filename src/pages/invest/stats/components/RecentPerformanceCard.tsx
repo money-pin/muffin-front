@@ -4,7 +4,7 @@ import Badge from "@/components/common/Badge";
 import type { InvestmentResultDate } from "@/pages/invest/stats/types";
 
 interface RecentPerformanceCardProps {
-  date: InvestmentResultDate;
+  date?: InvestmentResultDate;
   onClick?: () => void;
 }
 
@@ -16,7 +16,7 @@ export default function RecentPerformanceCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 py-5 pl-5 pr-4 text-left"
+      className="bg-neutral-0 flex w-full items-center justify-between rounded-2xl border border-neutral-100 py-5 pr-4 pl-5 text-left"
     >
       <div className="flex items-center gap-1">
         <img
@@ -33,7 +33,7 @@ export default function RecentPerformanceCard({
 
       <div className="flex items-center gap-1">
         <Badge variant="gray" size="sm">
-          {date.month}월 {date.day}일
+          {date ? `${date.month}월 ${date.day}일` : "이력 없음"}
         </Badge>
         <img
           src={chevronRightIcon}
