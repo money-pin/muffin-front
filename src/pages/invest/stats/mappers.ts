@@ -76,21 +76,21 @@ export function mapStatsHistoryToProfitHistoryData(
     hasNext: response.hasNext,
     summary: {
       title,
-      profitAmount: response.summary.profit_amount,
-      profitRate: response.summary.profit_rate,
-      investmentAmount: response.summary.total_investment,
+      profitAmount: response.summary.profitAmount,
+      profitRate: response.summary.profitRate,
+      investmentAmount: response.summary.totalInvestment,
     },
     sort: response.sort,
     sectors: response.sectors.map((sector) => {
-      const meta = getSectorMeta(sector.sector_code, sector.sector_name);
+      const meta = getSectorMeta(sector.sectorCode, sector.sectorName);
 
       return {
-        sectorCode: sector.sector_code,
-        name: sector.sector_name || meta.name,
+        sectorCode: sector.sectorCode,
+        name: sector.sectorName || meta.name,
         iconSrc: meta.iconSrc,
-        profitAmount: sector.profit_amount,
-        profitRate: sector.profit_rate,
-        investmentAmount: sector.total_investment,
+        profitAmount: sector.profitAmount,
+        profitRate: sector.profitRate,
+        investmentAmount: sector.totalInvestment,
       };
     }),
   };

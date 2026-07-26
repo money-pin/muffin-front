@@ -43,15 +43,15 @@ export interface StatsHistoryApi {
 }
 
 export interface StatsHistorySummaryApi {
-  profit_amount: number;
-  profit_rate: number;
-  total_investment: number;
+  profitAmount: number;
+  profitRate: number;
+  totalInvestment: number;
 }
 
 export interface StatsHistorySectorApi {
-  sector_code: string;
-  sector_name: string;
-  profit_amount: number;
-  profit_rate: number;
-  total_investment: number;
+  sectorCode: string;
+  sectorName: string;
+  profitAmount: number;
+  profitRate: number;
+  totalInvestment: number;
 }
