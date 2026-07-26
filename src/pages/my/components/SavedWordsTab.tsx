@@ -29,9 +29,9 @@ export default function SavedWordsTab() {
   });
 
   return (
-    <div className="flex w-full flex-col mt-0 pt-0">
+    <div className="mt-0 flex w-full flex-col pt-0">
       {/* 상단 정렬 드롭다운 영역 */}
-      <div className="flex w-full justify-end px-5 py-2 mt-0">
+      <div className="mt-0 flex w-full justify-end px-5 py-2">
         <SortDropdown
           options={sortOptions}
           value={sortValue}
@@ -41,16 +41,16 @@ export default function SavedWordsTab() {
       </div>
 
       {/* 저장된 용어 리스트 영역 */}
-      <section className="flex flex-col gap-[12px] px-5 mt-1 pb-10">
+      <section className="mt-1 flex flex-col gap-[12px] px-5 pb-10">
         {sortedWords.map((item) => (
           <div
             key={item.id}
-            className="flex w-full flex-col rounded-[16px] border border-neutral-100 bg-white p-[16px] gap-[11px] shadow-sm"
+            className="flex w-full flex-col gap-[11px] rounded-[16px] border border-neutral-100 bg-white p-[16px] shadow-sm"
           >
             {/* 상단: 용어 제목 + 주황색 북마크 아이콘 */}
             <div className="flex items-center justify-between">
               {/* 📌 디자인 토큰 적용: text-primary */}
-              <h3 className="text-[16px] font-bold leading-[160%] text-primary">
+              <h3 className="text-primary text-[16px] leading-[160%] font-bold">
                 {item.term}
               </h3>
               <button
@@ -68,7 +68,7 @@ export default function SavedWordsTab() {
             </div>
 
             {/* 하단: 용어 설명 텍스트 */}
-            <p className="text-[16px] font-normal leading-[160%] text-neutral-900 word-keep-all break-keep">
+            <p className="word-keep-all text-[16px] leading-[160%] font-normal break-keep text-neutral-900">
               {item.description}
             </p>
           </div>

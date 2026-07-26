@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 import BottomSheet from "@/components/common/BottomSheet";
 
+import {
+  useStatsRecentDetailQuery,
+  useStatsSummaryQuery,
+} from "@/pages/invest/stats/api/queries";
 import InvestmentStyleCard from "@/pages/invest/stats/components/InvestmentStyleCard";
 import ProfitRateTrendCard from "@/pages/invest/stats/components/ProfitRateTrendCard";
 import RecentPerformanceCard from "@/pages/invest/stats/components/RecentPerformanceCard";
@@ -10,10 +14,6 @@ import RecentPerformanceSheetContent from "@/pages/invest/stats/components/Recen
 import TopProfitSectorsCard from "@/pages/invest/stats/components/TopProfitSectorsCard";
 import TotalProfitCard from "@/pages/invest/stats/components/TotalProfitCard";
 import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
-import {
-  useStatsRecentDetailQuery,
-  useStatsSummaryQuery,
-} from "@/pages/invest/stats/api/queries";
 
 export default function StatsPage() {
   const navigate = useNavigate();
@@ -24,6 +24,7 @@ export default function StatsPage() {
     isError: isRecentPerformanceError,
     isLoading: isRecentPerformanceLoading,
   } = useStatsRecentDetailQuery(isRecentPerformanceOpen);
+
   const statsData = statsSummary ?? {
     investDate: statsMock.recentPerformance.date,
     cumulativeProfit: statsMock.cumulativeProfit,
