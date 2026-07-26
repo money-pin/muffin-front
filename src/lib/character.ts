@@ -11,7 +11,7 @@ export const CHARACTER_LABELS: Record<CharacterVariant, string> = {
   plain: "플레인 머핀",
   sprinkle: "스프링클 머핀",
   butter: "버터빛 머핀",
-  cream: "샘크림 머핀",
+  cream: "생크림 머핀",
 };
 
 function isCharacterVariant(value: unknown): value is CharacterVariant {

@@ -45,7 +45,7 @@ function SignupPage() {
         name: form.name,
         email: form.email,
         password: form.password,
-        termAgreed: form.agreed,
+        termsAgreed: form.agreed,
       });
       const expiresIn = await sendEmailVerification();
       setCodeSeconds(expiresIn);
