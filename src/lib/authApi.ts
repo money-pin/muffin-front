@@ -12,10 +12,10 @@ export async function signup(params: {
   password: string;
   termsAgreed: boolean;
 }) {
-  const { accessToken } = await apiRequest<AccessTokenResult>(
-    "/api/auth/signup",
-    { method: "POST", body: params },
-  );
+  const { accessToken } = await apiRequest<AccessTokenResult>("/auth/signup", {
+    method: "POST",
+    body: params,
+  });
   saveAccessToken(accessToken);
 }
 
@@ -73,7 +73,8 @@ export async function saveOnboardingCharacter(body: {
 }): Promise<OnboardingCharacterResult> {
   return apiRequest<OnboardingCharacterResult>("/api/onboarding/character", {
     method: "POST",
-    body,
+    // 백엔드 enum은 대문자(PLAIN/SPRINKLE/BUTTER) — 소문자로 오면 400
+    body: { ...body, muffin: body.muffin.toUpperCase() },
     auth: true,
   });
 }
