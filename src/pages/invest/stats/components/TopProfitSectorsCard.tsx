@@ -11,11 +11,19 @@ interface TopProfitSectorsCardProps {
   sectors: TopSector[];
 }
 
+const EMPTY_TOP_SECTORS: TopSector[] = [
+  { rank: 1, name: "---", profitAmount: 0, profitRate: 0 },
+  { rank: 2, name: "---", profitAmount: 0, profitRate: 0 },
+  { rank: 3, name: "---", profitAmount: 0, profitRate: 0 },
+];
+
 export default function TopProfitSectorsCard({
   sectors,
 }: TopProfitSectorsCardProps) {
+  const displaySectors = sectors.length > 0 ? sectors : EMPTY_TOP_SECTORS;
+
   return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-neutral-100 bg-neutral-0 px-5 pb-4 pt-5">
+    <div className="bg-neutral-0 flex w-full flex-col gap-3 rounded-2xl border border-neutral-100 px-5 pt-5 pb-4">
       <div className="flex w-full items-center gap-1 px-1">
         <img
           src={rankingIcon}
@@ -30,7 +38,7 @@ export default function TopProfitSectorsCard({
       </div>
 
       <div className="flex flex-col">
-        {sectors.map((sector, index) => (
+        {displaySectors.map((sector, index) => (
           <div key={sector.rank} className="flex flex-col">
             <div className="flex w-full items-center justify-between px-1 py-3">
               <div className="flex items-center gap-3">
@@ -51,7 +59,7 @@ export default function TopProfitSectorsCard({
                 <ProfitRateBadge rate={sector.profitRate} size="md" />
               </div>
             </div>
-            {index < sectors.length - 1 && (
+            {index < displaySectors.length - 1 && (
               <div className="w-full border-t border-neutral-100" />
             )}
           </div>

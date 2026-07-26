@@ -13,7 +13,7 @@ import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
 import {
   useStatsRecentDetailQuery,
   useStatsSummaryQuery,
-} from "@/pages/invest/stats/queries";
+} from "@/pages/invest/stats/api/queries";
 
 export default function StatsPage() {
   const navigate = useNavigate();
@@ -35,17 +35,21 @@ export default function StatsPage() {
   return (
     <>
       <main className="flex flex-col gap-3 bg-neutral-50 px-5 pt-6 pb-24">
-        <RecentPerformanceCard
-          date={statsData.investDate}
-          onClick={() => setIsRecentPerformanceOpen(true)}
-        />
+        {statsData.investDate && (
+          <RecentPerformanceCard
+            date={statsData.investDate}
+            onClick={() => setIsRecentPerformanceOpen(true)}
+          />
+        )}
         <TotalProfitCard
           data={statsData.cumulativeProfit}
           onClick={() => navigate("/invest/profit-history")}
         />
         <ProfitRateTrendCard data={statsData.trend} />
         <TopProfitSectorsCard sectors={statsData.topSectors} />
-        <InvestmentStyleCard profile={statsData.profile ?? statsMock.profile} />
+        {statsData.profile && (
+          <InvestmentStyleCard profile={statsData.profile} />
+        )}
       </main>
 
       <BottomSheet
