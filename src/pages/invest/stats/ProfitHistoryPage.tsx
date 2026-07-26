@@ -5,55 +5,59 @@ import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import ProfitHistoryPeriodTabs from "@/pages/invest/stats/components/ProfitHistoryPeriodTabs";
 import ProfitHistorySectorSection from "@/pages/invest/stats/components/ProfitHistorySectorSection";
 import ProfitHistorySummary from "@/pages/invest/stats/components/ProfitHistorySummary";
-import { profitHistoryMock } from "@/pages/invest/stats/mocks/profitHistoryMock";
+import { useStatsHistoryQuery } from "@/pages/invest/stats/api/queries";
 import type {
+  ProfitHistoryApiPeriod,
   ProfitHistoryPeriod,
   ProfitHistorySortKey,
 } from "@/pages/invest/stats/types";
-import {
-  formatProfitHistoryTitle,
-  shiftProfitHistoryDate,
-} from "@/pages/invest/stats/utils/profitHistoryDate";
+import { shiftProfitHistoryDate } from "@/pages/invest/stats/utils/profitHistoryDate";
 
 type DatePeriod = Exclude<ProfitHistoryPeriod, "all">;
 
-function getInitialDate(period: DatePeriod) {
-  const date = profitHistoryMock[period].date;
-  if (!date) throw new Error(`${period} 기간의 초기 날짜가 누락되었습니다.`);
+const UI_PERIOD_TO_API_PERIOD = {
+  day: "DAY",
+  week: "WEEK",
+  month: "MONTH",
+  year: "YEAR",
+  all: "ALL",
+} satisfies Record<ProfitHistoryPeriod, ProfitHistoryApiPeriod>;
 
-  return date;
+function isDatePeriod(period: ProfitHistoryPeriod): period is DatePeriod {
+  return period !== "all";
 }
-
-const initialDates: Record<DatePeriod, string> = {
-  day: getInitialDate("day"),
-  week: getInitialDate("week"),
-  month: getInitialDate("month"),
-  year: getInitialDate("year"),
-};
 
 export default function ProfitHistoryPage() {
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
   const [period, setPeriod] = useState<ProfitHistoryPeriod>("month");
   const [sortKey, setSortKey] = useState<ProfitHistorySortKey>("RATE_DESC");
-  const [dates, setDates] = useState(initialDates);
+  const [selectedDate, setSelectedDate] = useState<string>();
+  const apiPeriod = UI_PERIOD_TO_API_PERIOD[period];
+  const {
+    data: profitHistory,
+    isError,
+    isLoading,
+  } = useStatsHistoryQuery({
+    period: apiPeriod,
+    date: selectedDate,
+    sort: sortKey,
+  });
 
-  const currentData = profitHistoryMock[period];
-  const hasNext = period !== "all" && dates[period] !== initialDates[period];
-  const summary = {
-    ...currentData.summary,
-    title:
-      period === "all"
-        ? formatProfitHistoryTitle("all")
-        : formatProfitHistoryTitle(period, dates[period]),
+  const changePeriod = (nextPeriod: ProfitHistoryPeriod) => {
+    setPeriod(nextPeriod);
+    setSelectedDate(undefined);
+  };
+
+  const changeSort = (nextSortKey: ProfitHistorySortKey) => {
+    setSortKey(nextSortKey);
+    setSelectedDate(undefined);
   };
 
   const movePeriod = (amount: -1 | 1) => {
-    if (period === "all") return;
+    const baseDate = selectedDate ?? profitHistory?.date;
+    if (!isDatePeriod(period) || !baseDate) return;
 
-    setDates((current) => ({
-      ...current,
-      [period]: shiftProfitHistoryDate(period, current[period], amount),
-    }));
+    setSelectedDate(shiftProfitHistoryDate(period, baseDate, amount));
   };
 
   useEffect(() => {
@@ -62,27 +66,49 @@ export default function ProfitHistoryPage() {
   }, [setTopBar, resetTopBar]);
 
   return (
-    <main className="min-h-[calc(100dvh-56px)] bg-neutral-50">
+    <main className="flex min-h-[calc(100dvh-56px)] flex-col bg-neutral-50">
       <h1 className="sr-only">누적 수익 내역</h1>
 
-      <ProfitHistoryPeriodTabs value={period} onChange={setPeriod} />
+      <ProfitHistoryPeriodTabs value={period} onChange={changePeriod} />
 
-      <ProfitHistorySummary
-        period={period}
-        data={summary}
-        hasPrev={currentData.hasPrev}
-        hasNext={hasNext}
-        onPrev={() => movePeriod(-1)}
-        onNext={() => movePeriod(1)}
-      />
+      {isLoading && (
+        <p className="text-body-14-md px-5 py-10 text-center text-neutral-500">
+          누적 수익 내역을 불러오는 중입니다.
+        </p>
+      )}
 
-      <div aria-hidden="true" className="h-8 bg-neutral-50" />
+      {isError && !isLoading && (
+        <p className="text-body-14-md px-5 py-10 text-center text-neutral-500">
+          누적 수익 내역을 불러오지 못했습니다.
+        </p>
+      )}
 
-      <ProfitHistorySectorSection
-        sectors={currentData.sectors}
-        sortKey={sortKey}
-        onSortChange={setSortKey}
-      />
+      {profitHistory && !isLoading && !isError && (
+        <>
+          <ProfitHistorySummary
+            period={period}
+            data={profitHistory.summary}
+            hasPrev={profitHistory.hasPrev}
+            hasNext={profitHistory.hasNext}
+            onPrev={() => movePeriod(-1)}
+            onNext={() => movePeriod(1)}
+          />
+
+          {profitHistory.sectors.length > 0 ? (
+            <>
+              <div aria-hidden="true" className="h-8 bg-neutral-50" />
+
+              <ProfitHistorySectorSection
+                sectors={profitHistory.sectors}
+                sortKey={sortKey}
+                onSortChange={changeSort}
+              />
+            </>
+          ) : (
+            <div aria-hidden="true" className="flex-1 bg-neutral-50" />
+          )}
+        </>
+      )}
     </main>
   );
 }
