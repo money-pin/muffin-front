@@ -10,7 +10,7 @@ import {
   mapStatsRecentDetailToRecentPerformanceDetailData,
   mapStatsSummaryToStatsSummaryData,
 } from "./mappers";
-import type { ProfitHistoryApiPeriod, ProfitHistorySortKey } from "./types";
+import type { ProfitHistoryApiPeriod, ProfitHistorySortKey } from "../types";
 
 export interface StatsHistoryParams {
   period: ProfitHistoryApiPeriod;

@@ -12,8 +12,8 @@ import type {
   RecentPerformanceDetailData,
   StatsSummaryData,
   TopSector,
-} from "./types";
-import { formatProfitHistoryTitle } from "./utils/profitHistoryDate";
+} from "../types";
+import { formatProfitHistoryTitle } from "../utils/profitHistoryDate";
 
 const API_PERIOD_TO_UI_PERIOD = {
   DAY: "day",
