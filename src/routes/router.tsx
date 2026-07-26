@@ -3,6 +3,8 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import MobileLayout from "@/layouts/MobileLayout";
 import NavLayout from "@/layouts/NavLayout";
 import TopBarLayout from "@/layouts/TopBarLayout";
+import RequireAuth from "@/routes/RequireAuth";
+import RedirectIfAuth from "@/routes/RedirectIfAuth";
 
 import SplashPage from "@/pages/auth/SplashPage";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -27,89 +29,102 @@ export const router = createBrowserRouter([
   {
     element: <MobileLayout />,
     children: [
-      {
-        index: true,
-        element: <Navigate to="/home" replace />,
-      },
+      // 공개 라우트 (로그인 불필요)
       {
         path: "splash",
         element: <SplashPage />,
       },
+      // 로그인/회원가입 — 이미 로그인했으면 홈으로
       {
-        path: "login",
-        element: <LoginPage />,
-      },
-      {
-        path: "signup",
-        element: <SignupPage />,
-      },
-      {
-        path: "onboarding",
-        element: <OnboardingPage />,
-      },
-      {
-        path: "news/:newsId",
-        element: <NewsDetailPage />,
-      },
-      {
-        path: "my/storage",
-        element: <MyStoragePage />,
-      },
-      {
-        element: <NavLayout />,
+        element: <RedirectIfAuth />,
         children: [
           {
-            path: "home",
-            element: <HomePage />,
+            path: "login",
+            element: <LoginPage />,
           },
           {
-            path: "news",
-            element: <NewsPage />,
+            path: "signup",
+            element: <SignupPage />,
+          },
+        ],
+      },
+      // 로그인 필요 라우트 — 미로그인 시 /login으로
+      {
+        element: <RequireAuth />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/home" replace />,
           },
           {
-            path: "invest",
-            element: <InvestLayout />,
+            path: "onboarding",
+            element: <OnboardingPage />,
+          },
+          {
+            path: "news/:newsId",
+            element: <NewsDetailPage />,
+          },
+          {
+            path: "my/storage",
+            element: <MyStoragePage />,
+          },
+          {
+            element: <NavLayout />,
             children: [
               {
-                index: true,
-                element: <InvestPage />,
+                path: "home",
+                element: <HomePage />,
               },
               {
-                path: "stats",
-                element: <StatsPage />,
+                path: "news",
+                element: <NewsPage />,
               },
               {
-                path: "ranking",
-                element: <RankingPage />,
+                path: "invest",
+                element: <InvestLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: <InvestPage />,
+                  },
+                  {
+                    path: "stats",
+                    element: <StatsPage />,
+                  },
+                  {
+                    path: "ranking",
+                    element: <RankingPage />,
+                  },
+                ],
+              },
+              {
+                path: "my",
+                element: <MyPage />,
               },
             ],
           },
           {
-            path: "my",
-            element: <MyPage />,
+            element: <TopBarLayout />,
+            children: [
+              {
+                path: "quiz",
+                element: <QuizPage />,
+              },
+              {
+                path: "invest/profit-history",
+                element: <ProfitHistoryPage />,
+              },
+              {
+                path: "my/settings",
+                element: <MySettingsPage />,
+              },
+            ],
+          },
+          {
+            path: "showcase",
+            element: <ShowcasePage />,
           },
         ],
-      },
-      {
-        element: <TopBarLayout />,
-        children: [
-          {
-            path: "quiz",
-            element: <QuizPage />,
-          },
-          {
-            path: "invest/profit-history",
-            element: <ProfitHistoryPage />,
-          },
-          {
-            path: "my/settings",
-            element: <MySettingsPage />,
-          },
-        ],
-      },
-      {
-        path: "showcase",
-        element: <ShowcasePage />,
       },
       {
         path: "*",
