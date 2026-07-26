@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Indicator from "@/components/common/Indicator";
 import { saveCharacter } from "@/lib/character";
 import { completeOnboarding, saveOnboardingCharacter } from "@/lib/authApi";
+import { updateNickname } from "@/lib/mypageApi";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import muffinPlain from "@/assets/avatars/muffin-plain.png";
 import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
@@ -107,6 +108,16 @@ function OnboardingPage() {
     // 순서는 유지하되 실패는 독립 처리 — 캐릭터 저장 실패가 투자금 지급을 막지 않음.
     // 홈 진입도 막지 않음. 백엔드 미배포/실패 시 조용히 넘어감(다음 진입 시 재시도).
     void (async () => {
+      // 온보딩에서 입력한 닉네임을 서버에 저장 (홈·마이페이지에서 사용)
+      const trimmedNickname = nickname.trim();
+      if (trimmedNickname) {
+        try {
+          await updateNickname(trimmedNickname);
+        } catch {
+          // 닉네임 서버 저장 실패 — 마이페이지에서 다시 변경 가능
+        }
+      }
+
       try {
         await saveOnboardingCharacter({
           muffin,
