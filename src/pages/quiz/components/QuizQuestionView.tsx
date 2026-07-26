@@ -34,10 +34,10 @@ export default function QuizQuestionView({
   };
 
   return (
-    <div className="flex min-h-[calc(100dvh-118px)] flex-col px-5 pb-12">
+    <div className="flex min-h-[calc(100dvh-56px)] flex-col px-5 pb-12">
       <QuizStepIndicator total={total} currentIndex={index} />
 
-      <p className="mt-4 whitespace-pre-line text-heading-20-bd text-neutral-900">
+      <p className="text-heading-20-bd mt-4 whitespace-pre-line text-neutral-900">
         {question.question}
       </p>
 
@@ -48,7 +48,7 @@ export default function QuizQuestionView({
             type="button"
             disabled={submitted}
             onClick={() => onSelect(option.id)}
-            className={`flex min-h-[56px] w-full items-center justify-center rounded-[12px] border px-4 text-body-16-md-tighter transition-colors ${getOptionClass(option.id)}`}
+            className={`text-body-16-md-tighter flex min-h-[56px] w-full items-center justify-center rounded-[12px] border px-4 transition-colors ${getOptionClass(option.id)}`}
           >
             {option.label}
           </button>

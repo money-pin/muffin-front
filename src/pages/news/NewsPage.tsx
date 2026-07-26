@@ -107,7 +107,7 @@ export default function NewsPage() {
             className="h-[20px] w-[20px] object-contain"
             draggable={false}
           />
-          <h2 className="text-[16px] font-bold leading-[160%] text-[#1B1B1B]">
+          <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
             따끈한 금융 소식
           </h2>
         </div>
@@ -133,7 +133,7 @@ export default function NewsPage() {
                   <Badge>{news.category}</Badge>
                   <span className="text-xs text-neutral-400">2시간 전</span>
                 </div>
-                <h3 className="line-clamp-2 text-base font-bold leading-snug text-[#1B1B1B]">
+                <h3 className="line-clamp-2 text-base leading-snug font-bold text-[#1B1B1B]">
                   {news.title}
                 </h3>
               </div>

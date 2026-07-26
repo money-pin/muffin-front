@@ -52,11 +52,11 @@ export default function NewsDetailPage() {
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="relative flex-1 w-full overflow-y-auto"
+        className="relative w-full flex-1 overflow-y-auto"
       >
         <div className="relative flex w-full flex-col bg-white">
           {/* HeaderContent 영역 */}
-          <header className="absolute left-0 top-[12px] z-40 flex w-full items-center justify-between bg-transparent px-[20px]">
+          <header className="absolute top-[12px] left-0 z-40 flex w-full items-center justify-between bg-transparent px-[20px]">
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -107,31 +107,31 @@ export default function NewsDetailPage() {
             </div>
 
             {/* ArticleInfoContainer 영역 */}
-            <div className="absolute left-0 top-[122px] z-20 flex w-full flex-col gap-[8px] px-[20px]">
-              <h1 className="line-clamp-2 h-[56px] w-full text-[20px] font-medium leading-[140%] text-neutral-0">
+            <div className="absolute top-[122px] left-0 z-20 flex w-full flex-col gap-[8px] px-[20px]">
+              <h1 className="text-neutral-0 line-clamp-2 h-[56px] w-full text-[20px] leading-[140%] font-medium">
                 {newsData.title}
               </h1>
 
               <div className="flex h-[22px] items-center gap-[8px]">
-                <span className="inline-flex items-center justify-center rounded-[4px] bg-secondary-100 px-[6px] py-[4px] text-[12px] font-medium leading-[160%] text-primary">
+                <span className="bg-secondary-100 text-primary inline-flex items-center justify-center rounded-[4px] px-[6px] py-[4px] text-[12px] leading-[160%] font-medium">
                   {newsData.category}
                 </span>
-                <span className="flex h-[19px] items-center text-[12px] font-medium leading-[160%] text-neutral-100">
+                <span className="flex h-[19px] items-center text-[12px] leading-[160%] font-medium text-neutral-100">
                   {newsData.date}
                 </span>
               </div>
             </div>
 
             {/* ArticleBodyContainer 영역 */}
-            <div className="flex w-full flex-col gap-[8px] bg-white px-[20px] pb-[20px] pt-[24px]">
-              <div className="w-full text-justify text-[16px] font-normal leading-[160%] text-neutral-900">
+            <div className="flex w-full flex-col gap-[8px] bg-white px-[20px] pt-[24px] pb-[20px]">
+              <div className="w-full text-justify text-[16px] leading-[160%] font-normal text-neutral-900">
                 <p className="mb-4">{newsData.body[0]}</p>
                 <p>
                   이 열기는 한국의 반도체 ETF에도 영향을 주어, 마치 옆가게도
                   덩달아 손님이 늘어나는 것처럼 함께 상승하고 있어요.{" "}
                   <span
                     onClick={() => handleTermClick("양적완화")}
-                    className="cursor-pointer font-medium text-primary underline underline-offset-2"
+                    className="text-primary cursor-pointer font-medium underline underline-offset-2"
                   >
                     양적완화
                   </span>
@@ -178,7 +178,7 @@ export default function NewsDetailPage() {
                       />
                     </svg>
                   </div>
-                  <span className="flex h-[26px] w-auto whitespace-nowrap text-[16px] font-medium leading-[160%] text-neutral-400">
+                  <span className="flex h-[26px] w-auto text-[16px] leading-[160%] font-medium whitespace-nowrap text-neutral-400">
                     원문 뉴스 보기
                   </span>
                 </div>
@@ -189,7 +189,7 @@ export default function NewsDetailPage() {
             <div className="flex w-full flex-col gap-[8px] bg-white px-[20px] pb-[20px]">
               {/* 긍정 반응 */}
               <div className="flex w-full flex-col gap-[12px] rounded-[16px] border border-neutral-100 bg-white p-[16px]">
-                <div className="flex h-[26px] items-center gap-[4px] text-[16px] font-medium leading-[160%] text-neutral-900">
+                <div className="flex h-[26px] items-center gap-[4px] text-[16px] leading-[160%] font-medium text-neutral-900">
                   <svg
                     width="16"
                     height="16"
@@ -223,7 +223,7 @@ export default function NewsDetailPage() {
 
               {/* 부정 반응 */}
               <div className="flex w-full flex-col gap-[12px] rounded-[16px] border border-neutral-100 bg-white p-[16px]">
-                <div className="flex h-[26px] items-center gap-[4px] text-[16px] font-medium leading-[160%] text-neutral-900">
+                <div className="flex h-[26px] items-center gap-[4px] text-[16px] leading-[160%] font-medium text-neutral-900">
                   <svg
                     width="16"
                     height="16"
@@ -264,15 +264,15 @@ export default function NewsDetailPage() {
                   className="flex w-full flex-col gap-[16px] rounded-[16px] border border-neutral-100 bg-white p-[20px] shadow-sm"
                 >
                   <div className="flex w-full items-start gap-[4px]">
-                    <div className="shrink-0 pt-[1px] text-[16px] font-bold leading-[160%] text-neutral-900">
+                    <div className="shrink-0 pt-[1px] text-[16px] leading-[160%] font-bold text-neutral-900">
                       {card.id}.
                     </div>
-                    <h2 className="flex-1 text-left text-[16px] font-bold leading-[160%] text-neutral-900">
+                    <h2 className="flex-1 text-left text-[16px] leading-[160%] font-bold text-neutral-900">
                       {card.title}
                     </h2>
                   </div>
 
-                  <div className="flex w-full flex-col gap-4 text-justify text-[16px] font-normal leading-[160%] text-neutral-900">
+                  <div className="flex w-full flex-col gap-4 text-justify text-[16px] leading-[160%] font-normal text-neutral-900">
                     {card.paragraphs.map((p, pIdx) => (
                       <p key={pIdx}>{p.text}</p>
                     ))}
@@ -285,7 +285,7 @@ export default function NewsDetailPage() {
 
         {/* 📌 [핵심 수정] 스크롤 컨테이너 내부 우측 하단 sticky 플로팅 처리 */}
         {showScrollBtn && (
-          <div className="sticky bottom-6 z-50 flex justify-end pr-5 pointer-events-none">
+          <div className="pointer-events-none sticky bottom-6 z-50 flex justify-end pr-5">
             <div className="pointer-events-auto">
               <ScrollToTopButton onClick={handleScrollToTop} />
             </div>
@@ -299,9 +299,9 @@ export default function NewsDetailPage() {
         onClose={() => setIsTermSheetOpen(false)}
         ariaLabel="용어 설명"
       >
-        <div className="flex flex-col px-[21px] pb-[32px] pt-[8px] text-black">
+        <div className="flex flex-col px-[21px] pt-[8px] pb-[32px] text-black">
           <div className="flex w-full items-center justify-between border-b border-neutral-100 py-[8px]">
-            <h3 className="text-[20px] font-bold leading-[140%] text-neutral-900">
+            <h3 className="text-[20px] leading-[140%] font-bold text-neutral-900">
               <span className="text-primary">{selectedTerm?.term}</span>란?
             </h3>
 
@@ -320,7 +320,7 @@ export default function NewsDetailPage() {
           </div>
 
           <div className="pt-[16px]">
-            <p className="text-[16px] font-normal leading-[160%] text-neutral-900">
+            <p className="text-[16px] leading-[160%] font-normal text-neutral-900">
               {selectedTerm?.definition}
             </p>
           </div>

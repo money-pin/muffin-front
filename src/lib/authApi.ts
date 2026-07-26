@@ -10,12 +10,12 @@ export async function signup(params: {
   name: string;
   email: string;
   password: string;
-  termAgreed: boolean;
+  termsAgreed: boolean;
 }) {
-  const { accessToken } = await apiRequest<AccessTokenResult>(
-    "/api/auth/signup",
-    { method: "POST", body: params },
-  );
+  const { accessToken } = await apiRequest<AccessTokenResult>("/auth/signup", {
+    method: "POST",
+    body: params,
+  });
   saveAccessToken(accessToken);
 }
 
@@ -51,6 +51,30 @@ export async function withdraw() {
   return apiRequest<void>("/api/auth/account", {
     method: "DELETE",
     body: {},
+    auth: true,
+  });
+}
+
+// 온보딩 설문 결과로 결정된 캐릭터를 서버에 저장하고 캐릭터·추천 섹터를 받는다
+interface OnboardingCharacterResult {
+  characterId: number;
+  characterType: string;
+  characterName: string;
+  characterDescription: string;
+  imageUrl: string;
+  recommendedSectors: { sectorCode: string; sectorName: string }[];
+}
+
+export async function saveOnboardingCharacter(body: {
+  muffin: string; // 설문으로 결정된 머핀 타입 (plain/sprinkle/butter)
+  firstQuestion: number; // 각 질문에서 선택한 보기 번호 (1-based)
+  secondQuestion: number;
+  thirdQuestion: number;
+}): Promise<OnboardingCharacterResult> {
+  return apiRequest<OnboardingCharacterResult>("/api/onboarding/character", {
+    method: "POST",
+    // 백엔드 enum은 대문자(PLAIN/SPRINKLE/BUTTER) — 소문자로 오면 400
+    body: { ...body, muffin: body.muffin.toUpperCase() },
     auth: true,
   });
 }

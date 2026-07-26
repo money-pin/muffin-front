@@ -38,8 +38,7 @@ export default function ProfitHistoryPage() {
   const [dates, setDates] = useState(initialDates);
 
   const currentData = profitHistoryMock[period];
-  const hasNext =
-    period !== "all" && dates[period] !== initialDates[period];
+  const hasNext = period !== "all" && dates[period] !== initialDates[period];
   const summary = {
     ...currentData.summary,
     title:
@@ -63,7 +62,7 @@ export default function ProfitHistoryPage() {
   }, [setTopBar, resetTopBar]);
 
   return (
-    <main className="min-h-[calc(100dvh-118px)] bg-neutral-50">
+    <main className="min-h-[calc(100dvh-56px)] bg-neutral-50">
       <h1 className="sr-only">누적 수익 내역</h1>
 
       <ProfitHistoryPeriodTabs value={period} onChange={setPeriod} />
