@@ -1,10 +1,15 @@
 import { getSectorMeta } from "@/pages/invest/constants/sectorMeta";
 
-import type { StatsHistoryApi, StatsSummaryApi } from "./apiTypes";
+import type {
+  StatsHistoryApi,
+  StatsRecentDetailApi,
+  StatsSummaryApi,
+} from "./apiTypes";
 import type {
   InvestmentResultDate,
   ProfitHistoryData,
   ProfitHistoryPeriod,
+  RecentPerformanceDetailData,
   StatsSummaryData,
   TopSector,
 } from "./types";
@@ -96,6 +101,37 @@ export function mapStatsHistoryToProfitHistoryData(
   };
 }
 
+export function mapStatsRecentDetailToRecentPerformanceDetailData(
+  response: StatsRecentDetailApi,
+): RecentPerformanceDetailData {
+  return {
+    summary: response.date
+      ? {
+          date: parseInvestmentResultDate(response.date),
+          profitAmount: response.profitAmount,
+          profitRate: calculateProfitRate(
+            response.profitAmount,
+            response.totalInvestment,
+          ),
+          investmentAmount: response.totalInvestment,
+        }
+      : undefined,
+    sectors: response.sectors.map((sector) => {
+      const meta = getSectorMeta(sector.sectorCode, sector.sectorName);
+
+      return {
+        id: sector.sectorCode,
+        name: sector.sectorName || meta.name,
+        iconSrc: meta.iconSrc,
+        profitAmount: sector.profitAmount,
+        profitRate: sector.profitRate,
+        investmentAmount: sector.totalInvestment,
+        isFallback: sector.isFallback,
+      };
+    }),
+  };
+}
+
 function parseInvestmentResultDate(value: string): InvestmentResultDate {
   const [, month, day] = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) ?? [];
 
@@ -128,6 +164,12 @@ function parseOptionalInvestmentResultDate(
 
 function isTopSectorRank(rank: number): rank is TopSector["rank"] {
   return rank === 1 || rank === 2 || rank === 3;
+}
+
+function calculateProfitRate(profitAmount: number, totalInvestment: number) {
+  if (totalInvestment === 0) return 0;
+
+  return Number(((profitAmount / totalInvestment) * 100).toFixed(1));
 }
 
 function requireStatsHistoryDate(response: StatsHistoryApi) {

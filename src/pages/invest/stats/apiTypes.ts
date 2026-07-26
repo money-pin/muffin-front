@@ -55,3 +55,19 @@ export interface StatsHistorySectorApi {
   profitRate: number;
   totalInvestment: number;
 }
+
+export interface StatsRecentDetailApi {
+  date: string | null;
+  totalInvestment: number;
+  profitAmount: number;
+  sectors: StatsRecentDetailSectorApi[];
+}
+
+export interface StatsRecentDetailSectorApi {
+  sectorCode: string;
+  sectorName: string;
+  profitAmount: number;
+  profitRate: number;
+  totalInvestment: number;
+  isFallback: boolean;
+}

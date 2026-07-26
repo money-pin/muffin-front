@@ -67,6 +67,12 @@ export interface SectorPerformanceDetail {
   profitAmount: number;
   profitRate: number;
   investmentAmount: number;
+  isFallback?: boolean;
+}
+
+export interface RecentPerformanceDetailData {
+  summary?: RecentPerformanceSummary;
+  sectors: SectorPerformanceDetail[];
 }
 
 export interface InvestmentProfile {
