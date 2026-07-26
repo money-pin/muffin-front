@@ -104,7 +104,8 @@ function OnboardingPage() {
     };
 
     // 서버에 캐릭터 저장(재로그인·타 기기 동기화) → 초기 투자금 지급(멱등).
-    // 순서 보장하되 홈 진입은 막지 않음. 백엔드 미배포/실패 시 조용히 넘어감
+    // 순서는 유지하되 실패는 독립 처리 — 캐릭터 저장 실패가 투자금 지급을 막지 않음.
+    // 홈 진입도 막지 않음. 백엔드 미배포/실패 시 조용히 넘어감(다음 진입 시 재시도).
     void (async () => {
       try {
         await saveOnboardingCharacter({
@@ -113,9 +114,14 @@ function OnboardingPage() {
           secondQuestion: answerNumber("invest"),
           thirdQuestion: answerNumber("goal"),
         });
+      } catch {
+        // 캐릭터 서버 저장 실패 — 로컬 저장은 이미 완료, 다음 진입 시 재시도
+      }
+
+      try {
         await completeOnboarding();
       } catch {
-        // 온보딩은 멱등이라 다음 진입 시 재시도 가능
+        // 초기 투자금 지급은 멱등 — 다음 진입 시 재시도
       }
     })();
 
