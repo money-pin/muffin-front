@@ -8,7 +8,7 @@ import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import { apiRequest } from "@/lib/api";
 import { saveAccessToken } from "@/lib/auth";
 
-// POST /api/auth/login, /api/auth/google 공통 응답 result
+// POST /auth/login, /auth/google 공통 응답 result
 interface AuthResult {
   accessToken: string;
 }
@@ -32,7 +32,7 @@ function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const { accessToken } = await apiRequest<AuthResult>("/api/auth/login", {
+      const { accessToken } = await apiRequest<AuthResult>("/auth/login", {
         method: "POST",
         body: { email, password },
       });
@@ -56,9 +56,9 @@ function LoginPage() {
     setErrorMessage("");
 
     try {
-      const { accessToken } = await apiRequest<AuthResult>("/api/auth/google", {
+      const { accessToken } = await apiRequest<AuthResult>("/auth/google", {
         method: "POST",
-        body: { idToken, termsAgreed: true },
+        body: { idToken },
       });
 
       saveAccessToken(accessToken);
