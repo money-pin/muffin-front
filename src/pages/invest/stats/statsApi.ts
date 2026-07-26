@@ -1,8 +1,13 @@
 import { apiRequest } from "@/lib/api";
 
-import type { StatsHistoryApi, StatsSummaryApi } from "./apiTypes";
+import type {
+  StatsHistoryApi,
+  StatsRecentDetailApi,
+  StatsSummaryApi,
+} from "./apiTypes";
 import {
   mapStatsHistoryToProfitHistoryData,
+  mapStatsRecentDetailToRecentPerformanceDetailData,
   mapStatsSummaryToStatsSummaryData,
 } from "./mappers";
 import type { ProfitHistoryApiPeriod, ProfitHistorySortKey } from "./types";
@@ -41,4 +46,13 @@ export async function getStatsHistory({
   );
 
   return mapStatsHistoryToProfitHistoryData(response);
+}
+
+export async function getStatsRecentDetail() {
+  const response = await apiRequest<StatsRecentDetailApi>(
+    "/api/stats/recent-detail",
+    { auth: true },
+  );
+
+  return mapStatsRecentDetailToRecentPerformanceDetailData(response);
 }
