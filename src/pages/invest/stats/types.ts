@@ -8,10 +8,7 @@ export type ProfitHistoryPeriod = "day" | "week" | "month" | "year" | "all";
 export type ProfitHistoryApiPeriod = "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
 
 export type ProfitHistorySortKey =
-  | "AMOUNT_DESC"
-  | "AMOUNT_ASC"
-  | "RATE_DESC"
-  | "RATE_ASC";
+  "AMOUNT_DESC" | "AMOUNT_ASC" | "RATE_DESC" | "RATE_ASC";
 
 export interface ProfitHistorySummary {
   title: string;
@@ -76,4 +73,12 @@ export interface InvestmentProfile {
   type: string;
   description: string;
   details: string[];
+}
+
+export interface StatsSummaryData {
+  investDate?: InvestmentResultDate;
+  cumulativeProfit: CumulativeProfit;
+  trend: ProfitTrendPoint[];
+  topSectors: TopSector[];
+  profile?: InvestmentProfile;
 }
