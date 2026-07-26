@@ -52,7 +52,8 @@ export const NEWS_DETAIL_MOCK_DATA: Record<number, NewsDetailItem> = {
     terms: {
       양적완화: {
         term: "양적완화",
-        definition: "중앙은행이 시중에 돈을 더 많이 풀어서 경제를 활성화하는 정책",
+        definition:
+          "중앙은행이 시중에 돈을 더 많이 풀어서 경제를 활성화하는 정책",
       },
     },
     knowledgeCards: [

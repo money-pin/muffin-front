@@ -74,8 +74,8 @@ export default function ScrappedNewsTab() {
   });
 
   return (
-    <div className="w-full flex flex-col mt-0 pt-0">
-      <div className="w-full flex justify-end px-5 py-2 mt-0">
+    <div className="mt-0 flex w-full flex-col pt-0">
+      <div className="mt-0 flex w-full justify-end px-5 py-2">
         <SortDropdown
           options={sortOptions}
           value={sortValue}
@@ -84,7 +84,7 @@ export default function ScrappedNewsTab() {
         />
       </div>
 
-      <section className="px-5 flex flex-col gap-[12px] mt-1">
+      <section className="mt-1 flex flex-col gap-[12px] px-5">
         {sortedNewsList.map((news) => (
           <NewCard
             key={news.id}

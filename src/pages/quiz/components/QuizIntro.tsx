@@ -17,10 +17,10 @@ export default function QuizIntro({
   const character = useCharacter();
 
   return (
-    <div className="flex min-h-[calc(100dvh-118px)] flex-col px-5 pb-12">
+    <div className="flex min-h-[calc(100dvh-56px)] flex-col px-5 pb-12">
       <div className="flex flex-1 flex-col items-center justify-center gap-10">
         <CharacterAvatar size="large" variant={character} />
-        <p className="whitespace-pre-line text-center text-heading-20-bd text-neutral-900">
+        <p className="text-heading-20-bd text-center whitespace-pre-line text-neutral-900">
           {`${nickname}님, 오늘 구운 뉴스들로\n반죽을 만들어볼까요?`}
         </p>
       </div>
@@ -30,7 +30,7 @@ export default function QuizIntro({
         <button
           type="button"
           onClick={onLater}
-          className="flex h-[52px] w-full items-center justify-center rounded-[12px] bg-neutral-50 text-body-16-bd-tighter text-neutral-400"
+          className="text-body-16-bd-tighter flex h-[52px] w-full items-center justify-center rounded-[12px] bg-neutral-50 text-neutral-400"
         >
           나중에 하기
         </button>

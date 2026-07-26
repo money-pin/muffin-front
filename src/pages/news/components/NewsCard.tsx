@@ -42,7 +42,7 @@ export default function NewsCard({
   return (
     <div
       onClick={() => navigate(`/news/${id}`)}
-      className="flex w-full cursor-pointer items-center gap-[12px] rounded-[16px] border border-neutral-100 bg-neutral-0 px-[16px] pb-[16px] pt-[8px] shadow-sm"
+      className="bg-neutral-0 flex w-full cursor-pointer items-center gap-[12px] rounded-[16px] border border-neutral-100 px-[16px] pt-[8px] pb-[16px] shadow-sm"
     >
       <div className="h-[56px] w-[56px] flex-shrink-0 overflow-hidden rounded-[4px]">
         <img
@@ -75,9 +75,7 @@ export default function NewsCard({
         <div className="flex h-[22px] w-full items-center justify-between">
           <div className="flex items-center gap-[4px]">
             <Badge variant="orange">{category}</Badge>
-            <span className="text-caption-12-md text-neutral-400">
-              {date}
-            </span>
+            <span className="text-caption-12-md text-neutral-400">{date}</span>
           </div>
 
           <span className="text-caption-12-md text-neutral-400">
