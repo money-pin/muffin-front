@@ -8,7 +8,7 @@ import type {
 } from "@/pages/invest/trade/types/invest";
 
 export function getInvestmentSectors() {
-  return apiRequest<InvestmentSectorsResult>("/api/investment/sectors", {
+  return apiRequest<InvestmentSectorsResult>("/api/sectors", {
     method: "GET",
     auth: true,
   });

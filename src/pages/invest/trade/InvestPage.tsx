@@ -24,7 +24,8 @@ type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
 // 투자 페이지 모드
 type InvestViewMode = "trade" | "summary" | "edit";
 
-// 주말에도 투자 화면을 확인해야 할때 true로 설정 (개발용)
+// 개발 중 주말에도 투자 화면을 확인해야 하면 true로 변경
+// PR 올리기 전에는 false로 돌려두는 것을 권장
 const FORCE_TRADE_VIEW_FOR_DEV = false;
 
 function getKstDate() {
@@ -210,8 +211,8 @@ function InvestPage() {
     const asset = allAssets.find((item) => item.id === assetId);
     const sector = asset ? sectorByCode.get(asset.sectorCode) : undefined;
 
-    // 백엔드에서 비활성 처리된 섹터는 선택 불가
-    if (sector?.isActive === false) return;
+    // 서버 섹터 목록에 없는 카드는 선택하지 않음
+    if (!sector) return;
 
     setSelectedAssetId(assetId);
 
@@ -284,7 +285,7 @@ function InvestPage() {
   };
 
   // 이슈 1에서는 아직 서버 저장 X
-  // 다음 이슈에서 confirmInvestment() API 연결 예정
+  // 다음 이슈에서 Swagger 기준으로 confirm API 연결 예정
   const handleConfirmPurchase = () => {
     setConfirmedQuantities(assetQuantities);
     setIsConfirmSheetOpen(false);
@@ -360,7 +361,7 @@ function InvestPage() {
                 {section.items.map((asset) => {
                   const quantity = assetQuantities[asset.id] ?? 0;
                   const sector = sectorByCode.get(asset.sectorCode);
-                  const isDisabled = sector?.isActive === false;
+                  const isDisabled = !sector;
 
                   const isSelected =
                     selectedAssetId === asset.id && quantity > 0;

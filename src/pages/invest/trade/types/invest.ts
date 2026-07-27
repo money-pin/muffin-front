@@ -17,15 +17,15 @@ export type InvestAssetCardStatus = "default" | "selected" | "purchased";
 export type InvestSectorCode =
   | "DEPOSIT"
   | "GOLD"
-  | "DOLLAR"
-  | "BONDS"
-  | "COIN"
-  | "BIOTECH"
+  | "BOND"
+  | "USD"
+  | "TECH"
   | "SEMICONDUCTOR"
-  | "TECHNOLOGY"
+  | "BIO"
+  | "CRYPTO"
+  | "AUTO"
   | "ENERGY"
-  | "FINANCIALS"
-  | "AUTOMOBILE"
+  | "FINANCE"
   | "DEFENSE";
 
 export interface InvestAssetMeta {
@@ -43,17 +43,15 @@ export interface InvestAssetSection {
 }
 
 export interface InvestmentSector {
-  assetCardId: number;
-  sectorName: string;
   sectorCode: InvestSectorCode;
-  etfCode: string;
-  etfName: string;
-  isActive: boolean;
-  iconUrl: string;
+  name: string;
+  sectorOrder: number;
 }
 
 export interface InvestmentSectorGroup {
+  groupCode: string;
   groupName: string;
+  groupOrder: number;
   sectors: InvestmentSector[];
 }
 
@@ -62,6 +60,10 @@ export interface InvestmentSectorsResult {
   groups: InvestmentSectorGroup[];
 }
 
+/**
+ * 아래 confirm/today 타입은 다음 이슈에서 Swagger 기준으로 다시 정리할 예정.
+ * 이슈 1에서는 getInvestmentSectors 타입만 실제 응답 기준으로 사용.
+ */
 export interface InvestmentSelectionRequest {
   assetCardId: number;
   quantity: number;
@@ -83,26 +85,19 @@ export interface ConfirmInvestmentResult {
   }[];
 }
 
-export interface TodayInvestmentSelection {
-  sectorName: string;
+export interface TodayInvestmentSector {
   sectorCode: InvestSectorCode;
+  sectorName: string;
   quantity: number;
   amount: number;
-  percentage: number;
+  ratio: number;
 }
 
-export type TodayInvestmentResult =
-  | {
-      status: "CONFIRMED";
-      dailyInvestmentId: number;
-      investDate: string;
-      totalAmount: number;
-      confirmedAt: string;
-      deadline: string;
-      isEditable: boolean;
-      selections: TodayInvestmentSelection[];
-    }
-  | {
-      status: "CLOSED";
-      message: string;
-    };
+export interface TodayInvestmentResult {
+  status: string;
+  confirmDeadline: string;
+  remainingAmount: number;
+  totalAmount: number;
+  sectors: TodayInvestmentSector[];
+  nextInvestmentAvailableAt: string;
+}
