@@ -9,13 +9,17 @@ import InvestConfirmBottomSheet from "@/pages/invest/trade/components/InvestConf
 import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodayStatusPage";
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
 
-import { getInvestmentSectors } from "@/pages/invest/trade/apis/investmentApi";
+import {
+  getInvestmentSectors,
+  getTodayInvestment,
+} from "@/pages/invest/trade/apis/investmentApi";
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
 import { MOCK_INVEST_MARKET_DATA } from "@/pages/invest/trade/mocks/mockInvestMarketData";
 
 import type {
   InvestmentSectorsResult,
   InvestAssetId,
+  TodayInvestmentResult,
 } from "@/pages/invest/trade/types/invest";
 
 // 자산 구매 현황 저장
@@ -25,7 +29,6 @@ type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
 type InvestViewMode = "trade" | "summary" | "edit";
 
 // 개발 중 주말에도 투자 화면을 확인해야 하면 true로 변경
-// PR 올리기 전에는 false로 돌려두는 것을 권장
 const FORCE_TRADE_VIEW_FOR_DEV = false;
 
 function getKstDate() {
@@ -70,11 +73,15 @@ function isSameQuantityMap(
 
 function InvestPage() {
   const isWeekend = getIsKstWeekend();
-  const shouldShowWeekendClosedPage = isWeekend && !FORCE_TRADE_VIEW_FOR_DEV;
 
   const [sectorData, setSectorData] =
     useState<InvestmentSectorsResult | null>(null);
   const [sectorErrorMessage, setSectorErrorMessage] = useState("");
+
+  const [todayInvestmentData, setTodayInvestmentData] =
+    useState<TodayInvestmentResult | null>(null);
+  const [todayInvestmentErrorMessage, setTodayInvestmentErrorMessage] =
+    useState("");
 
   const [viewMode, setViewMode] = useState<InvestViewMode>("trade");
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
@@ -103,9 +110,29 @@ function InvestPage() {
     fetchInvestmentSectors();
   }, []);
 
+  useEffect(() => {
+    const fetchTodayInvestment = async () => {
+      try {
+        const data = await getTodayInvestment();
+
+        setTodayInvestmentData(data);
+        setTodayInvestmentErrorMessage("");
+      } catch (error) {
+        console.error("오늘 투자 현황 조회 실패:", error);
+        setTodayInvestmentErrorMessage("오늘 투자 현황을 불러오지 못했어요.");
+      }
+    };
+
+    fetchTodayInvestment();
+  }, []);
+
   const allAssets = useMemo(() => {
     return INVEST_ASSET_SECTIONS.flatMap((section) => section.items);
   }, []);
+
+  const assetBySectorCode = useMemo(() => {
+    return new Map(allAssets.map((asset) => [asset.sectorCode, asset]));
+  }, [allAssets]);
 
   const allSectors = useMemo(() => {
     return sectorData?.groups.flatMap((group) => group.sectors) ?? [];
@@ -116,6 +143,40 @@ function InvestPage() {
   }, [allSectors]);
 
   const unitAmount = sectorData?.unitAmount ?? 100000;
+
+  useEffect(() => {
+    if (!todayInvestmentData) return;
+
+    const nextConfirmedQuantities = todayInvestmentData.sectors.reduce(
+      (acc, item) => {
+        const asset = assetBySectorCode.get(item.sectorCode);
+
+        if (!asset || item.quantity <= 0) return acc;
+
+        return {
+          ...acc,
+          [asset.id]: item.quantity,
+        };
+      },
+      {} as AssetQuantityMap,
+    );
+
+    const hasServerInvestment =
+      Object.keys(nextConfirmedQuantities).length > 0;
+
+    setConfirmedQuantities(nextConfirmedQuantities);
+
+    if (hasServerInvestment) {
+      setAssetQuantities(nextConfirmedQuantities);
+      setSelectedAssetId(null);
+      setViewMode("summary");
+      return;
+    }
+
+    if (todayInvestmentData.status === "AVAILABLE") {
+      setViewMode("trade");
+    }
+  }, [assetBySectorCode, todayInvestmentData]);
 
   const selectedAsset = useMemo(() => {
     return allAssets.find((asset) => asset.id === selectedAssetId);
@@ -136,10 +197,28 @@ function InvestPage() {
     unitAmount,
   );
 
-  const remainingBudget = Math.max(
-    0,
-    MOCK_INVEST_MARKET_DATA.totalBudget - totalInvestAmount,
+  const serverTotalBudget =
+    todayInvestmentData &&
+    todayInvestmentData.remainingAmount + todayInvestmentData.totalAmount > 0
+      ? todayInvestmentData.remainingAmount + todayInvestmentData.totalAmount
+      : MOCK_INVEST_MARKET_DATA.totalBudget;
+
+  const remainingBudget = Math.max(0, serverTotalBudget - totalInvestAmount);
+
+  const hasServerInvestment = Boolean(
+    todayInvestmentData?.sectors.some((item) => item.quantity > 0),
   );
+
+  const isTodayClosed =
+    todayInvestmentData?.status === "CLOSED" ||
+    todayInvestmentData?.status === "BLOCKED" ||
+    todayInvestmentData?.status === "NO_INVEST";
+
+  const shouldShowWeekendClosedPage =
+    !FORCE_TRADE_VIEW_FOR_DEV &&
+    (todayInvestmentData
+      ? todayInvestmentData.status !== "AVAILABLE" && !hasServerInvestment
+      : isWeekend);
 
   // 확정 바텀시트에 보여줄 구매 목록
   const confirmItems = Object.entries(assetQuantities)
@@ -162,8 +241,22 @@ function InvestPage() {
       };
     });
 
-  // 오늘 투자 현황 화면에 보여줄 목록
-  const todayStatusItems = Object.entries(confirmedQuantities)
+  const serverTodayStatusItems =
+    todayInvestmentData?.sectors.flatMap((item) => {
+      const asset = assetBySectorCode.get(item.sectorCode);
+
+      if (!asset || item.quantity <= 0) return [];
+
+      return {
+        assetId: asset.id,
+        name: item.sectorName,
+        icon: asset.activeIcon,
+        amount: item.amount,
+        percentage: Math.round(item.ratio),
+      };
+    }) ?? [];
+
+  const localTodayStatusItems = Object.entries(confirmedQuantities)
     .filter(([, quantity]) => (quantity ?? 0) > 0)
     .map(([assetId, quantity]) => {
       const typedAssetId = assetId as InvestAssetId;
@@ -182,6 +275,11 @@ function InvestPage() {
         percentage,
       };
     });
+
+  const todayStatusItems =
+    serverTodayStatusItems.length > 0
+      ? serverTodayStatusItems
+      : localTodayStatusItems;
 
   const canDecrease = selectedQuantity > 0;
 
@@ -220,10 +318,7 @@ function InvestPage() {
       const currentQuantity = prev[assetId] ?? 0;
       const currentTotalAmount = getTotalInvestAmount(prev, unitAmount);
 
-      if (
-        currentTotalAmount + unitAmount >
-        MOCK_INVEST_MARKET_DATA.totalBudget
-      ) {
+      if (currentTotalAmount + unitAmount > serverTotalBudget) {
         return prev;
       }
 
@@ -284,7 +379,7 @@ function InvestPage() {
     setIsConfirmSheetOpen(true);
   };
 
-  // 이슈 1에서는 아직 서버 저장 X
+  // 이슈 2에서는 아직 서버 저장 X
   // 다음 이슈에서 Swagger 기준으로 confirm API 연결 예정
   const handleConfirmPurchase = () => {
     setConfirmedQuantities(assetQuantities);
@@ -331,6 +426,11 @@ function InvestPage() {
           <InvestTodayStatusPage
             items={todayStatusItems}
             onEdit={handleStartEdit}
+            isClosed={isTodayClosed}
+            confirmDeadline={todayInvestmentData?.confirmDeadline}
+            nextInvestmentAvailableAt={
+              todayInvestmentData?.nextInvestmentAvailableAt
+            }
           />
         </div>
       ) : (
@@ -341,13 +441,19 @@ function InvestPage() {
           ].join(" ")}
         >
           <InvestBudgetCard
-            totalBudget={MOCK_INVEST_MARKET_DATA.totalBudget}
+            totalBudget={serverTotalBudget}
             remainingBudget={remainingBudget}
           />
 
           {sectorErrorMessage && (
             <p className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-primary)]">
               {sectorErrorMessage}
+            </p>
+          )}
+
+          {todayInvestmentErrorMessage && (
+            <p className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-primary)]">
+              {todayInvestmentErrorMessage}
             </p>
           )}
 

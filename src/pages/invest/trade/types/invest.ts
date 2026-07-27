@@ -60,10 +60,31 @@ export interface InvestmentSectorsResult {
   groups: InvestmentSectorGroup[];
 }
 
-/**
- * 아래 confirm/today 타입은 다음 이슈에서 Swagger 기준으로 다시 정리할 예정.
- * 이슈 1에서는 getInvestmentSectors 타입만 실제 응답 기준으로 사용.
- */
+export type TodayInvestmentStatus =
+  | "AVAILABLE"
+  | "CONFIRMED"
+  | "CLOSED"
+  | "BLOCKED"
+  | "NO_INVEST"
+  | (string & {});
+
+export interface TodayInvestmentSector {
+  sectorCode: InvestSectorCode;
+  sectorName: string;
+  quantity: number;
+  amount: number;
+  ratio: number;
+}
+
+export interface TodayInvestmentResult {
+  status: TodayInvestmentStatus;
+  confirmDeadline: string;
+  remainingAmount: number;
+  totalAmount: number;
+  sectors: TodayInvestmentSector[];
+  nextInvestmentAvailableAt: string;
+}
+
 export interface InvestmentSelectionRequest {
   assetCardId: number;
   quantity: number;
@@ -83,21 +104,4 @@ export interface ConfirmInvestmentResult {
     quantity: number;
     amount: number;
   }[];
-}
-
-export interface TodayInvestmentSector {
-  sectorCode: InvestSectorCode;
-  sectorName: string;
-  quantity: number;
-  amount: number;
-  ratio: number;
-}
-
-export interface TodayInvestmentResult {
-  status: string;
-  confirmDeadline: string;
-  remainingAmount: number;
-  totalAmount: number;
-  sectors: TodayInvestmentSector[];
-  nextInvestmentAvailableAt: string;
 }

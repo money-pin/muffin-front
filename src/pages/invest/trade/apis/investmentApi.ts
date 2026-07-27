@@ -15,7 +15,7 @@ export function getInvestmentSectors() {
 }
 
 export function getTodayInvestment() {
-  return apiRequest<TodayInvestmentResult>("/api/investment/today", {
+  return apiRequest<TodayInvestmentResult>("/api/investments/today", {
     method: "GET",
     auth: true,
   });
