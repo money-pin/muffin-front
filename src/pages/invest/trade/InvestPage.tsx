@@ -59,7 +59,7 @@ function isSameQuantityMap(
 }
 
 function InvestPage() {
-  const isWeekend = false; //getIsKstWeekend(); //주말 여부
+  const isWeekend = getIsKstWeekend();//주말 여부
   const [viewMode, setViewMode] = useState<InvestViewMode>("trade");
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedAssetId, setSelectedAssetId] = useState<InvestAssetId | null>(
