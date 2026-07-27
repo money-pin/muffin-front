@@ -16,6 +16,7 @@ import InvestResultSheet from "./components/InvestResultSheet";
 import BottomSheet from "@/components/common/BottomSheet";
 import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
 import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
+import { getMyHome } from "@/lib/mypageApi";
 import {
   HOME_USER,
   HOME_ASSETS,
@@ -32,6 +33,23 @@ function HomePage() {
   const navigate = useNavigate();
   // 최근 투자 성과 클릭 시 수익 통계와 동일한 상세 바텀시트 노출
   const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
+
+  // 닉네임은 서버(/api/mypage/home)에서 조회, 실패 시 기존 표시값 유지
+  const [nickname, setNickname] = useState(HOME_USER.nickname);
+
+  useEffect(() => {
+    let active = true;
+    getMyHome()
+      .then((home) => {
+        if (active) setNickname(home.nickname);
+      })
+      .catch(() => {
+        // 조회 실패 — 기존 닉네임 유지
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // 투자결과 모달 자동 노출: 오전 10시 이후 & 아직 확인 안 한 전날 정산 결과일 때만 열림
   const [investResultOpen, setInvestResultOpen] = useState(
@@ -60,7 +78,7 @@ function HomePage() {
 
       <div className="mt-1 px-5">
         <AssetCard
-          nickname={HOME_USER.nickname}
+          nickname={nickname}
           streakDays={HOME_USER.streakDays}
           assets={HOME_ASSETS}
           onRecentClick={() => setRecentPerformanceOpen(true)}
