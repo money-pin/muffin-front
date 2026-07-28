@@ -1,4 +1,4 @@
-//오늘 투자 현황 페이지
+// 오늘 투자 현황 페이지
 import { useEffect, useState } from "react";
 
 import clockIcon from "@/assets/icon-24px/clock.svg";
@@ -19,6 +19,9 @@ interface TodayInvestItem {
 interface InvestTodayStatusPageProps {
   items: TodayInvestItem[];
   onEdit: () => void;
+  isClosed?: boolean;
+  confirmDeadline?: string;
+  nextInvestmentAvailableAt?: string;
 }
 
 function formatCurrency(value: number) {
@@ -35,17 +38,24 @@ function getIsClosedTime() {
   const kstNow = getKstDate();
   const hour = kstNow.getHours();
 
-  // 한국 시간 기준 00:00 이상, 10:00 전까지
   return hour >= 0 && hour < 10;
 }
 
-function getKstRemainingTimeText() {
-  const kstNow = getKstDate();
+function getRemainingTimeText(deadline?: string) {
+  const now = new Date();
 
-  const midnight = new Date(kstNow);
-  midnight.setHours(24, 0, 0, 0);
+  const targetDate = deadline ? new Date(deadline) : null;
 
-  const diffMs = Math.max(0, midnight.getTime() - kstNow.getTime());
+  const fallbackKstNow = getKstDate();
+  const fallbackMidnight = new Date(fallbackKstNow);
+  fallbackMidnight.setHours(24, 0, 0, 0);
+
+  const endDate =
+    targetDate && !Number.isNaN(targetDate.getTime())
+      ? targetDate
+      : fallbackMidnight;
+
+  const diffMs = Math.max(0, endDate.getTime() - now.getTime());
   const totalMinutes = Math.ceil(diffMs / 1000 / 60);
 
   const hours = Math.floor(totalMinutes / 60);
@@ -57,28 +67,31 @@ function getKstRemainingTimeText() {
   )}`;
 }
 
-function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
-  const [remainingTimeText, setRemainingTimeText] = useState(
-    getKstRemainingTimeText,
+function InvestTodayStatusPage({
+  items,
+  onEdit,
+  isClosed,
+  confirmDeadline,
+}: InvestTodayStatusPageProps) {
+  const [remainingTimeText, setRemainingTimeText] = useState(() =>
+    getRemainingTimeText(confirmDeadline),
   );
 
-  const [isClosedTime, setIsClosedTime] = useState(
-    FORCE_CLOSED_VIEW || getIsClosedTime(),
-  );
+  const isClosedTime = FORCE_CLOSED_VIEW || (isClosed ?? getIsClosedTime());
 
   useEffect(() => {
+    setRemainingTimeText(getRemainingTimeText(confirmDeadline));
+
     const timer = window.setInterval(() => {
-      setRemainingTimeText(getKstRemainingTimeText());
-      setIsClosedTime(FORCE_CLOSED_VIEW || getIsClosedTime());
+      setRemainingTimeText(getRemainingTimeText(confirmDeadline));
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [confirmDeadline]);
 
   return (
     <div className="flex flex-1 flex-col bg-[var(--color-neutral-50)] px-5 pt-5 pb-[100px]">
       <section className="flex h-[66px] w-full items-center rounded-[12px] bg-[var(--color-neutral-0)] py-[14px] pl-5 pr-4 ring-1 ring-inset ring-[var(--color-neutral-100)]">
-        {" "}
         {isClosedTime ? (
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)]">
             <img src={lockIcon} alt="" className="h-6 w-6" />
@@ -86,6 +99,7 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
         ) : (
           <img src={clockIcon} alt="" className="h-6 w-6 shrink-0" />
         )}
+
         <div className="ml-4 flex flex-col">
           <strong
             className={[
@@ -104,6 +118,7 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
               : "수정 마감까지 남은 시간"}
           </span>
         </div>
+
         {!isClosedTime && (
           <span className="ml-auto flex h-[30px] w-[54px] shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)] px-2 py-1 text-[length:var(--text-body-14-bd)] leading-[var(--text-body-14-bd--line-height)] font-[var(--text-body-14-bd--font-weight)] text-[var(--color-primary)]">
             {remainingTimeText}
@@ -185,6 +200,12 @@ function InvestTodayStatusPage({ items, onEdit }: InvestTodayStatusPageProps) {
               </div>
             );
           })}
+
+          {items.length === 0 && (
+            <p className="text-center text-[length:var(--text-body-14-md)] leading-[var(--text-body-14-md--line-height)] font-[var(--text-body-14-md--font-weight)] text-[var(--color-neutral-400)]">
+              오늘 확정된 투자 내역이 없어요.
+            </p>
+          )}
         </div>
       </section>
 
