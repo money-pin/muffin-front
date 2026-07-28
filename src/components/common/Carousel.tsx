@@ -50,7 +50,7 @@ export default function Carousel({ children }: CarouselProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-[4px] h-[8px]">
+      <div className="flex items-center gap-[4px]">
         {children.map((_, index) => {
           const isActive = currentIndex === index;
           return (
@@ -59,12 +59,16 @@ export default function Carousel({ children }: CarouselProps) {
               type="button"
               onClick={() => setCurrentIndex(index)}
               aria-label={`${index + 1}번째 슬라이드로 이동`}
-              className={`h-[8px] transition-all duration-300 rounded-full cursor-pointer border-none outline-none p-0 ${
-                isActive
-                  ? "w-[40px] bg-primary"
-                  : "w-[8px] bg-neutral-100 hover:bg-neutral-200"
-              }`}
-            />
+              className="flex h-11 items-center justify-center p-1 border-none bg-transparent cursor-pointer outline-none"
+            >
+              <span
+                className={`h-[8px] transition-all duration-300 rounded-full ${
+                  isActive
+                    ? "w-[40px] bg-primary"
+                    : "w-[8px] bg-neutral-100 hover:bg-neutral-200"
+                }`}
+              />
+            </button>
           );
         })}
       </div>
