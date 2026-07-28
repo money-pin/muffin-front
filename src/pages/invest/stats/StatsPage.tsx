@@ -11,6 +11,7 @@ import InvestmentStyleCard from "@/pages/invest/stats/components/InvestmentStyle
 import ProfitRateTrendCard from "@/pages/invest/stats/components/ProfitRateTrendCard";
 import RecentPerformanceCard from "@/pages/invest/stats/components/RecentPerformanceCard";
 import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
+import StatsPageSkeleton from "@/pages/invest/stats/components/StatsPageSkeleton";
 import TopProfitSectorsCard from "@/pages/invest/stats/components/TopProfitSectorsCard";
 import TotalProfitCard from "@/pages/invest/stats/components/TotalProfitCard";
 import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
@@ -18,7 +19,8 @@ import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
 export default function StatsPage() {
   const navigate = useNavigate();
   const [isRecentPerformanceOpen, setIsRecentPerformanceOpen] = useState(false);
-  const { data: statsSummary } = useStatsSummaryQuery();
+  const { data: statsSummary, isLoading: isStatsSummaryLoading } =
+    useStatsSummaryQuery();
   const {
     data: recentPerformanceDetail,
     isError: isRecentPerformanceError,
@@ -32,6 +34,10 @@ export default function StatsPage() {
     topSectors: statsMock.topSectors,
     profile: statsMock.profile,
   };
+
+  if (isStatsSummaryLoading) {
+    return <StatsPageSkeleton />;
+  }
 
   return (
     <>
