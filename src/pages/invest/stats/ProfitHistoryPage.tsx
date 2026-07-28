@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import ProfitHistoryPeriodTabs from "@/pages/invest/stats/components/ProfitHistoryPeriodTabs";
+import ProfitHistoryPageSkeleton from "@/pages/invest/stats/components/ProfitHistoryPageSkeleton";
 import ProfitHistorySectorSection from "@/pages/invest/stats/components/ProfitHistorySectorSection";
 import ProfitHistorySummary from "@/pages/invest/stats/components/ProfitHistorySummary";
 import { useStatsHistoryQuery } from "@/pages/invest/stats/api/queries";
@@ -71,11 +72,7 @@ export default function ProfitHistoryPage() {
 
       <ProfitHistoryPeriodTabs value={period} onChange={changePeriod} />
 
-      {isLoading && (
-        <p className="text-body-14-md px-5 py-10 text-center text-neutral-500">
-          누적 수익 내역을 불러오는 중입니다.
-        </p>
-      )}
+      {isLoading && <ProfitHistoryPageSkeleton sortKey={sortKey} />}
 
       {isError && !isLoading && (
         <p className="text-body-14-md px-5 py-10 text-center text-neutral-500">
