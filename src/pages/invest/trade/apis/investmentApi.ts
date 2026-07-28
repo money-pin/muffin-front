@@ -22,15 +22,16 @@ export function getTodayInvestment() {
 }
 
 export function confirmInvestment(body: ConfirmInvestmentRequest) {
-  return apiRequest<ConfirmInvestmentResult>("/api/investment/confirm", {
+  return apiRequest<ConfirmInvestmentResult>("/api/investments", {
     method: "POST",
     body,
     auth: true,
   });
 }
 
+
 export function updateInvestment(body: ConfirmInvestmentRequest) {
-  return apiRequest<ConfirmInvestmentResult>("/api/investment/confirm", {
+  return apiRequest<ConfirmInvestmentResult>("/api/investments", {
     method: "PUT",
     body,
     auth: true,

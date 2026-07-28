@@ -86,22 +86,12 @@ export interface TodayInvestmentResult {
 }
 
 export interface InvestmentSelectionRequest {
-  assetCardId: number;
+  sectorCode: InvestSectorCode;
   quantity: number;
 }
 
 export interface ConfirmInvestmentRequest {
-  selections: InvestmentSelectionRequest[];
+  sectors: InvestmentSelectionRequest[];
 }
 
-export interface ConfirmInvestmentResult {
-  dailyInvestmentId: number;
-  investDate: string;
-  totalAmount: number;
-  confirmedAt: string;
-  selections: {
-    sectorName: string;
-    quantity: number;
-    amount: number;
-  }[];
-}
+export type ConfirmInvestmentResult = TodayInvestmentResult;

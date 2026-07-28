@@ -1,25 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
-import InvestCompleteModal from "@/pages/invest/trade/components/InvestCompleteModal";
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
 import InvestAssetCountBar from "@/pages/invest/trade/components/InvestAssetCountBar";
 import InvestBottomAction from "@/pages/invest/trade/components/InvestBottomAction";
 import InvestBudgetCard from "@/pages/invest/trade/components/InvestBudgetCard";
+import InvestCompleteModal from "@/pages/invest/trade/components/InvestCompleteModal";
 import InvestConfirmBottomSheet from "@/pages/invest/trade/components/InvestConfirmBottomSheet";
 import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodayStatusPage";
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
 
-import {
-  getInvestmentSectors,
-  getTodayInvestment,
-} from "@/pages/invest/trade/apis/investmentApi";
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
 import { MOCK_INVEST_MARKET_DATA } from "@/pages/invest/trade/mocks/mockInvestMarketData";
+import {
+  investmentQueryKeys,
+  useConfirmInvestmentMutation,
+  useInvestmentSectorsQuery,
+  useTodayInvestmentQuery,
+} from "@/pages/invest/trade/investQueries";
 
 import type {
-  InvestmentSectorsResult,
+  ConfirmInvestmentRequest,
   InvestAssetId,
-  TodayInvestmentResult,
 } from "@/pages/invest/trade/types/invest";
 
 // 자산 구매 현황 저장
@@ -29,6 +31,7 @@ type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
 type InvestViewMode = "trade" | "summary" | "edit";
 
 // 개발 중 주말에도 투자 화면을 확인해야 하면 true로 변경
+// PR 올리기 전에는 false로 돌려두는 것을 권장
 const FORCE_TRADE_VIEW_FOR_DEV = false;
 
 function getKstDate() {
@@ -71,17 +74,32 @@ function isSameQuantityMap(
   });
 }
 
+function getErrorMessage(error: unknown, fallbackMessage: string) {
+  if (!error) return "";
+
+  return error instanceof Error ? error.message : fallbackMessage;
+}
+
 function InvestPage() {
   const isWeekend = getIsKstWeekend();
+  const queryClient = useQueryClient();
 
-  const [sectorData, setSectorData] =
-    useState<InvestmentSectorsResult | null>(null);
-  const [sectorErrorMessage, setSectorErrorMessage] = useState("");
+  const investmentSectorsQuery = useInvestmentSectorsQuery();
+  const todayInvestmentQuery = useTodayInvestmentQuery();
+  const confirmInvestmentMutation = useConfirmInvestmentMutation();
 
-  const [todayInvestmentData, setTodayInvestmentData] =
-    useState<TodayInvestmentResult | null>(null);
-  const [todayInvestmentErrorMessage, setTodayInvestmentErrorMessage] =
-    useState("");
+  const sectorData = investmentSectorsQuery.data ?? null;
+  const todayInvestmentData = todayInvestmentQuery.data ?? null;
+
+  const sectorErrorMessage = getErrorMessage(
+    investmentSectorsQuery.error,
+    "투자 섹터 정보를 불러오지 못했어요.",
+  );
+
+  const todayInvestmentErrorMessage = getErrorMessage(
+    todayInvestmentQuery.error,
+    "오늘 투자 현황을 불러오지 못했어요.",
+  );
 
   const [viewMode, setViewMode] = useState<InvestViewMode>("trade");
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
@@ -93,38 +111,9 @@ function InvestPage() {
   const [confirmedQuantities, setConfirmedQuantities] =
     useState<AssetQuantityMap>({});
   const [isConfirmSheetOpen, setIsConfirmSheetOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchInvestmentSectors = async () => {
-      try {
-        const data = await getInvestmentSectors();
-
-        setSectorData(data);
-        setSectorErrorMessage("");
-      } catch (error) {
-        console.error("섹터 목록 조회 실패:", error);
-        setSectorErrorMessage("투자 섹터 정보를 불러오지 못했어요.");
-      }
-    };
-
-    fetchInvestmentSectors();
-  }, []);
-
-  useEffect(() => {
-    const fetchTodayInvestment = async () => {
-      try {
-        const data = await getTodayInvestment();
-
-        setTodayInvestmentData(data);
-        setTodayInvestmentErrorMessage("");
-      } catch (error) {
-        console.error("오늘 투자 현황 조회 실패:", error);
-        setTodayInvestmentErrorMessage("오늘 투자 현황을 불러오지 못했어요.");
-      }
-    };
-
-    fetchTodayInvestment();
-  }, []);
+  const [confirmInvestmentErrorMessage, setConfirmInvestmentErrorMessage] =
+    useState("");
+  const [isConfirmingInvestment, setIsConfirmingInvestment] = useState(false);
 
   const allAssets = useMemo(() => {
     return INVEST_ASSET_SECTIONS.flatMap((section) => section.items);
@@ -281,6 +270,24 @@ function InvestPage() {
       ? serverTodayStatusItems
       : localTodayStatusItems;
 
+  const buildConfirmInvestmentBody = (): ConfirmInvestmentRequest => {
+    const sectors = Object.entries(assetQuantities)
+      .filter(([, quantity]) => (quantity ?? 0) > 0)
+      .flatMap(([assetId, quantity]) => {
+        const typedAssetId = assetId as InvestAssetId;
+        const asset = allAssets.find((item) => item.id === typedAssetId);
+
+        if (!asset) return [];
+
+        return {
+          sectorCode: asset.sectorCode,
+          quantity: quantity ?? 0,
+        };
+      });
+
+    return { sectors };
+  };
+
   const canDecrease = selectedQuantity > 0;
 
   const canIncrease =
@@ -312,6 +319,7 @@ function InvestPage() {
     // 서버 섹터 목록에 없는 카드는 선택하지 않음
     if (!sector) return;
 
+    setConfirmInvestmentErrorMessage("");
     setSelectedAssetId(assetId);
 
     setAssetQuantities((prev) => {
@@ -332,6 +340,8 @@ function InvestPage() {
   // 수량 감소
   const handleDecrease = () => {
     if (!selectedAssetId) return;
+
+    setConfirmInvestmentErrorMessage("");
 
     setAssetQuantities((prev) => {
       const currentQuantity = prev[selectedAssetId] ?? 0;
@@ -357,6 +367,8 @@ function InvestPage() {
   const handleIncrease = () => {
     if (!selectedAssetId || !canIncrease) return;
 
+    setConfirmInvestmentErrorMessage("");
+
     setAssetQuantities((prev) => {
       const currentQuantity = prev[selectedAssetId] ?? 0;
 
@@ -370,21 +382,53 @@ function InvestPage() {
   const handleReset = () => {
     setSelectedAssetId(null);
     setAssetQuantities({});
+    setConfirmInvestmentErrorMessage("");
   };
 
   // 구매하기 버튼 -> 확인 바텀시트 오픈
   const handlePurchase = () => {
     if (!hasAnyInvestment) return;
 
+    setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
   };
 
-  // 이슈 2에서는 아직 서버 저장 X
-  // 다음 이슈에서 Swagger 기준으로 confirm API 연결 예정
-  const handleConfirmPurchase = () => {
-    setConfirmedQuantities(assetQuantities);
-    setIsConfirmSheetOpen(false);
-    setIsCompleteModalOpen(true);
+  const handleConfirmPurchase = async () => {
+    if (isConfirmingInvestment) return;
+
+    const confirmRequestBody = buildConfirmInvestmentBody();
+
+    if (confirmRequestBody.sectors.length === 0) {
+      setConfirmInvestmentErrorMessage("하나 이상의 섹터를 선택해주세요.");
+      setIsConfirmSheetOpen(false);
+      return;
+    }
+
+    try {
+      setIsConfirmingInvestment(true);
+      setConfirmInvestmentErrorMessage("");
+
+      const data =
+        await confirmInvestmentMutation.mutateAsync(confirmRequestBody);
+
+      queryClient.setQueryData(investmentQueryKeys.today(), data);
+
+      setConfirmedQuantities(assetQuantities);
+      setIsConfirmSheetOpen(false);
+      setIsCompleteModalOpen(true);
+    } catch (error) {
+      console.error("투자 확정 실패:", error);
+
+      const message = getErrorMessage(
+        error,
+        "투자 확정에 실패했어요. 잠시 후 다시 시도해주세요.",
+      );
+
+      setConfirmInvestmentErrorMessage(message);
+      setIsConfirmSheetOpen(false);
+    } finally {
+      setIsConfirmingInvestment(false);
+    }
   };
 
   const handleCompleteModalConfirm = () => {
@@ -400,18 +444,21 @@ function InvestPage() {
 
     setAssetQuantities(confirmedQuantities);
     setSelectedAssetId(firstConfirmedAssetId);
+    setConfirmInvestmentErrorMessage("");
     setViewMode("edit");
   };
 
   const handleEditCancel = () => {
     setAssetQuantities(confirmedQuantities);
     setSelectedAssetId(null);
+    setConfirmInvestmentErrorMessage("");
     setViewMode("summary");
   };
 
   const handleEditSubmit = () => {
     if (!hasAnyInvestment) return;
 
+    setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
   };
 
@@ -454,6 +501,12 @@ function InvestPage() {
           {todayInvestmentErrorMessage && (
             <p className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-primary)]">
               {todayInvestmentErrorMessage}
+            </p>
+          )}
+
+          {confirmInvestmentErrorMessage && (
+            <p className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-primary)]">
+              {confirmInvestmentErrorMessage}
             </p>
           )}
 
