@@ -104,7 +104,7 @@ export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="select-none"
+        className="h-full w-full select-none"
       >
         <line
           x1={PADDING_LEFT}

@@ -32,20 +32,20 @@ function SkeletonCard({
 export default function StatsPageSkeleton() {
   return (
     <main className="flex flex-col gap-3 bg-neutral-50 px-5 pt-6 pb-24">
-      <SkeletonCard className="flex items-center justify-between py-5 pr-4 pl-5">
-        <div className="flex items-center gap-1">
+      <SkeletonCard className="flex items-center justify-between gap-3 py-5 pr-4 pl-5">
+        <div className="flex min-w-0 items-center gap-1">
           <img
             src={calendarIcon}
             alt=""
             aria-hidden="true"
-            className="h-5 w-5 object-contain"
+            className="h-5 w-5 shrink-0 object-contain"
             draggable={false}
           />
-          <h2 className="text-body-16-bd-tighter text-neutral-900">
+          <h2 className="text-body-16-bd-tighter truncate text-neutral-900">
             최근 투자 성과
           </h2>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <SkeletonBlock className="h-[22px] w-12" />
           <img
             src={chevronRightIcon}
@@ -57,27 +57,27 @@ export default function StatsPageSkeleton() {
         </div>
       </SkeletonCard>
 
-      <SkeletonCard className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
+      <SkeletonCard className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex items-center gap-1 px-1">
             <img
               src={noteIcon}
               alt=""
               aria-hidden="true"
-              className="h-5 w-5 object-contain"
+              className="h-5 w-5 shrink-0 object-contain"
               draggable={false}
             />
-            <h2 className="text-body-16-bd-tighter text-neutral-900">
+            <h2 className="text-body-16-bd-tighter truncate text-neutral-900">
               총 누적 수익
             </h2>
           </div>
-          <SkeletonBlock className="h-6 w-[215px]" />
+          <SkeletonBlock className="h-6 w-full max-w-[215px]" />
         </div>
         <img
           src={chevronRightIcon}
           alt=""
           aria-hidden="true"
-          className="h-6 w-6 object-contain"
+          className="h-6 w-6 shrink-0 object-contain"
           draggable={false}
         />
       </SkeletonCard>
@@ -88,7 +88,7 @@ export default function StatsPageSkeleton() {
             src={chartIcon}
             alt=""
             aria-hidden="true"
-            className="h-5 w-5 object-contain"
+            className="h-5 w-5 shrink-0 object-contain"
             draggable={false}
           />
           <h2 className="text-body-16-bd-tighter text-neutral-900">
@@ -107,7 +107,7 @@ export default function StatsPageSkeleton() {
             src={rankingIcon}
             alt=""
             aria-hidden="true"
-            className="h-5 w-5 object-contain"
+            className="h-5 w-5 shrink-0 object-contain"
             draggable={false}
           />
           <h2 className="text-body-16-bd-tighter text-neutral-900">
@@ -118,13 +118,13 @@ export default function StatsPageSkeleton() {
           {[1, 2, 3].map((rank) => (
             <div
               key={rank}
-              className="flex items-center justify-between px-2 py-3"
+              className="flex items-center justify-between gap-3 px-2 py-3"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <RankBadge rank={rank as 1 | 2 | 3} />
-                <SkeletonBlock className="h-6 w-[84px]" />
+                <SkeletonBlock className="h-6 w-full max-w-[84px]" />
               </div>
-              <SkeletonBlock className="h-6 w-[140px]" />
+              <SkeletonBlock className="h-6 w-[42%] max-w-[140px] shrink-0" />
             </div>
           ))}
         </div>
@@ -136,7 +136,7 @@ export default function StatsPageSkeleton() {
             src={bullseyeIcon}
             alt=""
             aria-hidden="true"
-            className="h-5 w-5 object-contain"
+            className="h-5 w-5 shrink-0 object-contain"
             draggable={false}
           />
           <h2 className="text-body-16-bd-tighter text-neutral-900">
@@ -144,11 +144,11 @@ export default function StatsPageSkeleton() {
           </h2>
         </div>
         <SkeletonBlock className="h-[49px] w-full rounded-xl" />
-        <SkeletonBlock className="h-[22px] w-[273px]" />
+        <SkeletonBlock className="h-[22px] w-full max-w-[273px]" />
         <div className="flex flex-col gap-2">
-          <SkeletonBlock className="h-4 w-[236px]" />
-          <SkeletonBlock className="h-4 w-[236px]" />
-          <SkeletonBlock className="h-4 w-[236px]" />
+          <SkeletonBlock className="h-4 w-full max-w-[236px]" />
+          <SkeletonBlock className="h-4 w-full max-w-[236px]" />
+          <SkeletonBlock className="h-4 w-full max-w-[236px]" />
         </div>
       </SkeletonCard>
     </main>
