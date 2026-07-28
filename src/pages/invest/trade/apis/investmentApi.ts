@@ -29,10 +29,9 @@ export function confirmInvestment(body: ConfirmInvestmentRequest) {
   });
 }
 
-
 export function updateInvestment(body: ConfirmInvestmentRequest) {
-  return apiRequest<ConfirmInvestmentResult>("/api/investments", {
-    method: "PUT",
+  return apiRequest<ConfirmInvestmentResult>("/api/investments/today", {
+    method: "PATCH",
     body,
     auth: true,
   });
