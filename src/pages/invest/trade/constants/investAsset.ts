@@ -34,7 +34,7 @@ import semiconductorActiveIcon from "@/assets/investment/investment-semiconducto
 import technologyIcon from "@/assets/investment/investment-technology-disabled.svg";
 import technologyActiveIcon from "@/assets/investment/investment-technology.svg";
 
-import type { InvestAssetSection } from "@/types/invest";
+import type { InvestAssetSection } from "@/pages/invest/trade/types/invest";
 
 export const INVEST_ASSET_SECTIONS: InvestAssetSection[] = [
   {
@@ -46,24 +46,28 @@ export const INVEST_ASSET_SECTIONS: InvestAssetSection[] = [
         name: "예금",
         icon: depositIcon,
         activeIcon: depositActiveIcon,
+        sectorCode: "DEPOSIT",
       },
       {
         id: "gold",
         name: "금",
         icon: goldIcon,
         activeIcon: goldActiveIcon,
+        sectorCode: "GOLD",
       },
       {
         id: "dollar",
         name: "달러",
         icon: dollarIcon,
         activeIcon: dollarActiveIcon,
+        sectorCode: "USD",
       },
       {
         id: "bonds",
         name: "채권",
         icon: bondsIcon,
         activeIcon: bondsActiveIcon,
+        sectorCode: "BOND",
       },
     ],
   },
@@ -76,24 +80,28 @@ export const INVEST_ASSET_SECTIONS: InvestAssetSection[] = [
         name: "코인",
         icon: coinIcon,
         activeIcon: coinActiveIcon,
+        sectorCode: "CRYPTO",
       },
       {
         id: "biotech",
         name: "바이오",
         icon: biotechIcon,
         activeIcon: biotechActiveIcon,
+        sectorCode: "BIO",
       },
       {
         id: "semiconductor",
         name: "반도체",
         icon: semiconductorIcon,
         activeIcon: semiconductorActiveIcon,
+        sectorCode: "SEMICONDUCTOR",
       },
       {
         id: "technology",
         name: "테크",
         icon: technologyIcon,
         activeIcon: technologyActiveIcon,
+        sectorCode: "TECH",
       },
     ],
   },
@@ -106,24 +114,28 @@ export const INVEST_ASSET_SECTIONS: InvestAssetSection[] = [
         name: "에너지",
         icon: energyIcon,
         activeIcon: energyActiveIcon,
+        sectorCode: "ENERGY",
       },
       {
         id: "financials",
         name: "금융",
         icon: financialsIcon,
         activeIcon: financialsActiveIcon,
+        sectorCode: "FINANCE",
       },
       {
         id: "automobile",
         name: "자동차",
         icon: automobileIcon,
         activeIcon: automobileActiveIcon,
+        sectorCode: "AUTO",
       },
       {
         id: "defense",
         name: "방산",
         icon: defenseIcon,
         activeIcon: defenseActiveIcon,
+        sectorCode: "DEFENSE",
       },
     ],
   },
