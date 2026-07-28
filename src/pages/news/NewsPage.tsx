@@ -117,9 +117,9 @@ export default function NewsPage() {
             <div
               key={news.id}
               onClick={() => navigate(`/news/${news.id}`)}
-              className="flex cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
+              className="flex w-full cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
             >
-              <div className="h-[201px] w-full overflow-hidden rounded-[12px]">
+              <div className="aspect-[16/10] w-full overflow-hidden rounded-[12px]">
                 <img
                   src={CAROUSEL_IMAGES[news.imageType]}
                   alt=""
