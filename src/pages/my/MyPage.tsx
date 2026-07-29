@@ -22,7 +22,8 @@ import {
 function MyPage() {
   const navigate = useNavigate();
   const character = useCharacter();
-  const [nickname, setNickname] = useState(MY_USER.nickname);
+  // 초기값을 목으로 두면 틀린 이름이 잠깐 노출되므로 빈 값으로 시작해 응답 후 채운다
+  const [nickname, setNickname] = useState("");
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
 
   // 닉네임은 서버(/api/mypage/home)에서 조회, 실패 시 기존 표시값 유지

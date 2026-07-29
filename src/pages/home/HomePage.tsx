@@ -42,8 +42,9 @@ function HomePage() {
   // 최근 투자 성과 클릭 시 수익 통계와 동일한 상세 바텀시트 노출
   const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
 
-  // 닉네임은 서버(/api/mypage/home)에서 조회, 실패 시 기존 표시값 유지
-  const [nickname, setNickname] = useState(HOME_USER.nickname);
+  // 닉네임은 서버(/api/mypage/home)에서 조회. 초기값을 목으로 두면 틀린 이름이
+  // 잠깐 노출되므로(예: 예은) 빈 값으로 시작해 응답 후 채운다.
+  const [nickname, setNickname] = useState("");
 
   useEffect(() => {
     let active = true;
