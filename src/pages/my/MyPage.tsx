@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import SectionHeader from "@/components/common/SectionHeader";
 import { useCharacter, CHARACTER_LABELS } from "@/lib/character";
+import { getMyHome, updateNickname } from "@/lib/mypageApi";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
 
 import MyProfile from "./components/MyProfile";
@@ -23,6 +24,21 @@ function MyPage() {
   const character = useCharacter();
   const [nickname, setNickname] = useState(MY_USER.nickname);
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
+
+  // 닉네임은 서버(/api/mypage/home)에서 조회, 실패 시 기존 표시값 유지
+  useEffect(() => {
+    let active = true;
+    getMyHome()
+      .then((home) => {
+        if (active) setNickname(home.nickname);
+      })
+      .catch(() => {
+        // 조회 실패 — 기존 닉네임 유지
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -66,7 +82,7 @@ function MyPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-9 border-t border-neutral-100 bg-[#f9f9f9] px-5 pb-9 pt-6">
+      <div className="flex flex-1 flex-col gap-9 border-t border-neutral-100 bg-[#f9f9f9] px-5 pt-6 pb-9">
         <section className="flex flex-col gap-4">
           <SectionHeader title="학습 저장소" />
           {/* 이 부분만 탭 클릭 시 파라미터(?tab=menu)를 포함해 이동하도록 수정했습니다 */}
@@ -108,6 +124,8 @@ function MyPage() {
           onChange={(next) => {
             setNickname(next);
             setNicknameModalOpen(false);
+            // 변경한 닉네임을 서버에 저장 (실패해도 화면은 낙관적으로 반영)
+            updateNickname(next).catch(() => {});
           }}
         />
       )}
