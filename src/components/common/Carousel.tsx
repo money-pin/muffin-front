@@ -20,7 +20,7 @@ export default function Carousel({ children }: CarouselProps) {
 
   const handleTouchEnd = () => {
     const diffX = touchStartX.current - touchEndX.current;
-    
+
     if (diffX > 50 && currentIndex < children.length - 1) {
       setCurrentIndex((prev) => prev + 1);
     } else if (diffX < -50 && currentIndex > 0) {
@@ -30,38 +30,45 @@ export default function Carousel({ children }: CarouselProps) {
 
   return (
     <div className="w-full flex flex-col items-center gap-[16px]">
-      <div 
+      <div
         className="w-full overflow-hidden px-5"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div 
+        <div
           className="flex transition-transform duration-300 ease-out gap-[12px]"
-          style={{ 
-            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 12}px))` 
+          style={{
+            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 12}px))`,
           }}
         >
           {children.map((child, index) => (
-            <div key={index} className="w-[85%] min-w-[85%] sm:w-auto sm:min-w-[350px] shrink-0">
+            <div key={index} className="w-[85%] shrink-0">
               {child}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex items-center gap-[4px] h-[8px]">
+      <div className="flex items-center gap-[4px]">
         {children.map((_, index) => {
           const isActive = currentIndex === index;
           return (
-            <div
+            <button
               key={index}
-              className={`h-[8px] transition-all duration-300 rounded-full ${
-                isActive 
-                  ? "w-[40px] bg-primary" 
-                  : "w-[8px] bg-neutral-100"
-              }`}
-            />
+              type="button"
+              onClick={() => setCurrentIndex(index)}
+              aria-label={`${index + 1}번째 슬라이드로 이동`}
+              className="flex h-11 items-center justify-center p-1 border-none bg-transparent cursor-pointer outline-none"
+            >
+              <span
+                className={`h-[8px] transition-all duration-300 rounded-full ${
+                  isActive
+                    ? "w-[40px] bg-primary"
+                    : "w-[8px] bg-neutral-100 hover:bg-neutral-200"
+                }`}
+              />
+            </button>
           );
         })}
       </div>
