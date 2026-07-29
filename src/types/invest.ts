@@ -26,3 +26,18 @@ export interface InvestAssetSection {
   title: string;
   items: InvestAssetMeta[];
 }
+
+export type InvestmentAssetChangeDirection =
+  | "UP"
+  | "DOWN"
+  | "FLAT"
+  | "NONE"
+  | (string & {});
+
+export interface InvestmentAssetResult {
+  totalAsset: number;
+  dailyChangeAmount: number;
+  dailyChangeRate: number;
+  changeDirection: InvestmentAssetChangeDirection;
+  settlementPending: boolean;
+}
