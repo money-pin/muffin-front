@@ -133,7 +133,7 @@ export function mapStatsRecentDetailToRecentPerformanceDetailData(
 }
 
 function parseInvestmentResultDate(value: string): InvestmentResultDate {
-  const [, month, day] = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) ?? [];
+  const [, , month, day] = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) ?? [];
 
   if (!month || !day) {
     throw new Error(`투자 통계 기준일 형식이 올바르지 않습니다: ${value}`);

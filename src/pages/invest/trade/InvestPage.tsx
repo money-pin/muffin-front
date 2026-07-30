@@ -138,6 +138,8 @@ function InvestPage() {
   useEffect(() => {
     if (!todayInvestmentData) return;
 
+    let isActive = true;
+
     const nextConfirmedQuantities = todayInvestmentData.sectors.reduce(
       (acc, item) => {
         const asset = assetBySectorCode.get(item.sectorCode);
@@ -152,21 +154,28 @@ function InvestPage() {
       {} as AssetQuantityMap,
     );
 
-    const hasServerInvestment =
-      Object.keys(nextConfirmedQuantities).length > 0;
+    const hasServerInvestment = Object.keys(nextConfirmedQuantities).length > 0;
 
-    setConfirmedQuantities(nextConfirmedQuantities);
+    queueMicrotask(() => {
+      if (!isActive) return;
 
-    if (hasServerInvestment) {
-      setAssetQuantities(nextConfirmedQuantities);
-      setSelectedAssetId(null);
-      setViewMode("summary");
-      return;
-    }
+      setConfirmedQuantities(nextConfirmedQuantities);
 
-    if (todayInvestmentData.status === "AVAILABLE") {
-      setViewMode("trade");
-    }
+      if (hasServerInvestment) {
+        setAssetQuantities(nextConfirmedQuantities);
+        setSelectedAssetId(null);
+        setViewMode("summary");
+        return;
+      }
+
+      if (todayInvestmentData.status === "AVAILABLE") {
+        setViewMode("trade");
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [assetBySectorCode, todayInvestmentData]);
 
   const selectedAsset = useMemo(() => {

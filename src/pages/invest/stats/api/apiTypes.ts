@@ -4,12 +4,12 @@ import type {
 } from "@/pages/invest/stats/types";
 
 export interface StatsSummaryApi {
-  investDate?: string;
+  investDate: string | null;
   cumulativeProfitAmount: number;
   cumulativeProfitRate: number;
   graph: StatsSummaryGraphPointApi[];
   topSectors: StatsSummaryTopSectorApi[];
-  investmentType?: StatsSummaryInvestmentTypeApi;
+  investmentType: StatsSummaryInvestmentTypeApi | null;
 }
 
 export interface StatsSummaryGraphPointApi {

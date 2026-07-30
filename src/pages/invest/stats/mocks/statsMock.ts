@@ -104,12 +104,12 @@ export const statsMock: {
   },
   trend: [
     { label: "5/1", value: 0 },
-    { label: "5/2", value: 15000 },
-    { label: "5/3", value: 10000 },
-    { label: "5/4", value: 26000 },
-    { label: "5/5", value: 33000 },
-    { label: "5/6", value: 29000 },
-    { label: "5/7", value: 45000 },
+    { label: "5/2", value: 1.5 },
+    { label: "5/3", value: 1.0 },
+    { label: "5/4", value: 2.6 },
+    { label: "5/5", value: 3.3 },
+    { label: "5/6", value: 2.9 },
+    { label: "5/7", value: 4.5 },
   ],
   topSectors: [
     { rank: 1, name: "반도체", profitAmount: 45000, profitRate: 12.5 },
