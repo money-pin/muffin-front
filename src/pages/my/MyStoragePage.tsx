@@ -14,7 +14,8 @@ export default function MyStoragePage() {
   const currentTab = (searchParams.get("tab") || "news") as TabType;
 
   // 퀴즈 복습 상세 선택 상태를 부모에서 관리
-  const [selectedQuizHistory, setSelectedQuizHistory] = useState<QuizHistoryItem | null>(null);
+  const [selectedQuizHistory, setSelectedQuizHistory] =
+    useState<QuizHistoryItem | null>(null);
 
   const tabTitleMap: Record<TabType, string> = {
     news: "스크랩한 뉴스",
@@ -39,18 +40,18 @@ export default function MyStoragePage() {
 
   return (
     /* 📌 bg-[#F5F5F5] -> bg-white 변경으로 전체 흰색 배경 통일 */
-    <div className="w-full max-w-[var(--max-width-app,390px)] min-h-full bg-white flex flex-col text-black relative mx-auto">
+    <div className="relative mx-auto flex min-h-full w-full max-w-[var(--max-width-app)] flex-col bg-white text-black">
       {/* 고정 TopBar */}
-      <div className="w-full bg-white border-b border-neutral-100 z-50 shrink-0">
-        <TopBar 
-          title={getTitle()} 
-          showBack={true} 
-          onBack={handleBack} 
+      <div className="z-50 w-full shrink-0 border-b border-neutral-100 bg-white">
+        <TopBar
+          title={getTitle()}
+          showBack={true}
+          onBack={handleBack}
           background="white"
         />
       </div>
 
-      <div className="flex-1 w-full overflow-y-auto min-h-0">
+      <div className="min-h-0 w-full flex-1 overflow-y-auto">
         {currentTab === "news" && <ScrappedNewsTab />}
         {currentTab === "word" && <SavedWordsTab />}
         {currentTab === "quiz" && (
