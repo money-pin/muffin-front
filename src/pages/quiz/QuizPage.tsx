@@ -17,10 +17,25 @@ import type { QuizAttemptResult } from "@/pages/quiz/api/types";
 
 type QuizPhase = "intro" | "question" | "result";
 
-function QuizStateMessage({ children }: { children: string }) {
+function QuizStateMessage({
+  children,
+  onRetry,
+}: {
+  children: string;
+  onRetry?: () => void;
+}) {
   return (
-    <div className="flex min-h-[calc(100dvh-56px)] items-center justify-center px-5">
+    <div className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center gap-4 px-5">
       <p className="text-body-14-md text-center text-neutral-500">{children}</p>
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="text-body-14-bd text-primary"
+        >
+          다시 시도
+        </button>
+      )}
     </div>
   );
 }
@@ -91,16 +106,23 @@ function QuizPage() {
   }
 
   if (phase === "result") {
-    const result = resultQuery.data;
-    const correctCount =
-      result?.progress.correctCount ?? attempt?.progress.correctCount ?? 0;
-    const total = result?.progress.totalCount ?? questions.length;
-    const reward = result?.reward.amount ?? 0;
+    // 결과 응답이 온 뒤에만 결과 화면을 보여줘 보상 0원 깜빡임을 방지
+    if (resultQuery.isLoading) {
+      return <QuizStateMessage>결과를 불러오는 중입니다.</QuizStateMessage>;
+    }
+    if (resultQuery.isError || !resultQuery.data) {
+      return (
+        <QuizStateMessage onRetry={() => resultQuery.refetch()}>
+          결과를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
+        </QuizStateMessage>
+      );
+    }
+    const { progress, reward } = resultQuery.data;
     return (
       <QuizResultView
-        correctCount={correctCount}
-        total={total}
-        reward={reward}
+        correctCount={progress.correctCount}
+        total={progress.totalCount}
+        reward={reward.amount}
         onGoHome={goHome}
       />
     );
@@ -153,6 +175,12 @@ function QuizPage() {
         total={questions.length}
         selectedId={selectedId}
         submitted={submitted}
+        isSubmitting={submitAttemptMutation.isPending}
+        submitError={
+          submitAttemptMutation.isError
+            ? "제출에 실패했어요. 잠시 후 다시 시도해주세요."
+            : undefined
+        }
         onSelect={setSelectedId}
         onSubmit={handleSubmit}
       />
