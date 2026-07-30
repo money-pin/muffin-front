@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import BottomSheet from "@/components/common/BottomSheet";
+import ErrorRetryModal from "@/components/common/ErrorRetryModal";
 
 import {
   useStatsRecentDetailQuery,
@@ -14,30 +15,43 @@ import RecentPerformanceSheetContent from "@/pages/invest/stats/components/Recen
 import StatsPageSkeleton from "@/pages/invest/stats/components/StatsPageSkeleton";
 import TopProfitSectorsCard from "@/pages/invest/stats/components/TopProfitSectorsCard";
 import TotalProfitCard from "@/pages/invest/stats/components/TotalProfitCard";
-import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
 
 export default function StatsPage() {
   const navigate = useNavigate();
   const [isRecentPerformanceOpen, setIsRecentPerformanceOpen] = useState(false);
-  const { data: statsSummary, isLoading: isStatsSummaryLoading } =
-    useStatsSummaryQuery();
+  const {
+    data: statsSummary,
+    isError: isStatsSummaryError,
+    isFetching: isStatsSummaryFetching,
+    isLoading: isStatsSummaryLoading,
+    refetch: refetchStatsSummary,
+  } = useStatsSummaryQuery();
   const {
     data: recentPerformanceDetail,
     isError: isRecentPerformanceError,
     isLoading: isRecentPerformanceLoading,
   } = useStatsRecentDetailQuery(isRecentPerformanceOpen);
 
-  const statsData = statsSummary ?? {
-    investDate: statsMock.recentPerformance.date,
-    cumulativeProfit: statsMock.cumulativeProfit,
-    trend: statsMock.trend,
-    topSectors: statsMock.topSectors,
-    profile: statsMock.profile,
-  };
-
   if (isStatsSummaryLoading) {
     return <StatsPageSkeleton />;
   }
+
+  if (isStatsSummaryError || !statsSummary) {
+    return (
+      <>
+        <main className="min-h-[calc(100dvh-220px)] bg-neutral-50 px-5 pt-6 pb-24" />
+        <ErrorRetryModal
+          isOpen
+          onRetry={() => {
+            void refetchStatsSummary();
+          }}
+          isRetrying={isStatsSummaryFetching}
+        />
+      </>
+    );
+  }
+
+  const statsData = statsSummary;
 
   return (
     <>
