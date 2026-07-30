@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Indicator from "@/components/common/Indicator";
 import { saveCharacter } from "@/lib/character";
 import { completeOnboarding, saveOnboardingCharacter } from "@/lib/authApi";
-import { updateNickname } from "@/lib/mypageApi";
+import { getMyHome, updateNickname } from "@/lib/mypageApi";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import muffinPlain from "@/assets/avatars/muffin-plain.png";
 import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
@@ -83,18 +83,21 @@ function OnboardingPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [nickname, setNickname] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const step = STEPS[stepIndex];
   const displayName = nickname.trim() || "회원";
   const progress = PROGRESS[step];
 
-  const goNext = () => {
+  const goNext = async () => {
     if (stepIndex < STEPS.length - 1) {
       setStepIndex((i) => i + 1);
       return;
     }
+    if (isSubmitting) return;
 
-    // 온보딩 완료 — 설문으로 정해진 캐릭터를 로컬에 저장해 홈·마이·퀴즈에서 공유
+    // 설문으로 정해진 캐릭터를 로컬에 먼저 저장(홈·마이·퀴즈 즉시 공유)
     const muffin = resolveOnboardingResult(answers);
     saveCharacter(muffin);
 
@@ -104,20 +107,14 @@ function OnboardingPage() {
       return question ? question.options.indexOf(answers[questionId]) + 1 : 0;
     };
 
-    // 서버에 캐릭터 저장(재로그인·타 기기 동기화) → 초기 투자금 지급(멱등).
-    // 순서는 유지하되 실패는 독립 처리 — 캐릭터 저장 실패가 투자금 지급을 막지 않음.
-    // 홈 진입도 막지 않음. 백엔드 미배포/실패 시 조용히 넘어감(다음 진입 시 재시도).
-    void (async () => {
-      // 온보딩에서 입력한 닉네임을 서버에 저장 (홈·마이페이지에서 사용)
-      const trimmedNickname = nickname.trim();
-      if (trimmedNickname) {
-        try {
-          await updateNickname(trimmedNickname);
-        } catch {
-          // 닉네임 서버 저장 실패 — 마이페이지에서 다시 변경 가능
-        }
-      }
-
+    // 백엔드는 온보딩 완료(캐릭터 저장 → 완료)를 강제한다.
+    // 완료가 실제로 됐는지 mypage/home 200으로 검증한 뒤에만 홈으로 보낸다.
+    // 실패하면 홈으로 보내지 않고 에러를 노출해 재시도하게 한다.
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      // 이미 캐릭터/완료가 있는 계정은 409로 실패할 수 있으나,
+      // 최종 판단은 아래 getMyHome 검증에 맡기고 개별 실패는 삼킨다.
       try {
         await saveOnboardingCharacter({
           muffin,
@@ -126,20 +123,41 @@ function OnboardingPage() {
           thirdQuestion: answerNumber("goal"),
         });
       } catch {
-        // 캐릭터 서버 저장 실패 — 로컬 저장은 이미 완료, 다음 진입 시 재시도
+        // 이미 캐릭터가 있거나 일시 오류 — 완료 검증으로 판단
       }
-
       try {
         await completeOnboarding();
       } catch {
-        // 초기 투자금 지급은 멱등 — 다음 진입 시 재시도
+        // 이미 완료됐을 수 있음 — 완료 검증으로 판단
       }
-    })();
 
-    navigate("/home", { replace: true });
+      // 서버 기준 완료 검증: 온보딩 미완료면 409로 throw되고,
+      // 200이어도 캐릭터가 없으면(캐릭터 저장 실패) 완료로 보지 않는다.
+      const home = await getMyHome();
+      if (!home.character) {
+        throw new Error("온보딩 캐릭터가 저장되지 않았습니다.");
+      }
+
+      // 완료 확인됨 → 닉네임 저장(실패해도 홈 진입은 막지 않음)
+      const trimmedNickname = nickname.trim();
+      if (trimmedNickname) {
+        try {
+          await updateNickname(trimmedNickname);
+        } catch {
+          // 마이페이지에서 다시 변경 가능
+        }
+      }
+
+      navigate("/home", { replace: true });
+    } catch {
+      setSubmitError("온보딩 완료에 실패했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const goBack = () => {
+    if (isSubmitting) return; // 제출 중에는 이탈 방지
     if (stepIndex > 0) {
       setStepIndex((i) => i - 1);
     } else {
@@ -159,8 +177,9 @@ function OnboardingPage() {
           <button
             type="button"
             onClick={goBack}
+            disabled={isSubmitting}
             aria-label="뒤로가기"
-            className="flex h-7 w-7 items-center justify-center"
+            className="flex h-7 w-7 items-center justify-center disabled:opacity-40"
           >
             <img
               src={chevronLeftIcon}
@@ -293,9 +312,16 @@ function OnboardingPage() {
               {displayName}님의 직감을 구워볼까요?
             </>
           }
-          buttonLabel="시작하기"
+          buttonLabel={isSubmitting ? "처리 중..." : "시작하기"}
           onNext={goNext}
-        />
+          disabled={isSubmitting}
+        >
+          {submitError && (
+            <p className="text-body-14-md text-primary text-center">
+              {submitError}
+            </p>
+          )}
+        </MessageStep>
       )}
     </div>
   );

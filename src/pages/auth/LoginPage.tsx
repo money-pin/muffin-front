@@ -7,6 +7,7 @@ import Button from "@/components/common/Button";
 import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import { apiRequest } from "@/lib/api";
 import { saveAccessToken } from "@/lib/auth";
+import { resolveEntryRoute } from "@/lib/mypageApi";
 
 // POST /auth/login, /auth/google 공통 응답 result
 interface AuthResult {
@@ -38,7 +39,9 @@ function LoginPage() {
       });
 
       saveAccessToken(accessToken);
-      navigate("/home", { replace: true });
+      // 온보딩 완료 여부에 따라 홈/온보딩으로 분기
+      const entryRoute = await resolveEntryRoute();
+      navigate(entryRoute, { replace: true });
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -62,7 +65,9 @@ function LoginPage() {
       });
 
       saveAccessToken(accessToken);
-      navigate("/home", { replace: true });
+      // 온보딩 완료 여부에 따라 홈/온보딩으로 분기 (구글 신규 유저 → 온보딩)
+      const entryRoute = await resolveEntryRoute();
+      navigate(entryRoute, { replace: true });
     } catch (error) {
       setErrorMessage(
         error instanceof Error
