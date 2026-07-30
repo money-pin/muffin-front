@@ -25,30 +25,28 @@ import type {
   InvestAssetId,
 } from "@/pages/invest/trade/types/invest";
 
-// 자산 구매 현황 저장
 type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
+type InvestScreenMode = "weekend" | "trade" | "status";
 
-// 투자 페이지 모드
-type InvestViewMode = "trade" | "summary" | "edit";
-
-// 개발 중 주말에도 투자 화면을 확인해야 하면 true로 변경
-// PR 올리기 전에는 false로 돌려두는 것을 권장
+// 개발 중 강제로 투자 선택 화면을 확인해야 할 때만 true
 const FORCE_TRADE_VIEW_FOR_DEV = false;
 
-function getKstDate() {
-  return new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
-  );
+// 서버가 투자 가능한 시간에 내려줄 수 있는 상태들
+const INVESTMENT_AVAILABLE_STATUSES = new Set([
+  "AVAILABLE",
+  "CONFIRMED",
+  "CONFIRMED_EDITABLE",
+]);
+
+function getIsKstWeekend(date: Date) {
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    weekday: "short",
+  }).format(date);
+
+  return weekday === "Sat" || weekday === "Sun";
 }
 
-function getIsKstWeekend() {
-  const kstNow = getKstDate();
-  const day = kstNow.getDay();
-
-  return day === 0 || day === 6;
-}
-
-// 총 투자 금액 계산
 function getTotalInvestAmount(
   assetQuantities: AssetQuantityMap,
   unitAmount: number,
@@ -58,7 +56,6 @@ function getTotalInvestAmount(
   }, 0);
 }
 
-// 수정 버튼용 수량 체크
 function isSameQuantityMap(
   current: AssetQuantityMap,
   confirmed: AssetQuantityMap,
@@ -82,7 +79,6 @@ function getErrorMessage(error: unknown, fallbackMessage: string) {
 }
 
 function InvestPage() {
-  const isWeekend = getIsKstWeekend();
   const queryClient = useQueryClient();
 
   const investmentSectorsQuery = useInvestmentSectorsQuery();
@@ -103,12 +99,12 @@ function InvestPage() {
     "오늘 투자 현황을 불러오지 못했어요.",
   );
 
-  const [viewMode, setViewMode] = useState<InvestViewMode>("trade");
+  const [now, setNow] = useState(() => new Date());
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedAssetId, setSelectedAssetId] = useState<InvestAssetId | null>(
     null,
   );
-
   const [assetQuantities, setAssetQuantities] = useState<AssetQuantityMap>({});
   const [confirmedQuantities, setConfirmedQuantities] =
     useState<AssetQuantityMap>({});
@@ -116,6 +112,36 @@ function InvestPage() {
   const [confirmInvestmentErrorMessage, setConfirmInvestmentErrorMessage] =
     useState("");
   const [isSubmittingInvestment, setIsSubmittingInvestment] = useState(false);
+
+  // 페이지를 계속 열어둔 상태에서도 자정·오전 10시·주말 전환을 반영
+  useEffect(() => {
+    const refreshTimeAndStatus = () => {
+      setNow(new Date());
+
+      void queryClient.invalidateQueries({
+        queryKey: investmentQueryKeys.today(),
+      });
+    };
+
+    const timer = window.setInterval(refreshTimeAndStatus, 30_000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshTimeAndStatus();
+      }
+    };
+
+    window.addEventListener("focus", refreshTimeAndStatus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshTimeAndStatus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [queryClient]);
+
+  const isWeekend = getIsKstWeekend(now);
 
   const allAssets = useMemo(() => {
     return INVEST_ASSET_SECTIONS.flatMap((section) => section.items);
@@ -134,13 +160,36 @@ function InvestPage() {
   }, [allSectors]);
 
   const unitAmount = sectorData?.unitAmount ?? 100000;
+  const todayStatus = todayInvestmentData?.status ?? "";
 
+  // 실제 응답에서 sectors가 생략될 수 있으므로 항상 배열로 정규화
+  const todayInvestmentSectors = useMemo(
+    () => todayInvestmentData?.sectors ?? [],
+    [todayInvestmentData?.sectors],
+  );
+
+  const hasServerInvestment = todayInvestmentSectors.some(
+    (item) => item.quantity > 0,
+  );
+
+  const hasLocalConfirmedInvestment = Object.values(confirmedQuantities).some(
+    (quantity) => (quantity ?? 0) > 0,
+  );
+
+  // 서버 내역이 있으면 서버를 우선하고, 서버가 내역 필드를 생략하면 로컬 확정값 사용
+  const hasConfirmedInvestment =
+    hasServerInvestment || hasLocalConfirmedInvestment;
+
+  const isInvestmentAvailable = INVESTMENT_AVAILABLE_STATUSES.has(todayStatus);
+  const canEditTodayInvestment =
+    hasConfirmedInvestment && isInvestmentAvailable;
+
+  // 서버가 sectors 배열을 실제로 내려준 경우에만 로컬 확정값과 동기화
   useEffect(() => {
-    if (!todayInvestmentData) return;
+    if (!todayInvestmentData || isEditMode) return;
+    if (!Array.isArray(todayInvestmentData.sectors)) return;
 
-    let isActive = true;
-
-    const nextConfirmedQuantities = todayInvestmentData.sectors.reduce(
+    const nextConfirmedQuantities = todayInvestmentSectors.reduce(
       (acc, item) => {
         const asset = assetBySectorCode.get(item.sectorCode);
 
@@ -154,29 +203,39 @@ function InvestPage() {
       {} as AssetQuantityMap,
     );
 
-    const hasServerInvestment = Object.keys(nextConfirmedQuantities).length > 0;
+    const hasInvestment = Object.keys(nextConfirmedQuantities).length > 0;
 
     queueMicrotask(() => {
-      if (!isActive) return;
-
-      setConfirmedQuantities(nextConfirmedQuantities);
-
-      if (hasServerInvestment) {
+      if (hasInvestment) {
+        setConfirmedQuantities(nextConfirmedQuantities);
         setAssetQuantities(nextConfirmedQuantities);
         setSelectedAssetId(null);
-        setViewMode("summary");
         return;
       }
 
-      if (todayInvestmentData.status === "AVAILABLE") {
-        setViewMode("trade");
+      // 투자 가능 상태에서 명시적으로 빈 배열이 왔다면 이전 확정 내역만 초기화
+      // 사용자가 현재 고르고 있는 assetQuantities는 지우지 않음
+      if (todayStatus === "AVAILABLE") {
+        setConfirmedQuantities({});
       }
     });
+  }, [
+    assetBySectorCode,
+    isEditMode,
+    todayInvestmentData,
+    todayInvestmentSectors,
+    todayStatus,
+  ]);
 
-    return () => {
-      isActive = false;
-    };
-  }, [assetBySectorCode, todayInvestmentData]);
+  // 투자 불가능 시간이나 주말로 넘어가면 편집/확정 UI를 닫음
+  useEffect(() => {
+    if (!isWeekend && isInvestmentAvailable) return;
+
+    queueMicrotask(() => {
+      setIsEditMode(false);
+      setIsConfirmSheetOpen(false);
+    });
+  }, [isInvestmentAvailable, isWeekend]);
 
   const selectedAsset = useMemo(() => {
     return allAssets.find((asset) => asset.id === selectedAssetId);
@@ -187,44 +246,25 @@ function InvestPage() {
     : 0;
 
   const selectedAssetPrice = selectedAssetId ? unitAmount : 0;
-
   const selectedAssetTotalAmount = selectedAssetPrice * selectedQuantity;
-
   const totalInvestAmount = getTotalInvestAmount(assetQuantities, unitAmount);
-
   const confirmedTotalInvestAmount = getTotalInvestAmount(
     confirmedQuantities,
     unitAmount,
   );
 
+  const responseRemainingAmount = todayInvestmentData?.remainingAmount;
+  const responseTotalAmount = todayInvestmentData?.totalAmount;
+
   const serverTotalBudget =
-    todayInvestmentData &&
-    todayInvestmentData.remainingAmount + todayInvestmentData.totalAmount > 0
-      ? todayInvestmentData.remainingAmount + todayInvestmentData.totalAmount
+    typeof responseRemainingAmount === "number" &&
+    typeof responseTotalAmount === "number" &&
+    responseRemainingAmount + responseTotalAmount > 0
+      ? responseRemainingAmount + responseTotalAmount
       : MOCK_INVEST_MARKET_DATA.totalBudget;
 
   const remainingBudget = Math.max(0, serverTotalBudget - totalInvestAmount);
 
-  const hasServerInvestment = Boolean(
-    todayInvestmentData?.sectors.some((item) => item.quantity > 0),
-  );
-
-  const canEditTodayInvestment =
-    todayInvestmentData?.status === "CONFIRMED_EDITABLE";
-
-  const isTodayClosed =
-    todayInvestmentData?.status === "CLOSED" ||
-    todayInvestmentData?.status === "BLOCKED" ||
-    todayInvestmentData?.status === "NO_INVEST" ||
-    (hasServerInvestment && !canEditTodayInvestment);
-
-  const shouldShowWeekendClosedPage =
-    !FORCE_TRADE_VIEW_FOR_DEV &&
-    (todayInvestmentData
-      ? todayInvestmentData.status !== "AVAILABLE" && !hasServerInvestment
-      : isWeekend);
-
-  // 확정 바텀시트에 보여줄 구매/수정 목록
   const confirmItems = Object.entries(assetQuantities)
     .filter(([, quantity]) => (quantity ?? 0) > 0)
     .map(([assetId, quantity]) => {
@@ -245,20 +285,19 @@ function InvestPage() {
       };
     });
 
-  const serverTodayStatusItems =
-    todayInvestmentData?.sectors.flatMap((item) => {
-      const asset = assetBySectorCode.get(item.sectorCode);
+  const serverTodayStatusItems = todayInvestmentSectors.flatMap((item) => {
+    const asset = assetBySectorCode.get(item.sectorCode);
 
-      if (!asset || item.quantity <= 0) return [];
+    if (!asset || item.quantity <= 0) return [];
 
-      return {
-        assetId: asset.id,
-        name: item.sectorName,
-        icon: asset.activeIcon,
-        amount: item.amount,
-        percentage: Math.round(item.ratio),
-      };
-    }) ?? [];
+    return {
+      assetId: asset.id,
+      name: item.sectorName,
+      icon: asset.activeIcon,
+      amount: item.amount,
+      percentage: Math.round(item.ratio),
+    };
+  });
 
   const localTodayStatusItems = Object.entries(confirmedQuantities)
     .filter(([, quantity]) => (quantity ?? 0) > 0)
@@ -285,6 +324,25 @@ function InvestPage() {
       ? serverTodayStatusItems
       : localTodayStatusItems;
 
+  const screenMode: InvestScreenMode = (() => {
+    if (FORCE_TRADE_VIEW_FOR_DEV) return "trade";
+
+    // 1순위: 주말
+    if (isWeekend) return "weekend";
+
+    // 투자 가능한 시간에 사용자가 수정 화면에 진입한 경우
+    if (isEditMode && isInvestmentAvailable) return "trade";
+
+    // 투자 여부와 관계없이, 이미 확정한 내역이 있으면 현황 화면
+    if (hasConfirmedInvestment) return "status";
+
+    // 투자하지 않았고 투자 가능한 시간이면 투자 선택 화면
+    if (isInvestmentAvailable) return "trade";
+
+    // 평일 투자 불가능 시간 + 미투자: 내역 없는 마감 현황 화면
+    return "status";
+  })();
+
   const buildInvestmentBody = (): ConfirmInvestmentRequest => {
     const sectors = Object.entries(assetQuantities)
       .filter(([, quantity]) => (quantity ?? 0) > 0)
@@ -304,20 +362,13 @@ function InvestPage() {
   };
 
   const canDecrease = selectedQuantity > 0;
-
   const canIncrease =
     selectedAssetPrice > 0 && remainingBudget >= selectedAssetPrice;
-
   const hasAnyInvestment = totalInvestAmount > 0;
-
   const hasAssetCountBar = Boolean(selectedAsset && selectedQuantity > 0);
-
-  const isEditMode = viewMode === "edit";
-
   const isEditChanged =
     isEditMode && !isSameQuantityMap(assetQuantities, confirmedQuantities);
 
-  // 하단 액션 버튼 종류
   const bottomActionVariant =
     isEditMode && isEditChanged
       ? "editSubmit"
@@ -331,7 +382,6 @@ function InvestPage() {
     const asset = allAssets.find((item) => item.id === assetId);
     const sector = asset ? sectorByCode.get(asset.sectorCode) : undefined;
 
-    // 서버 섹터 목록에 없는 카드는 선택하지 않음
     if (!sector) return;
 
     setConfirmInvestmentErrorMessage("");
@@ -352,7 +402,6 @@ function InvestPage() {
     });
   };
 
-  // 수량 감소
   const handleDecrease = () => {
     if (!selectedAssetId) return;
 
@@ -378,7 +427,6 @@ function InvestPage() {
     });
   };
 
-  // 수량 증가
   const handleIncrease = () => {
     if (!selectedAssetId || !canIncrease) return;
 
@@ -400,17 +448,15 @@ function InvestPage() {
     setConfirmInvestmentErrorMessage("");
   };
 
-  // 구매하기 버튼 -> 확인 바텀시트 오픈
   const handlePurchase = () => {
-    if (!hasAnyInvestment) return;
+    if (!hasAnyInvestment || !isInvestmentAvailable) return;
 
     setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
   };
 
-  // 구매 확정 또는 수정 확정
   const handleSubmitInvestment = async () => {
-    if (isSubmittingInvestment) return;
+    if (isSubmittingInvestment || !isInvestmentAvailable) return;
 
     const requestBody = buildInvestmentBody();
 
@@ -424,14 +470,21 @@ function InvestPage() {
       setIsSubmittingInvestment(true);
       setConfirmInvestmentErrorMessage("");
 
-      const data = isEditMode
-        ? await updateInvestmentMutation.mutateAsync(requestBody)
-        : await confirmInvestmentMutation.mutateAsync(requestBody);
+      if (isEditMode) {
+        await updateInvestmentMutation.mutateAsync(requestBody);
+      } else {
+        await confirmInvestmentMutation.mutateAsync(requestBody);
+      }
 
-      queryClient.setQueryData(investmentQueryKeys.today(), data);
+      // 확정/수정 API 응답은 today 조회 응답과 구조가 다르므로
+      // today 캐시에 직접 넣지 않고 조회 API를 다시 호출한다.
+      void queryClient.invalidateQueries({
+        queryKey: investmentQueryKeys.today(),
+      });
 
-      setConfirmedQuantities(assetQuantities);
+      setConfirmedQuantities({ ...assetQuantities });
       setSelectedAssetId(null);
+      setIsEditMode(false);
       setIsConfirmSheetOpen(false);
       setIsCompleteModalOpen(true);
     } catch (error) {
@@ -454,7 +507,6 @@ function InvestPage() {
   const handleCompleteModalConfirm = () => {
     setIsCompleteModalOpen(false);
     setSelectedAssetId(null);
-    setViewMode("summary");
   };
 
   const handleStartEdit = () => {
@@ -467,36 +519,82 @@ function InvestPage() {
     setAssetQuantities(confirmedQuantities);
     setSelectedAssetId(firstConfirmedAssetId);
     setConfirmInvestmentErrorMessage("");
-    setViewMode("edit");
+    setIsEditMode(true);
   };
 
   const handleEditCancel = () => {
     setAssetQuantities(confirmedQuantities);
     setSelectedAssetId(null);
     setConfirmInvestmentErrorMessage("");
-    setViewMode("summary");
+    setIsEditMode(false);
   };
 
-  // 수정 완료 버튼 -> 확인 바텀시트 오픈
   const handleEditSubmit = () => {
-    if (!hasAnyInvestment || !isEditChanged) return;
+    if (
+      !hasAnyInvestment ||
+      !isEditChanged ||
+      !canEditTodayInvestment
+    ) {
+      return;
+    }
 
     setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
   };
 
+  // 주말은 API 상태와 관계없이 주말 전용 화면을 우선 노출
+  if (screenMode === "weekend") {
+    return (
+      <div className="-mb-[80px] flex flex-1 flex-col">
+        <InvestWeekendClosedPage />
+      </div>
+    );
+  }
+
+  // weekday에서 today API의 최초 응답을 기다리는 동안 잘못된 화면 노출 방지
+  if (todayInvestmentQuery.isPending && !todayInvestmentData) {
+    return (
+      <div className="-mb-[80px] flex flex-1 items-center justify-center bg-[var(--color-neutral-50)] px-5">
+        <p className="text-[length:var(--text-body-14-md-tighter)] text-[var(--color-neutral-600)]">
+          오늘 투자 현황을 불러오는 중이에요.
+        </p>
+      </div>
+    );
+  }
+
+  if (todayInvestmentQuery.isError && !todayInvestmentData) {
+    return (
+      <div className="-mb-[80px] flex flex-1 items-center justify-center bg-[var(--color-neutral-50)] px-5 text-center">
+        <p className="text-[length:var(--text-body-14-md-tighter)] text-[var(--color-primary)]">
+          {todayInvestmentErrorMessage}
+        </p>
+      </div>
+    );
+  }
+
+  // 투자하기/수정 화면은 섹터 목록이 필요하므로 최초 섹터 응답도 기다림
+  if (
+    screenMode === "trade" &&
+    investmentSectorsQuery.isPending &&
+    !sectorData
+  ) {
+    return (
+      <div className="-mb-[80px] flex flex-1 items-center justify-center bg-[var(--color-neutral-50)] px-5">
+        <p className="text-[length:var(--text-body-14-md-tighter)] text-[var(--color-neutral-600)]">
+          투자 항목을 불러오는 중이에요.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
-      {shouldShowWeekendClosedPage ? (
-        <div className="-mb-[80px] flex flex-1 flex-col">
-          <InvestWeekendClosedPage />
-        </div>
-      ) : viewMode === "summary" ? (
+      {screenMode === "status" ? (
         <div className="-mb-[80px] flex flex-1 flex-col">
           <InvestTodayStatusPage
             items={todayStatusItems}
             onEdit={handleStartEdit}
-            isClosed={isTodayClosed}
+            isClosed={!isInvestmentAvailable}
             confirmDeadline={todayInvestmentData?.confirmDeadline}
             nextInvestmentAvailableAt={
               todayInvestmentData?.nextInvestmentAvailableAt

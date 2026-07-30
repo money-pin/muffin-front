@@ -63,6 +63,8 @@ export interface InvestmentSectorsResult {
 export type TodayInvestmentStatus =
   | "AVAILABLE"
   | "CONFIRMED"
+  | "CONFIRMED_EDITABLE"
+  | "UNAVAILABLE"
   | "CLOSED"
   | "BLOCKED"
   | "NO_INVEST"
@@ -76,13 +78,14 @@ export interface TodayInvestmentSector {
   ratio: number;
 }
 
+// 실제 API는 UNAVAILABLE 등 일부 상태에서 내역/금액 필드를 생략할 수 있음
 export interface TodayInvestmentResult {
   status: TodayInvestmentStatus;
-  confirmDeadline: string;
-  remainingAmount: number;
-  totalAmount: number;
-  sectors: TodayInvestmentSector[];
-  nextInvestmentAvailableAt: string;
+  confirmDeadline?: string;
+  remainingAmount?: number;
+  totalAmount?: number;
+  sectors?: TodayInvestmentSector[];
+  nextInvestmentAvailableAt?: string;
 }
 
 export interface InvestmentSelectionRequest {
@@ -94,4 +97,16 @@ export interface ConfirmInvestmentRequest {
   sectors: InvestmentSelectionRequest[];
 }
 
-export type ConfirmInvestmentResult = TodayInvestmentResult;
+// 확정/수정 API 응답은 오늘 투자 현황 조회 응답과 구조가 다름
+export interface ConfirmInvestmentResult {
+  dailyInvestmentId: number;
+  investDate: string;
+  totalAmount: number;
+  confirmedAt: string;
+  selections: {
+    sectorCode?: InvestSectorCode;
+    sectorName: string;
+    quantity: number;
+    amount: number;
+  }[];
+}
