@@ -8,6 +8,8 @@ interface QuizQuestionViewProps {
   total: number;
   selectedId: string | null;
   submitted: boolean;
+  isSubmitting?: boolean;
+  submitError?: string;
   onSelect: (optionId: string) => void;
   onSubmit: () => void;
 }
@@ -20,6 +22,8 @@ export default function QuizQuestionView({
   total,
   selectedId,
   submitted,
+  isSubmitting = false,
+  submitError,
   onSelect,
   onSubmit,
 }: QuizQuestionViewProps) {
@@ -57,8 +61,16 @@ export default function QuizQuestionView({
 
       {!submitted && (
         <div className="mt-auto">
-          <Button onClick={onSubmit} disabled={selectedId === null}>
-            제출하기
+          {submitError && (
+            <p className="text-body-14-md text-positive mb-3 text-center">
+              {submitError}
+            </p>
+          )}
+          <Button
+            onClick={onSubmit}
+            disabled={selectedId === null || isSubmitting}
+          >
+            {isSubmitting ? "제출 중..." : "제출하기"}
           </Button>
         </div>
       )}
