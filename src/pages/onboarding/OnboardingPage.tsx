@@ -131,8 +131,12 @@ function OnboardingPage() {
         // 이미 완료됐을 수 있음 — 완료 검증으로 판단
       }
 
-      // 서버 기준 완료 검증: 온보딩 미완료면 409로 throw됨
-      await getMyHome();
+      // 서버 기준 완료 검증: 온보딩 미완료면 409로 throw되고,
+      // 200이어도 캐릭터가 없으면(캐릭터 저장 실패) 완료로 보지 않는다.
+      const home = await getMyHome();
+      if (!home.character) {
+        throw new Error("온보딩 캐릭터가 저장되지 않았습니다.");
+      }
 
       // 완료 확인됨 → 닉네임 저장(실패해도 홈 진입은 막지 않음)
       const trimmedNickname = nickname.trim();
@@ -153,6 +157,7 @@ function OnboardingPage() {
   };
 
   const goBack = () => {
+    if (isSubmitting) return; // 제출 중에는 이탈 방지
     if (stepIndex > 0) {
       setStepIndex((i) => i - 1);
     } else {
@@ -172,8 +177,9 @@ function OnboardingPage() {
           <button
             type="button"
             onClick={goBack}
+            disabled={isSubmitting}
             aria-label="뒤로가기"
-            className="flex h-7 w-7 items-center justify-center"
+            className="flex h-7 w-7 items-center justify-center disabled:opacity-40"
           >
             <img
               src={chevronLeftIcon}
@@ -308,6 +314,7 @@ function OnboardingPage() {
           }
           buttonLabel={isSubmitting ? "처리 중..." : "시작하기"}
           onNext={goNext}
+          disabled={isSubmitting}
         >
           {submitError && (
             <p className="text-body-14-md text-primary text-center">

@@ -7,6 +7,7 @@ interface MessageStepProps {
   subtitle?: ReactNode;
   buttonLabel: string;
   onNext: () => void;
+  disabled?: boolean; // 제출 중 등 버튼 비활성화
   media?: ReactNode; // 타이틀 위 일러스트/카드 (머핀 캐릭터, 자금 카드 등)
   children?: ReactNode; // 타이틀·부제 아래 부가 요소 (추천 섹터 칩 등)
 }
@@ -17,6 +18,7 @@ export default function MessageStep({
   subtitle,
   buttonLabel,
   onNext,
+  disabled = false,
   media,
   children,
 }: MessageStepProps) {
@@ -26,7 +28,7 @@ export default function MessageStep({
         {media && <div className="mb-7">{media}</div>}
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-heading-20-bd leading-[1.5] text-neutral-1000">
+          <h2 className="text-heading-20-bd text-neutral-1000 leading-[1.5]">
             {title}
           </h2>
           {subtitle && (
@@ -39,7 +41,9 @@ export default function MessageStep({
         {children && <div className="mt-8 w-full">{children}</div>}
       </div>
 
-      <Button onClick={onNext}>{buttonLabel}</Button>
+      <Button onClick={onNext} disabled={disabled}>
+        {buttonLabel}
+      </Button>
     </div>
   );
 }
