@@ -104,7 +104,7 @@ export default function NewsPage() {
             src={megaphoneIcon}
             alt=""
             aria-hidden="true"
-            className="h-[20px] w-[20px] object-contain"
+            className="h-[20px] w-[20px] shrink-0 object-contain"
             draggable={false}
           />
           <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
@@ -117,9 +117,9 @@ export default function NewsPage() {
             <div
               key={news.id}
               onClick={() => navigate(`/news/${news.id}`)}
-              className="flex cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
+              className="flex w-full cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
             >
-              <div className="h-[201px] w-full overflow-hidden rounded-[12px]">
+              <div className="aspect-[16/10] w-full overflow-hidden rounded-[12px]">
                 <img
                   src={CAROUSEL_IMAGES[news.imageType]}
                   alt=""
@@ -131,9 +131,10 @@ export default function NewsPage() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-[6px]">
                   <Badge>{news.category}</Badge>
-                  <span className="text-xs text-neutral-400">2시간 전</span>
+                  <span className="text-xs text-neutral-400 shrink-0">2시간 전</span>
                 </div>
-                <h3 className="line-clamp-2 text-base leading-snug font-bold text-[#1B1B1B]">
+                {/* 🟢 명세 규칙 4: 한글 2줄 한계 및 break-keep 추가 */}
+                <h3 className="line-clamp-2 break-keep text-base leading-snug font-bold text-[#1B1B1B]">
                   {news.title}
                 </h3>
               </div>

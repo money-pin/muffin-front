@@ -17,6 +17,7 @@ import {
   useConfirmInvestmentMutation,
   useInvestmentSectorsQuery,
   useTodayInvestmentQuery,
+  useUpdateInvestmentMutation,
 } from "@/pages/invest/trade/investQueries";
 
 import type {
@@ -87,6 +88,7 @@ function InvestPage() {
   const investmentSectorsQuery = useInvestmentSectorsQuery();
   const todayInvestmentQuery = useTodayInvestmentQuery();
   const confirmInvestmentMutation = useConfirmInvestmentMutation();
+  const updateInvestmentMutation = useUpdateInvestmentMutation();
 
   const sectorData = investmentSectorsQuery.data ?? null;
   const todayInvestmentData = todayInvestmentQuery.data ?? null;
@@ -113,7 +115,7 @@ function InvestPage() {
   const [isConfirmSheetOpen, setIsConfirmSheetOpen] = useState(false);
   const [confirmInvestmentErrorMessage, setConfirmInvestmentErrorMessage] =
     useState("");
-  const [isConfirmingInvestment, setIsConfirmingInvestment] = useState(false);
+  const [isSubmittingInvestment, setIsSubmittingInvestment] = useState(false);
 
   const allAssets = useMemo(() => {
     return INVEST_ASSET_SECTIONS.flatMap((section) => section.items);
@@ -198,10 +200,14 @@ function InvestPage() {
     todayInvestmentData?.sectors.some((item) => item.quantity > 0),
   );
 
+  const canEditTodayInvestment =
+    todayInvestmentData?.status === "CONFIRMED_EDITABLE";
+
   const isTodayClosed =
     todayInvestmentData?.status === "CLOSED" ||
     todayInvestmentData?.status === "BLOCKED" ||
-    todayInvestmentData?.status === "NO_INVEST";
+    todayInvestmentData?.status === "NO_INVEST" ||
+    (hasServerInvestment && !canEditTodayInvestment);
 
   const shouldShowWeekendClosedPage =
     !FORCE_TRADE_VIEW_FOR_DEV &&
@@ -209,7 +215,7 @@ function InvestPage() {
       ? todayInvestmentData.status !== "AVAILABLE" && !hasServerInvestment
       : isWeekend);
 
-  // 확정 바텀시트에 보여줄 구매 목록
+  // 확정 바텀시트에 보여줄 구매/수정 목록
   const confirmItems = Object.entries(assetQuantities)
     .filter(([, quantity]) => (quantity ?? 0) > 0)
     .map(([assetId, quantity]) => {
@@ -270,7 +276,7 @@ function InvestPage() {
       ? serverTodayStatusItems
       : localTodayStatusItems;
 
-  const buildConfirmInvestmentBody = (): ConfirmInvestmentRequest => {
+  const buildInvestmentBody = (): ConfirmInvestmentRequest => {
     const sectors = Object.entries(assetQuantities)
       .filter(([, quantity]) => (quantity ?? 0) > 0)
       .flatMap(([assetId, quantity]) => {
@@ -393,41 +399,46 @@ function InvestPage() {
     setIsConfirmSheetOpen(true);
   };
 
-  const handleConfirmPurchase = async () => {
-    if (isConfirmingInvestment) return;
+  // 구매 확정 또는 수정 확정
+  const handleSubmitInvestment = async () => {
+    if (isSubmittingInvestment) return;
 
-    const confirmRequestBody = buildConfirmInvestmentBody();
+    const requestBody = buildInvestmentBody();
 
-    if (confirmRequestBody.sectors.length === 0) {
+    if (requestBody.sectors.length === 0) {
       setConfirmInvestmentErrorMessage("하나 이상의 섹터를 선택해주세요.");
       setIsConfirmSheetOpen(false);
       return;
     }
 
     try {
-      setIsConfirmingInvestment(true);
+      setIsSubmittingInvestment(true);
       setConfirmInvestmentErrorMessage("");
 
-      const data =
-        await confirmInvestmentMutation.mutateAsync(confirmRequestBody);
+      const data = isEditMode
+        ? await updateInvestmentMutation.mutateAsync(requestBody)
+        : await confirmInvestmentMutation.mutateAsync(requestBody);
 
       queryClient.setQueryData(investmentQueryKeys.today(), data);
 
       setConfirmedQuantities(assetQuantities);
+      setSelectedAssetId(null);
       setIsConfirmSheetOpen(false);
       setIsCompleteModalOpen(true);
     } catch (error) {
-      console.error("투자 확정 실패:", error);
+      console.error(isEditMode ? "투자 수정 실패:" : "투자 확정 실패:", error);
 
       const message = getErrorMessage(
         error,
-        "투자 확정에 실패했어요. 잠시 후 다시 시도해주세요.",
+        isEditMode
+          ? "투자 수정에 실패했어요. 잠시 후 다시 시도해주세요."
+          : "투자 확정에 실패했어요. 잠시 후 다시 시도해주세요.",
       );
 
       setConfirmInvestmentErrorMessage(message);
       setIsConfirmSheetOpen(false);
     } finally {
-      setIsConfirmingInvestment(false);
+      setIsSubmittingInvestment(false);
     }
   };
 
@@ -438,6 +449,8 @@ function InvestPage() {
   };
 
   const handleStartEdit = () => {
+    if (!canEditTodayInvestment) return;
+
     const firstConfirmedAssetId =
       allAssets.find((asset) => (confirmedQuantities[asset.id] ?? 0) > 0)?.id ??
       null;
@@ -455,8 +468,9 @@ function InvestPage() {
     setViewMode("summary");
   };
 
+  // 수정 완료 버튼 -> 확인 바텀시트 오픈
   const handleEditSubmit = () => {
-    if (!hasAnyInvestment) return;
+    if (!hasAnyInvestment || !isEditChanged) return;
 
     setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
@@ -581,7 +595,7 @@ function InvestPage() {
         items={confirmItems}
         totalAmount={totalInvestAmount}
         onClose={() => setIsConfirmSheetOpen(false)}
-        onConfirm={handleConfirmPurchase}
+        onConfirm={handleSubmitInvestment}
       />
 
       <InvestCompleteModal

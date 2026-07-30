@@ -17,6 +17,7 @@ import BottomSheet from "@/components/common/BottomSheet";
 import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
 import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
 import { getMyHome } from "@/lib/mypageApi";
+import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
 import {
   HOME_USER,
   HOME_ASSETS,
@@ -27,6 +28,13 @@ import {
 
 const INVEST_RESULT_SEEN_KEY = "muffin:investResultSeenDate";
 
+// 변동 방향(UP/DOWN)에 따라 부호를 붙인다
+function signByDirection(value: number, direction: string) {
+  if (direction === "DOWN") return -Math.abs(value);
+  if (direction === "UP") return Math.abs(value);
+  return value;
+}
+
 // Figma Home: 위 흰색 → 아래 주황빛(secondary-300 20%) 그라데이션 위에
 // 캐릭터·총자산 카드, 그 아래 흰색 라운드 시트(퀴즈·뉴스·TOP3)가 얹히는 구조
 function HomePage() {
@@ -34,8 +42,9 @@ function HomePage() {
   // 최근 투자 성과 클릭 시 수익 통계와 동일한 상세 바텀시트 노출
   const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
 
-  // 닉네임은 서버(/api/mypage/home)에서 조회, 실패 시 기존 표시값 유지
-  const [nickname, setNickname] = useState(HOME_USER.nickname);
+  // 닉네임은 서버(/api/mypage/home)에서 조회. 초기값을 목으로 두면 틀린 이름이
+  // 잠깐 노출되므로(예: 예은) 빈 값으로 시작해 응답 후 채운다.
+  const [nickname, setNickname] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -50,6 +59,23 @@ function HomePage() {
       active = false;
     };
   }, []);
+
+  // 총자산은 서버(/api/investments/asset)에서 조회, 실패/로딩 시 기존 표시값 유지
+  const investmentAsset = useInvestmentAssetQuery().data;
+  const homeAssets = investmentAsset
+    ? {
+        ...HOME_ASSETS,
+        total: investmentAsset.totalAsset,
+        change: signByDirection(
+          investmentAsset.dailyChangeAmount,
+          investmentAsset.changeDirection,
+        ),
+        changeRate: signByDirection(
+          investmentAsset.dailyChangeRate,
+          investmentAsset.changeDirection,
+        ),
+      }
+    : HOME_ASSETS;
 
   // 투자결과 모달 자동 노출: 오전 10시 이후 & 아직 확인 안 한 전날 정산 결과일 때만 열림
   const [investResultOpen, setInvestResultOpen] = useState(
@@ -80,7 +106,7 @@ function HomePage() {
         <AssetCard
           nickname={nickname}
           streakDays={HOME_USER.streakDays}
-          assets={HOME_ASSETS}
+          assets={homeAssets}
           onRecentClick={() => setRecentPerformanceOpen(true)}
         />
       </div>
