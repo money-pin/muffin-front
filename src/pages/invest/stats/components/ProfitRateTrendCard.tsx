@@ -5,13 +5,15 @@ import ProfitRateGraph from "./ProfitRateGraph";
 
 interface ProfitRateTrendCardProps {
   data: ProfitTrendPoint[];
+  isEmpty?: boolean;
 }
 
 export default function ProfitRateTrendCard({
   data,
+  isEmpty = false,
 }: ProfitRateTrendCardProps) {
   return (
-    <div className="flex w-full flex-col items-center gap-4 rounded-2xl border border-neutral-100 bg-neutral-0 p-5">
+    <div className="bg-neutral-0 flex w-full flex-col items-center gap-4 rounded-2xl border border-neutral-100 p-5">
       <div className="flex w-full items-center gap-1 px-1">
         <img
           src={chartIcon}
@@ -25,7 +27,7 @@ export default function ProfitRateTrendCard({
         </h2>
       </div>
 
-      <ProfitRateGraph data={data} />
+      <ProfitRateGraph data={data} isEmpty={isEmpty} />
 
       <p className="text-caption-12-md text-neutral-400">
         최근 7일간의 수익률 변화
