@@ -1,33 +1,97 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import ScrollToTopButton from "./components/ScrollToTopButton";
 import BottomSheet from "@/components/common/BottomSheet";
-import bookmarkLine from "@/assets/icon-24px/bookmark-line-gray5.svg";
+import Badge from "@/components/common/Badge";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
-import wordSaveIcon from "@/assets/icon-28px/wordsave.svg";
+import bookmarkLineWhite from "@/assets/icon-24px/bookmark-line-white.svg";
+import newsImpactNegativeIcon from "@/assets/icon-16px/news-impact-negative.svg";
+import newsImpactPositiveIcon from "@/assets/icon-16px/news-impact-positive.svg";
+import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import wordSaveActiveIcon from "@/assets/icon-28px/wordsave-active.svg";
+import wordSaveIcon from "@/assets/icon-28px/wordsave.svg";
 import { ApiError } from "@/lib/api";
+import type { SectorImpactItem } from "@/lib/newsApi";
 import {
+  formatCategoryName,
+  formatRelativeDate,
+  getNewsImage,
+} from "@/lib/newsFormat";
+import ScrollToTopButton from "./components/ScrollToTopButton";
+import {
+  useExplanationCards,
   useNewsDetail,
   useReadNews,
   useSectorImpacts,
-  useExplanationCards,
   useTerm,
   useToggleScrap,
   useToggleTermSave,
 } from "./newsQueries";
-import {
-  getNewsImage,
-  formatCategoryName,
-  formatRelativeDate,
-} from "@/lib/newsFormat";
-import type { SectorImpactItem } from "@/lib/newsApi";
 
-// 섹터 영향도 → 긍정/부정 박스로 분류. NEUTRAL은 Figma 기준 숨긴다.
 function splitImpacts(impacts: SectorImpactItem[]) {
-  const positive = impacts.filter((s) => s.impact === "POSITIVE");
-  const negative = impacts.filter((s) => s.impact === "NEGATIVE");
+  const positive = impacts.filter((sector) => sector.impact === "POSITIVE");
+  const negative = impacts.filter((sector) => sector.impact === "NEGATIVE");
   return { positive, negative };
+}
+
+function renderMarkdownBold(content: string) {
+  const parts = content.split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-bold text-neutral-700">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return <span key={index}>{part}</span>;
+  });
+}
+
+interface ImpactCardProps {
+  type: "positive" | "negative";
+  sectors: SectorImpactItem[];
+}
+
+function ImpactCard({ type, sectors }: ImpactCardProps) {
+  const isPositive = type === "positive";
+  const iconSrc = isPositive ? newsImpactPositiveIcon : newsImpactNegativeIcon;
+
+  return (
+    <section className="bg-neutral-0 flex w-full flex-col gap-3 rounded-[12px] border border-neutral-100 p-4">
+      <div className="flex items-center gap-1 px-1">
+        <img
+          src={iconSrc}
+          alt=""
+          aria-hidden="true"
+          className="size-4 shrink-0 object-contain"
+          draggable={false}
+        />
+        <p className="text-body-16-md-tighter text-neutral-700">
+          <span
+            className={`font-bold ${
+              isPositive ? "text-positive" : "text-negative"
+            }`}
+          >
+            {isPositive ? "긍정" : "부정"}
+          </span>{" "}
+          반응이 나타나요!
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {sectors.map((sector) => (
+          <span
+            key={sector.sectorCode}
+            className="text-caption-12-md-tighter flex h-[22px] items-center rounded-[4px] bg-neutral-50 px-2 text-neutral-700"
+          >
+            {sector.sectorName}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export default function NewsDetailPage() {
@@ -35,14 +99,12 @@ export default function NewsDetailPage() {
   const { newsId } = useParams<{ newsId: string }>();
   const idNum = newsId ? Number(newsId) : NaN;
   const containerRef = useRef<HTMLDivElement>(null);
+  const hasReadRef = useRef(false);
 
   const [showScrollBtn, setShowScrollBtn] = useState(false);
-
-  // 용어 바텀시트: 클릭된 termId를 담아 useTerm으로 조회
   const [selectedTermId, setSelectedTermId] = useState<number | null>(null);
   const isTermSheetOpen = selectedTermId != null;
 
-  // ── 데이터 조회 ──
   const { data: detail, isLoading, isError } = useNewsDetail(idNum);
   const { data: impactData } = useSectorImpacts(idNum);
   const {
@@ -56,20 +118,16 @@ export default function NewsDetailPage() {
     error: termError,
   } = useTerm(selectedTermId);
 
-  // ── 뮤테이션 ──
   const { mutate: toggleScrap, isPending: isScrapPending } =
     useToggleScrap(idNum);
   const { mutate: toggleTermSave, isPending: isTermSavePending } =
     useToggleTermSave(selectedTermId ?? -1);
   const { mutate: readNews } = useReadNews(idNum);
 
-  // 상세 조회 성공 후 열람 처리(/read)를 화면 진입당 딱 1회 호출.
-  // useRef 플래그로 StrictMode 이중 실행·리렌더 중복 호출을 막는다.
-  const hasReadRef = useRef(false);
   useEffect(() => {
-    // newsId가 바뀌면(다른 기사로 진입) 다시 호출할 수 있도록 플래그 리셋
     hasReadRef.current = false;
   }, [idNum]);
+
   useEffect(() => {
     if (detail && !hasReadRef.current) {
       hasReadRef.current = true;
@@ -112,7 +170,7 @@ export default function NewsDetailPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-dvh items-center justify-center text-neutral-400">
-        불러오는 중…
+        불러오는 중...
       </div>
     );
   }
@@ -139,229 +197,142 @@ export default function NewsDetailPage() {
     cardError instanceof ApiError && cardError.code === "CONTENT_409_001";
 
   return (
-    <div className="relative mx-auto flex min-h-dvh w-full max-w-[var(--max-width-app,450px)] flex-col bg-neutral-50 text-black">
+    <div className="relative mx-auto flex min-h-dvh w-full max-w-[var(--max-width-app)] flex-col bg-neutral-50 text-neutral-900">
       <div
         ref={containerRef}
         onScroll={handleScroll}
         className="relative w-full flex-1 overflow-y-auto"
       >
-        <div className="relative flex w-full flex-col bg-white">
-          {/* 헤더 */}
-          <header className="absolute top-[12px] left-0 z-40 flex w-full items-center justify-between bg-transparent px-[20px]">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex h-[28px] w-[28px] shrink-0 items-center justify-center"
-              aria-label="뒤로가기"
-            >
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="#FFFFFF"
-                strokeWidth={2}
+        <article className="bg-neutral-0 flex w-full flex-col">
+          <div className="relative h-[225px] w-full shrink-0 overflow-hidden bg-neutral-900">
+            <img
+              src={getNewsImage(detail.thumbnailUrl, detail.categoryName)}
+              alt=""
+              aria-hidden="true"
+              className="h-full w-full object-cover opacity-55"
+              draggable={false}
+            />
+
+            <header className="absolute top-0 left-0 z-10 flex w-full items-center justify-between px-5 pt-16">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="flex size-7 shrink-0 items-center justify-center"
+                aria-label="뒤로가기"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 22l-8-8 8-8"
+                <img
+                  src={chevronLeftIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="size-7 brightness-0 invert"
+                  draggable={false}
                 />
-              </svg>
-            </button>
+              </button>
 
-            <button
-              type="button"
-              onClick={handleBookmarkClick}
-              disabled={isScrapPending}
-              className="flex h-[24px] w-[24px] shrink-0 items-center justify-center"
-              aria-label={detail.isScrapped ? "북마크 해제" : "북마크"}
-            >
-              <img
-                src={detail.isScrapped ? bookmarkFill : bookmarkLine}
-                alt=""
-                className="h-full w-full object-contain"
-              />
-            </button>
-          </header>
+              <button
+                type="button"
+                onClick={handleBookmarkClick}
+                disabled={isScrapPending}
+                className="flex size-6 shrink-0 items-center justify-center disabled:opacity-60"
+                aria-label={detail.isScrapped ? "북마크 해제" : "북마크"}
+              >
+                <img
+                  src={detail.isScrapped ? bookmarkFill : bookmarkLineWhite}
+                  alt=""
+                  aria-hidden="true"
+                  className="size-6 object-contain"
+                  draggable={false}
+                />
+              </button>
+            </header>
 
-          {/* 기사 영역 */}
-          <div className="relative flex w-full flex-col">
-            <div className="relative h-[225px] w-full shrink-0 overflow-hidden bg-neutral-900">
-              <div className="absolute inset-0 z-10 bg-black/60" />
-              <img
-                src={getNewsImage(detail.thumbnailUrl, detail.categoryName)}
-                alt=""
-                className="relative z-0 h-full w-full object-cover"
-                draggable={false}
-              />
-            </div>
-
-            <div className="absolute top-[122px] left-0 z-20 flex w-full flex-col gap-[8px] px-[20px]">
-              <h1 className="text-neutral-0 line-clamp-2 h-[56px] w-full text-[20px] leading-[140%] font-medium">
+            <div className="absolute bottom-5 left-0 z-10 flex w-full flex-col gap-2 px-5">
+              <h1 className="text-heading-20-md text-neutral-0 line-clamp-2">
                 {detail.title}
               </h1>
 
-              <div className="flex h-[22px] items-center gap-[8px]">
-                <span className="bg-secondary-100 text-primary inline-flex items-center justify-center rounded-[4px] px-[6px] py-[4px] text-[12px] leading-[160%] font-medium">
-                  {displayCategoryName}
-                </span>
-                <span className="flex h-[19px] items-center text-[12px] leading-[160%] font-medium text-neutral-100">
+              <div className="flex items-center gap-2">
+                <Badge>{displayCategoryName}</Badge>
+                <span className="text-caption-12-md-tighter text-neutral-100">
                   {formatRelativeDate(detail.publishedAt)}
                 </span>
               </div>
             </div>
+          </div>
 
-            {/* 본문: bodySegments 렌더링 */}
-            <div className="flex w-full flex-col gap-[8px] bg-white px-[20px] pt-[24px] pb-[20px]">
-              <p className="w-full text-justify text-[16px] leading-[160%] font-normal text-neutral-900">
-                {detail.bodySegments.map((seg, i) =>
-                  seg.type === "HIGHLIGHT" && seg.termId != null ? (
-                    <span
-                      key={i}
-                      onClick={() => setSelectedTermId(seg.termId as number)}
-                      className="text-primary cursor-pointer font-medium underline underline-offset-2"
-                    >
-                      {seg.text}
-                    </span>
-                  ) : (
-                    <span key={i}>{seg.text}</span>
-                  ),
-                )}
-              </p>
-
-              {/* 원문 링크 */}
-              <a
-                href={detail.originalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-[24px] w-full cursor-pointer items-center justify-end"
-              >
-                <div className="flex h-[24px] items-center gap-[8px]">
-                  <div className="flex h-[24px] w-[24px] shrink-0 items-center justify-center">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path
-                        d="M14 10V14H2V2H6"
-                        stroke="var(--color-neutral-400, #999999)"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M10 2H14V6"
-                        stroke="var(--color-neutral-400, #999999)"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M6 10L14 2"
-                        stroke="var(--color-neutral-400, #999999)"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <span className="flex h-[26px] w-auto text-[16px] leading-[160%] font-medium whitespace-nowrap text-neutral-400">
-                    원문 뉴스 보기
-                  </span>
-                </div>
-              </a>
-            </div>
-
-            {/* 섹터 영향도 (긍정/부정) */}
-            <div className="flex w-full flex-col gap-[8px] bg-white px-[20px] pb-[20px]">
-              {positive.length > 0 && (
-                <div className="flex w-full flex-col gap-[12px] rounded-[16px] border border-neutral-100 bg-white p-[16px]">
-                  <div className="flex h-[26px] items-center gap-[4px] text-[16px] leading-[160%] font-medium text-neutral-900">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path
-                        d="M2 13L6 9L9 12L14 6M14 6H10M14 6V10"
-                        stroke="#ff3045"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="font-bold text-[#ff3045]">긍정</span>
-                    <span>반응이 나타나요!</span>
-                  </div>
-                  <div className="flex flex-wrap gap-[4px]">
-                    {positive.map((s) => (
-                      <span
-                        key={s.sectorCode}
-                        className="flex h-[22px] items-center justify-center rounded-[4px] bg-neutral-50 px-[8px] py-[4px] text-[12px] font-medium text-neutral-400"
-                      >
-                        {s.sectorName}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {negative.length > 0 && (
-                <div className="flex w-full flex-col gap-[12px] rounded-[16px] border border-neutral-100 bg-white p-[16px]">
-                  <div className="flex h-[26px] items-center gap-[4px] text-[16px] leading-[160%] font-medium text-neutral-900">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path
-                        d="M2 5L6 9L9 6L14 12M14 12H10M14 12V8"
-                        stroke="#1289ff"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="font-bold text-[#1289ff]">부정</span>
-                    <span>반응이 나타나요!</span>
-                  </div>
-                  <div className="flex flex-wrap gap-[4px]">
-                    {negative.map((s) => (
-                      <span
-                        key={s.sectorCode}
-                        className="flex h-[22px] items-center justify-center rounded-[4px] bg-neutral-50 px-[8px] py-[4px] text-[12px] font-medium text-neutral-400"
-                      >
-                        {s.sectorName}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 해설 카드 (경제 상식) */}
-            {cards.length > 0 ? (
-              <div className="flex w-full flex-col items-center gap-[16px] bg-white px-[20px] pb-[32px]">
-                {cards.map((card) => (
-                  <div
-                    key={card.cardOrder}
-                    className="flex w-full flex-col gap-[16px] rounded-[16px] border border-neutral-100 bg-white p-[20px] shadow-sm"
+          <section className="flex w-full flex-col gap-1 px-5 pt-6 pb-5">
+            <p className="text-body-16-rg-tighter break-keep whitespace-pre-wrap text-neutral-900">
+              {detail.bodySegments.map((segment, index) =>
+                segment.type === "HIGHLIGHT" && segment.termId != null ? (
+                  <button
+                    key={`${segment.termId}-${index}`}
+                    type="button"
+                    onClick={() => setSelectedTermId(segment.termId as number)}
+                    className="text-primary inline cursor-pointer underline underline-offset-2"
                   >
-                    <div className="flex w-full items-start gap-[4px]">
-                      <div className="shrink-0 pt-[1px] text-[16px] leading-[160%] font-bold text-neutral-900">
-                        {card.cardOrder}.
-                      </div>
-                      <h2 className="flex-1 text-left text-[16px] leading-[160%] font-bold text-neutral-900">
-                        {card.title}
-                      </h2>
-                    </div>
-                    <div className="flex w-full flex-col gap-4 text-justify text-[16px] leading-[160%] font-normal text-neutral-900">
-                      <p>{card.content}</p>
-                    </div>
-                  </div>
-                ))}
+                    {segment.text}
+                  </button>
+                ) : (
+                  <span key={index}>{segment.text}</span>
+                ),
+              )}
+            </p>
+
+            <a
+              href={detail.originalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-body-16-md-tighter ml-auto flex h-[45px] items-center gap-2 rounded-[8px] pr-4 text-neutral-400"
+            >
+              <span aria-hidden="true" className="text-[20px] leading-none">
+                ↗
+              </span>
+              원문 뉴스 보기
+            </a>
+
+            {(positive.length > 0 || negative.length > 0) && (
+              <div className="flex flex-col gap-2 pt-1">
+                {positive.length > 0 && (
+                  <ImpactCard type="positive" sectors={positive} />
+                )}
+                {negative.length > 0 && (
+                  <ImpactCard type="negative" sectors={negative} />
+                )}
               </div>
-            ) : isCardError ? (
-              <div className="bg-neutral-50 px-5 py-6 pb-10">
-                <p className="text-body-14-md rounded-[16px] bg-white px-5 py-8 text-center text-neutral-400">
-                  {isExplanationPending
-                    ? "아직 해설 카드를 준비 중이에요."
-                    : "경제 상식 정보를 불러오지 못했어요."}
+            )}
+          </section>
+        </article>
+
+        {cards.length > 0 ? (
+          <section className="flex w-full flex-col gap-3 bg-neutral-50/80 px-5 pt-5 pb-10">
+            {cards.map((card) => (
+              <div
+                key={card.cardOrder}
+                className="bg-neutral-0 flex w-full flex-col gap-4 rounded-[16px] p-5 shadow-[0_0_2px_rgba(0,0,0,0.08)]"
+              >
+                <div className="flex items-start gap-1">
+                  <span className="text-body-16-bd-tighter shrink-0 text-neutral-900">
+                    {card.cardOrder}.
+                  </span>
+                  <h2 className="text-body-16-bd-tighter min-w-0 flex-1 text-neutral-900">
+                    {card.title}
+                  </h2>
+                </div>
+                <p className="text-body-16-rg-tighter break-keep whitespace-pre-wrap text-neutral-700">
+                  {renderMarkdownBold(card.content)}
                 </p>
               </div>
-            ) : null}
-          </div>
-        </div>
+            ))}
+          </section>
+        ) : isCardError ? (
+          <section className="bg-neutral-50 px-5 py-6 pb-10">
+            <p className="text-body-14-md bg-neutral-0 rounded-[16px] px-5 py-8 text-center text-neutral-400">
+              {isExplanationPending
+                ? "아직 해설 카드를 준비 중이에요."
+                : "경제 상식 정보를 불러오지 못했어요."}
+            </p>
+          </section>
+        ) : null}
 
         {showScrollBtn && (
           <div className="pointer-events-none sticky bottom-6 z-50 flex justify-end pr-5">
@@ -372,15 +343,15 @@ export default function NewsDetailPage() {
         )}
       </div>
 
-      {/* 용어 설명 바텀시트 */}
       <BottomSheet
         isOpen={isTermSheetOpen}
         onClose={() => setSelectedTermId(null)}
         ariaLabel="용어 설명"
+        snapMode="half-full"
       >
-        <div className="flex flex-col px-[21px] pt-[8px] pb-[32px] text-black">
-          <div className="flex w-full items-center justify-between border-b border-neutral-100 py-[8px]">
-            <h3 className="text-[20px] leading-[140%] font-bold text-neutral-900">
+        <div className="flex min-h-full flex-col px-5 pt-2 pb-8 text-neutral-900">
+          <div className="flex w-full items-center justify-between border-b border-neutral-100 py-2">
+            <h3 className="text-heading-20-bd min-w-0 flex-1">
               <span className="text-primary">{termData?.term ?? "용어"}</span>
               란?
             </h3>
@@ -388,23 +359,25 @@ export default function NewsDetailPage() {
             <button
               type="button"
               onClick={handleTermSaveClick}
-              className="flex h-[28px] w-[28px] shrink-0 items-center justify-center"
+              className="flex size-7 shrink-0 items-center justify-center"
               aria-label="용어 저장하기"
               disabled={!termData || isTermSavePending}
             >
               <img
                 src={termData?.isSaved ? wordSaveActiveIcon : wordSaveIcon}
-                alt={termData?.isSaved ? "용어 저장됨" : "용어 저장하기"}
-                className="h-full w-full object-contain"
+                alt=""
+                aria-hidden="true"
+                className="size-7 object-contain"
+                draggable={false}
               />
             </button>
           </div>
 
-          <div className="pt-[16px]">
-            <p className="text-[16px] leading-[160%] font-normal text-neutral-900">
+          <div className="pt-4">
+            <p className="text-body-16-rg-tighter break-keep whitespace-pre-wrap text-neutral-900">
               {isTermError
                 ? "용어를 불러오지 못했습니다."
-                : (termData?.content ?? "불러오는 중…")}
+                : (termData?.content ?? "불러오는 중...")}
             </p>
           </div>
         </div>
