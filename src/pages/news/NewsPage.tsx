@@ -1,100 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
 import Carousel from "@/components/common/Carousel";
 import TabBar from "@/components/common/TabBar";
 import Badge from "@/components/common/Badge";
-import NewsCard, { type NewsCardProps } from "./components/NewsCard";
+import NewsCard from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
+import { useTodayNews, useNewsList } from "./newsQueries";
+import {
+  getNewsImage,
+  formatRelativeTime,
+} from "@/lib/newsFormat";
 
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
-import newscardEconomy from "@/assets/newscard/newscard-economy.png";
-import newscardIT from "@/assets/newscard/newscard-IT.png";
-import newscardWorld from "@/assets/newscard/newscard-world.png";
 
-const CAROUSEL_IMAGES = {
-  economy: newscardEconomy,
-  IT: newscardIT,
-  world: newscardWorld,
-} as const;
+type NewsTabType = "all" | "economy" | "stock" | "world";
+
+const newsTabs = [
+  { value: "all", label: "전체" },
+  { value: "economy", label: "경제" },
+  { value: "stock", label: "증권" },
+  { value: "world", label: "세계" },
+] as const;
+
+// 탭 → categoryId 매핑 (백엔드 확인 완료: 경제=1, 증권=2, 세계=3).
+// 'all'은 categoryId 미전송(전체 조회).
+const TAB_CATEGORY_ID: Record<Exclude<NewsTabType, "all">, number> = {
+  economy: 1, // 경제
+  stock: 2, // 증권
+  world: 3, // 세계
+};
 
 export default function NewsPage() {
   const navigate = useNavigate();
-  type NewsTabType = "all" | "economy" | "stock" | "world";
   const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
 
-  const trendingNewsList = [
-    {
-      id: 1,
-      imageType: "economy" as const,
-      category: "경제",
-      title: "엔비디아 실적 발표 대기, 국내 반도체 자산 시장에 미칠 영향은?",
-    },
-    {
-      id: 2,
-      imageType: "IT" as const,
-      category: "IT",
-      title: "AI 반도체 수요 폭증, 삼성전자 HBM 증설 나선다",
-    },
-    {
-      id: 3,
-      imageType: "world" as const,
-      category: "세계",
-      title: "美 연준 금리 동결, 신흥국 증시 안도 랠리",
-    },
-  ];
+  // 따끈한 금융 소식 (오늘의 뉴스)
+  const { data: todayData } = useTodayNews();
+  const trendingNewsList = todayData?.items ?? [];
 
-  const todayNewsList: NewsCardProps[] = [
-    {
-      id: 1,
-      title: "코인 시장 변동성 확대",
-      category: "경제",
-      date: "오늘",
-      views: "6천회",
-      imageType: "economy",
-    },
-    {
-      id: 2,
-      title: "에너지 섹터 투자 포인트",
-      category: "증권",
-      date: "1일 전",
-      views: "6천회",
-      imageType: "IT",
-    },
-    {
-      id: 3,
-      title: "미국 기준금리 동결, 증시 안도 랠리",
-      category: "세계",
-      date: "3일 전",
-      views: "6천회",
-      imageType: "world",
-    },
-    {
-      id: 4,
-      title: "국내 증시 외국인 순매수세",
-      category: "경제",
-      date: "2026-04-21",
-      views: "56만회",
-      imageType: "economy",
-    },
-  ];
+  // 오늘의 뉴스 목록 (탭 필터 + 무한스크롤)
+  const categoryId =
+    currentTab === "all" ? undefined : TAB_CATEGORY_ID[currentTab];
+  const {
+    data: newsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useNewsList(categoryId);
 
-  const newsTabs = [
-    { value: "all", label: "전체" },
-    { value: "economy", label: "경제" },
-    { value: "stock", label: "증권" },
-    { value: "world", label: "세계" },
-  ] as const;
+  const newsItems = newsData?.pages.flatMap((page) => page.items) ?? [];
 
-  const tabCategoryMap: Record<Exclude<NewsTabType, "all">, string> = {
-    economy: "경제",
-    stock: "증권",
-    world: "세계",
-  };
-
-  const filteredNewsList = todayNewsList.filter((news) => {
-    if (currentTab === "all") return true;
-    return news.category === tabCategoryMap[currentTab];
-  });
+  // 무한스크롤: 하단 감지 영역이 보이면 다음 페이지 로드
+  const { ref: loadMoreRef, inView } = useInView();
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-[#F5F5F5] pt-5 text-black">
@@ -115,13 +79,13 @@ export default function NewsPage() {
         <Carousel>
           {trendingNewsList.map((news) => (
             <div
-              key={news.id}
-              onClick={() => navigate(`/news/${news.id}`)}
+              key={news.newsId}
+              onClick={() => navigate(`/news/${news.newsId}`)}
               className="flex w-full cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
             >
               <div className="aspect-[16/10] w-full overflow-hidden rounded-[12px]">
                 <img
-                  src={CAROUSEL_IMAGES[news.imageType]}
+                  src={getNewsImage(news.thumbnailUrl, news.categoryName)}
                   alt=""
                   aria-hidden="true"
                   className="h-full w-full object-cover"
@@ -130,10 +94,11 @@ export default function NewsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-[6px]">
-                  <Badge>{news.category}</Badge>
-                  <span className="text-xs text-neutral-400 shrink-0">2시간 전</span>
+                  <Badge>{news.categoryName}</Badge>
+                  <span className="shrink-0 text-xs text-neutral-400">
+                    {formatRelativeTime(news.publishedAt)}
+                  </span>
                 </div>
-                {/* 🟢 명세 규칙 4: 한글 2줄 한계 및 break-keep 추가 */}
                 <h3 className="line-clamp-2 break-keep text-base leading-snug font-bold text-[#1B1B1B]">
                   {news.title}
                 </h3>
@@ -155,10 +120,35 @@ export default function NewsPage() {
         <h2 className="text-lg font-bold text-neutral-950">오늘의 뉴스</h2>
 
         <div className="flex flex-col gap-[12px]">
-          {filteredNewsList.map((news) => (
-            <NewsCard key={news.id} {...news} />
+          {newsItems.map((news) => (
+            <NewsCard
+              key={news.newsId}
+              newsId={news.newsId}
+              title={news.title}
+              categoryName={news.categoryName}
+              publishedAt={news.publishedAt}
+              viewCount={news.viewCount}
+              thumbnailUrl={news.thumbnailUrl}
+              initialScrapped={news.isScrapped}
+            />
           ))}
         </div>
+
+        {/* 무한스크롤 트리거 + 로딩 표시 */}
+        {!isLoading && hasNextPage && (
+          <div
+            ref={loadMoreRef}
+            className="flex h-[40px] items-center justify-center text-caption-12-md text-neutral-400"
+          >
+            {isFetchingNextPage ? "불러오는 중…" : ""}
+          </div>
+        )}
+
+        {!isLoading && newsItems.length === 0 && (
+          <p className="py-10 text-center text-neutral-400">
+            표시할 뉴스가 없어요.
+          </p>
+        )}
       </section>
 
       <ScrollToTopButton />
