@@ -14,7 +14,7 @@ export default function QuizReviewTab({
     return (
       <div className="flex flex-col gap-4 p-5 pb-36">
         {/* 맞힌 문제 수 요약 카운터 */}
-        <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-neutral-100 shrink-0">
+        <div className="flex shrink-0 items-center justify-between rounded-xl border border-neutral-100 bg-white p-4">
           <span className="text-body-14-md text-neutral-600">맞힌 문제 수</span>
           <div className="text-body-16-bd">
             <span className="text-primary">{selectedHistory.score}</span>
@@ -31,12 +31,12 @@ export default function QuizReviewTab({
               return (
                 <div
                   key={q.id}
-                  className={`flex flex-col gap-4 rounded-xl bg-white px-4 py-5 border ${
+                  className={`flex flex-col gap-4 rounded-xl border bg-white px-4 py-5 ${
                     isCorrect ? "border-neutral-100" : "border-positive"
                   }`}
                 >
                   {/* 질문 폰트: Body/16_md_tighter 스펙 */}
-                  <h3 className="whitespace-pre-line text-body-16-md-tighter text-neutral-900 leading-[1.6]">
+                  <h3 className="text-body-16-md-tighter leading-[1.6] whitespace-pre-line text-neutral-900">
                     {`Q${index + 1}. ${q.question}`}
                   </h3>
 
@@ -46,23 +46,27 @@ export default function QuizReviewTab({
                       const isUserChoice = option.id === q.userAnswerId;
                       const isCorrectAnswer = option.id === q.answerId;
 
-                      let styleClass = "bg-neutral-50/70 border-transparent text-neutral-900";
+                      let styleClass =
+                        "bg-neutral-50/70 border-transparent text-neutral-900";
                       let badgeText = null;
                       let badgeClass = "";
 
                       if (isCorrect) {
                         if (isUserChoice) {
-                          styleClass = "bg-primary-50 border-primary text-primary font-bold";
+                          styleClass =
+                            "bg-primary-50 border-primary text-primary font-bold";
                           badgeText = "내 정답";
                           badgeClass = "bg-primary text-white";
                         }
                       } else {
                         if (isUserChoice) {
-                          styleClass = "bg-positive-50 border-positive text-positive font-bold";
+                          styleClass =
+                            "bg-positive-50 border-positive text-positive font-bold";
                           badgeText = "내 오답";
                           badgeClass = "bg-positive text-white";
                         } else if (isCorrectAnswer) {
-                          styleClass = "bg-primary-50 border-primary text-primary font-bold";
+                          styleClass =
+                            "bg-primary-50 border-primary text-primary font-bold";
                           badgeText = "정답";
                           badgeClass = "bg-primary text-white";
                         }
@@ -71,12 +75,14 @@ export default function QuizReviewTab({
                       return (
                         <div
                           key={option.id}
-                          className={`flex min-h-[52px] items-center justify-between rounded-xl border px-4 text-body-14-md transition-colors ${styleClass}`}
+                          className={`text-body-14-md flex min-h-[52px] items-center justify-between gap-2 rounded-xl border px-4 transition-colors ${styleClass}`}
                         >
-                          <span>{option.label}</span>
+                          <span className="min-w-0 flex-1 break-keep">
+                            {option.label}
+                          </span>
                           {badgeText && (
                             <span
-                              className={`rounded-full px-2.5 py-1 text-caption-12-bd shrink-0 ${badgeClass}`}
+                              className={`text-caption-12-bd shrink-0 rounded-full px-2.5 py-1 ${badgeClass}`}
                             >
                               {badgeText}
                             </span>
@@ -88,7 +94,7 @@ export default function QuizReviewTab({
 
                   {/* 해설 영역 */}
                   <div className="mt-1 flex flex-col gap-1.5 pt-1">
-                    <div className="flex items-center gap-1.5 text-caption-12-md text-neutral-500">
+                    <div className="text-caption-12-md flex items-center gap-1.5 text-neutral-500">
                       <svg
                         width="16"
                         height="16"
@@ -114,7 +120,9 @@ export default function QuizReviewTab({
               );
             })
           ) : (
-            <div className="p-5 text-center text-neutral-400">퀴즈 데이터가 없습니다.</div>
+            <div className="p-5 text-center text-neutral-400">
+              퀴즈 데이터가 없습니다.
+            </div>
           )}
         </div>
       </div>
@@ -129,7 +137,7 @@ export default function QuizReviewTab({
           key={item.id}
           type="button"
           onClick={() => onSelectHistory(item)}
-          className="flex h-16 w-full items-center justify-between rounded-xl border border-neutral-100 bg-white px-5 cursor-pointer transition-active active:bg-neutral-50"
+          className="transition-active flex h-16 w-full cursor-pointer items-center justify-between rounded-xl border border-neutral-100 bg-white px-5 active:bg-neutral-50"
         >
           <span className="text-body-16-bd text-neutral-900">{item.date}</span>
           <div className="text-body-16-bd">

@@ -82,17 +82,27 @@ function QuizPage() {
   if (todayQuizQuery.isLoading) {
     return <QuizStateMessage>퀴즈를 불러오는 중입니다.</QuizStateMessage>;
   }
-  if (todayQuizQuery.isError || questions.length === 0) {
+  if (todayQuizQuery.isError) {
     return (
-      <QuizStateMessage>
-        오늘의 퀴즈를 아직 불러올 수 없어요. 잠시 후 다시 시도해주세요.
+      <QuizStateMessage onRetry={() => todayQuizQuery.refetch()}>
+        오늘의 퀴즈를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
       </QuizStateMessage>
     );
   }
 
   // 이미 오늘 완료한 경우 (결과 화면 진행 중이 아니면 완료 화면)
+  // FINISHED면 questions가 빈 배열로 오므로 아래 빈 상태 체크보다 먼저 처리한다.
   if (alreadyFinished && phase !== "result") {
     return <QuizCompletedView onGoHome={goHome} />;
+  }
+
+  // 아직 문제를 받지 못한 경우 (미발행/생성 중 등)
+  if (questions.length === 0 && phase !== "result") {
+    return (
+      <QuizStateMessage>
+        오늘의 퀴즈가 아직 준비 중이에요. 잠시 후 다시 시도해주세요.
+      </QuizStateMessage>
+    );
   }
 
   if (phase === "intro") {

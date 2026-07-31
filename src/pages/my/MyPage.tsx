@@ -49,6 +49,7 @@ function MyPage() {
             type="button"
             onClick={() => navigate("/my/settings")}
             aria-label="설정"
+            className="-mr-3 flex size-11 shrink-0 items-center justify-center"
           >
             <svg
               aria-hidden="true"
@@ -100,6 +101,7 @@ function MyPage() {
                 type="button"
                 onClick={() => navigate("/news")}
                 aria-label="뉴스 더보기"
+                className="-mr-3 flex size-11 shrink-0 items-center justify-center"
               >
                 <img
                   src={chevronRightIcon}

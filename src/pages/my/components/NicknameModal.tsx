@@ -3,10 +3,7 @@ import { useState } from "react";
 import Button from "@/components/common/Button";
 import closeIcon from "@/assets/icon-24px/close.svg";
 import closeButtonIcon from "@/assets/icon-24px/close-button.svg";
-import {
-  NICKNAME_MAX_LENGTH,
-  TAKEN_NICKNAMES,
-} from "@/pages/my/myData";
+import { NICKNAME_MAX_LENGTH, TAKEN_NICKNAMES } from "@/pages/my/myData";
 
 interface NicknameModalProps {
   isOpen: boolean;
@@ -37,7 +34,10 @@ export default function NicknameModal({
   };
   const status = getStatus();
 
-  const helperByStatus: Record<NicknameStatus, { text: string; className: string }> = {
+  const helperByStatus: Record<
+    NicknameStatus,
+    { text: string; className: string }
+  > = {
     idle: {
       text: `최대 ${NICKNAME_MAX_LENGTH}자 설정 가능`,
       className: "text-neutral-400",
@@ -53,11 +53,12 @@ export default function NicknameModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="absolute inset-0 mx-auto max-w-[390px] bg-neutral-1000/45"
+        aria-hidden="true"
+        className="bg-neutral-1000/45 absolute inset-0"
         onClick={onClose}
       />
 
-      <div className="relative z-10 w-[326px] rounded-[16px] bg-white px-4 pb-5 pt-6">
+      <div className="relative z-10 w-[calc(100%-40px)] max-w-[326px] rounded-[16px] bg-white px-4 pt-6 pb-5">
         <div className="relative flex items-center justify-center">
           <p className="text-heading-18-bd text-neutral-900">닉네임 변경</p>
           <button
@@ -66,7 +67,12 @@ export default function NicknameModal({
             className="absolute right-0"
             aria-label="닫기"
           >
-            <img src={closeIcon} alt="" aria-hidden="true" className="h-6 w-6" />
+            <img
+              src={closeIcon}
+              alt=""
+              aria-hidden="true"
+              className="h-6 w-6"
+            />
           </button>
         </div>
 
@@ -79,7 +85,7 @@ export default function NicknameModal({
             value={value}
             maxLength={NICKNAME_MAX_LENGTH}
             onChange={(event) => setValue(event.target.value)}
-            className="w-full text-body-16-md-tighter text-neutral-900 outline-none placeholder:text-neutral-400"
+            className="text-body-16-md-tighter w-full text-neutral-900 outline-none placeholder:text-neutral-400"
             placeholder="닉네임 입력"
           />
           {value !== "" && (
@@ -97,7 +103,7 @@ export default function NicknameModal({
             </button>
           )}
         </div>
-        <p className={`mt-2 text-caption-12-md ${helper.className}`}>
+        <p className={`text-caption-12-md mt-2 ${helper.className}`}>
           {helper.text}
         </p>
 

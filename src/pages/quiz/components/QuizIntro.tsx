@@ -20,7 +20,7 @@ export default function QuizIntro({
     <div className="flex min-h-[calc(100dvh-56px)] flex-col px-5 pb-12">
       <div className="flex flex-1 flex-col items-center justify-center gap-10">
         <CharacterAvatar size="large" variant={character} />
-        <p className="text-heading-20-bd text-center whitespace-pre-line text-neutral-900">
+        <p className="text-heading-20-bd text-center break-keep whitespace-pre-line text-neutral-900">
           {`${nickname}님, 오늘 구운 뉴스들로\n반죽을 만들어볼까요?`}
         </p>
       </div>

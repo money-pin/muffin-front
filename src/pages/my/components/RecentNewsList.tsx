@@ -13,7 +13,7 @@ export default function RecentNewsList({
   onNewsClick,
 }: RecentNewsListProps) {
   return (
-    <div className="-mx-5 flex gap-3 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="-mx-5 flex [scrollbar-width:none] gap-3 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
       {newsList.map((news) => (
         <button
           key={news.id}
@@ -31,11 +31,11 @@ export default function RecentNewsList({
             <img
               src={news.bookmarked ? bookmarkFillIcon : bookmarkWhiteIcon}
               alt={news.bookmarked ? "북마크됨" : ""}
-              className="absolute right-2 top-2 h-6 w-6"
+              className="absolute top-2 right-2 h-6 w-6"
               draggable={false}
             />
           </div>
-          <p className="line-clamp-2 text-body-14-md text-neutral-900">
+          <p className="text-body-14-md line-clamp-2 break-keep text-neutral-900">
             {news.title}
           </p>
         </button>

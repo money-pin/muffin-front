@@ -6,6 +6,8 @@ import { clearAccessToken } from "@/lib/auth";
 import { logout, withdraw } from "@/lib/authApi";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 
+import PrivacyPolicyModal from "@/pages/legal/PrivacyPolicyModal";
+
 import SettingToggle from "./components/SettingToggle";
 import ConfirmModal from "./components/ConfirmModal";
 import { APP_VERSION } from "./myData";
@@ -80,6 +82,7 @@ function MySettingsPage() {
   });
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
 
   // 로그아웃: 백엔드에서 토큰 무효화 후 로컬 토큰 삭제.
   // API가 실패해도 로컬은 비우고 로그인 화면으로 보낸다(세션 종료 보장).
@@ -146,7 +149,10 @@ function MySettingsPage() {
 
       <Section title="약관 및 정책">
         <LinkRow label="이용약관" />
-        <LinkRow label="개인 정보 처리 방침" />
+        <LinkRow
+          label="개인 정보 처리 방침"
+          onClick={() => setPrivacyModalOpen(true)}
+        />
       </Section>
 
       <Section title="앱 정보">
@@ -173,6 +179,10 @@ function MySettingsPage() {
         danger
         onCancel={() => setWithdrawModalOpen(false)}
         onConfirm={handleWithdraw}
+      />
+      <PrivacyPolicyModal
+        isOpen={privacyModalOpen}
+        onClose={() => setPrivacyModalOpen(false)}
       />
     </div>
   );

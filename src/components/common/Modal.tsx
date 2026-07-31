@@ -29,12 +29,13 @@ function Modal({
   return createPortal(
     <RemoveScroll>
       <div className="fixed inset-0 z-50 flex justify-center">
-        <div className="relative h-full w-full max-w-[var(--max-width-app)]">
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-[var(--color-neutral-1000)]/50"
-          />
+        {/* 딤: 프레임 밖(전체화면) — #152 */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[var(--color-neutral-1000)]/50"
+        />
 
+        <div className="relative h-full w-full max-w-[var(--max-width-app)]">
           <div
             className={[
               "relative z-10 flex h-full w-full items-center justify-center",
