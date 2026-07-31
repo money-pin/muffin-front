@@ -18,7 +18,7 @@ export default function QuizFeedbackSheet({
   onNext,
 }: QuizFeedbackSheetProps) {
   return (
-    <div className="fixed bottom-0 left-1/2 z-40 w-full max-w-[390px] -translate-x-1/2 rounded-t-[20px] bg-white px-5 pb-[42px] pt-6 shadow-[0px_0px_8px_rgba(0,0,0,0.2)]">
+    <div className="fixed bottom-0 left-1/2 z-40 w-full max-w-[var(--max-width-app)] -translate-x-1/2 rounded-t-[20px] bg-white px-5 pt-6 pb-[42px] shadow-[0px_0px_8px_rgba(0,0,0,0.2)]">
       <div className="flex items-center gap-1">
         <span className="flex h-6 w-6 items-center justify-center">
           <svg
@@ -32,7 +32,9 @@ export default function QuizFeedbackSheet({
               cx="10"
               cy="10"
               r="10"
-              fill={isCorrect ? "var(--color-primary)" : "var(--color-positive)"}
+              fill={
+                isCorrect ? "var(--color-primary)" : "var(--color-positive)"
+              }
             />
             {isCorrect ? (
               <path
@@ -60,7 +62,7 @@ export default function QuizFeedbackSheet({
       </div>
 
       {!isCorrect && (
-        <p className="mt-3 text-body-16-md-tighter text-neutral-900">
+        <p className="text-body-16-md-tighter mt-3 text-neutral-900">
           정답: {answerLabel}
         </p>
       )}
@@ -84,7 +86,7 @@ export default function QuizFeedbackSheet({
           </svg>
           <p className="text-body-14-md-tighter text-neutral-600">해설</p>
         </div>
-        <p className="mt-2 text-body-16-rg-tighter text-neutral-900">
+        <p className="text-body-16-rg-tighter mt-2 text-neutral-900">
           {explanation}
         </p>
       </div>

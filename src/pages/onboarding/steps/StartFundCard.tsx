@@ -4,7 +4,7 @@ import logo from "@/assets/logo.svg";
 export default function StartFundCard() {
   return (
     <div
-      className="flex h-[160px] w-[284px] flex-col items-start gap-6 rounded-[16px] p-5 drop-shadow-[0px_2px_3px_rgba(0,0,0,0.25)]"
+      className="flex h-[160px] w-[284px] max-w-full flex-col items-start gap-6 rounded-[16px] p-5 drop-shadow-[0px_2px_3px_rgba(0,0,0,0.25)]"
       style={{
         backgroundImage:
           "linear-gradient(150.6deg, #f46c0e 36.78%, #ff9900 59.27%, #ffc266 73.08%, #ff9900 82.18%, #f46c0e 91.33%)",
@@ -21,10 +21,10 @@ export default function StartFundCard() {
       </div>
 
       <div className="flex items-center gap-1 text-white">
-        <span className="text-[28px] font-bold leading-[1.3] tracking-[0.4px]">
+        <span className="text-[28px] leading-[1.3] font-bold tracking-[0.4px]">
           1,000,000
         </span>
-        <span className="text-[28px] font-bold leading-[1.3]">원</span>
+        <span className="text-[28px] leading-[1.3] font-bold">원</span>
       </div>
     </div>
   );

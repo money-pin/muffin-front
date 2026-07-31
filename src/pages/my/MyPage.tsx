@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 import SectionHeader from "@/components/common/SectionHeader";
 import { useCharacter, CHARACTER_LABELS } from "@/lib/character";
-import { getMyHome, updateNickname } from "@/lib/mypageApi";
+import { updateNickname, type MyHome } from "@/lib/mypageApi";
+import { mypageQueryKeys, useMyHomeQuery } from "@/lib/mypageQueries";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
 
+import MyPageSkeleton from "./components/MyPageSkeleton";
 import MyProfile from "./components/MyProfile";
 import StreakWeekCard from "./components/StreakWeekCard";
 import StorageShortcuts from "./components/StorageShortcuts";
@@ -22,24 +25,17 @@ import {
 function MyPage() {
   const navigate = useNavigate();
   const character = useCharacter();
-  // 초기값을 목으로 두면 틀린 이름이 잠깐 노출되므로 빈 값으로 시작해 응답 후 채운다
-  const [nickname, setNickname] = useState("");
+  const queryClient = useQueryClient();
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
 
-  // 닉네임은 서버(/api/mypage/home)에서 조회, 실패 시 기존 표시값 유지
-  useEffect(() => {
-    let active = true;
-    getMyHome()
-      .then((home) => {
-        if (active) setNickname(home.nickname);
-      })
-      .catch(() => {
-        // 조회 실패 — 기존 닉네임 유지
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+  // 닉네임은 홈과 같은 캐시(useMyHomeQuery)에서 조회. 로딩 동안엔 스켈레톤을
+  // 노출해 닉네임 칸이 비었다가 채워지는 깜빡임을 막는다.
+  const myHomeQuery = useMyHomeQuery();
+  const nickname = myHomeQuery.data?.nickname ?? "";
+
+  if (myHomeQuery.isLoading) {
+    return <MyPageSkeleton />;
+  }
 
   return (
     <div className="flex min-h-full flex-col">
@@ -49,6 +45,7 @@ function MyPage() {
             type="button"
             onClick={() => navigate("/my/settings")}
             aria-label="설정"
+            className="-mr-3 flex size-11 shrink-0 items-center justify-center"
           >
             <svg
               aria-hidden="true"
@@ -100,6 +97,7 @@ function MyPage() {
                 type="button"
                 onClick={() => navigate("/news")}
                 aria-label="뉴스 더보기"
+                className="-mr-3 flex size-11 shrink-0 items-center justify-center"
               >
                 <img
                   src={chevronRightIcon}
@@ -123,7 +121,10 @@ function MyPage() {
           currentNickname={nickname}
           onClose={() => setNicknameModalOpen(false)}
           onChange={(next) => {
-            setNickname(next);
+            // 캐시를 낙관적으로 갱신 (홈·마이 공유 캐시라 양쪽 즉시 반영)
+            queryClient.setQueryData<MyHome>(mypageQueryKeys.home(), (old) =>
+              old ? { ...old, nickname: next } : old,
+            );
             setNicknameModalOpen(false);
             // 변경한 닉네임을 서버에 저장 (실패해도 화면은 낙관적으로 반영)
             updateNickname(next).catch(() => {});
