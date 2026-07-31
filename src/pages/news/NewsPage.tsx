@@ -9,6 +9,7 @@ import ScrollToTopButton from "./components/ScrollToTopButton";
 import { useTodayNews, useNewsList } from "./newsQueries";
 import {
   getNewsImage,
+  formatCategoryName,
   formatRelativeTime,
 } from "@/lib/newsFormat";
 
@@ -38,6 +39,7 @@ export default function NewsPage() {
   // 따끈한 금융 소식 (오늘의 뉴스)
   const { data: todayData } = useTodayNews();
   const trendingNewsList = todayData?.items ?? [];
+  const hasTrendingNews = trendingNewsList.length > 0;
 
   // 오늘의 뉴스 목록 (탭 필터 + 무한스크롤)
   const categoryId =
@@ -62,53 +64,59 @@ export default function NewsPage() {
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-[#F5F5F5] pt-5 text-black">
-      <section className="flex w-full flex-col gap-3">
-        <div className="flex h-[26px] items-center gap-[4px] px-5">
-          <img
-            src={megaphoneIcon}
-            alt=""
-            aria-hidden="true"
-            className="h-[20px] w-[20px] shrink-0 object-contain"
-            draggable={false}
-          />
-          <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
-            따끈한 금융 소식
-          </h2>
-        </div>
+      {hasTrendingNews && (
+        <section className="flex w-full flex-col gap-3">
+          <div className="flex h-[26px] items-center gap-[4px] px-5">
+            <img
+              src={megaphoneIcon}
+              alt=""
+              aria-hidden="true"
+              className="h-[20px] w-[20px] shrink-0 object-contain"
+              draggable={false}
+            />
+            <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
+              따끈한 금융 소식
+            </h2>
+          </div>
 
-        <Carousel>
-          {trendingNewsList.map((news) => (
-            <div
-              key={news.newsId}
-              onClick={() => navigate(`/news/${news.newsId}`)}
-              className="flex w-full cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
-            >
-              <div className="aspect-[16/10] w-full overflow-hidden rounded-[12px]">
-                <img
-                  src={getNewsImage(news.thumbnailUrl, news.categoryName)}
-                  alt=""
-                  aria-hidden="true"
-                  className="h-full w-full object-cover"
-                  draggable={false}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-[6px]">
-                  <Badge>{news.categoryName}</Badge>
-                  <span className="shrink-0 text-xs text-neutral-400">
-                    {formatRelativeTime(news.publishedAt)}
-                  </span>
+          <Carousel>
+            {trendingNewsList.map((news) => (
+              <div
+                key={news.newsId}
+                onClick={() => navigate(`/news/${news.newsId}`)}
+                className="flex w-full cursor-pointer flex-col gap-4 rounded-[20px] border border-neutral-100 bg-white p-5 shadow-sm"
+              >
+                <div className="aspect-[16/10] w-full overflow-hidden rounded-[12px]">
+                  <img
+                    src={getNewsImage(news.thumbnailUrl, news.categoryName)}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover"
+                    draggable={false}
+                  />
                 </div>
-                <h3 className="line-clamp-2 break-keep text-base leading-snug font-bold text-[#1B1B1B]">
-                  {news.title}
-                </h3>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-[6px]">
+                    <Badge>{formatCategoryName(news.categoryName)}</Badge>
+                    <span className="shrink-0 text-xs text-neutral-400">
+                      {formatRelativeTime(news.publishedAt)}
+                    </span>
+                  </div>
+                  <h3 className="line-clamp-2 text-base leading-snug font-bold break-keep text-[#1B1B1B]">
+                    {news.title}
+                  </h3>
+                </div>
               </div>
-            </div>
-          ))}
-        </Carousel>
-      </section>
+            ))}
+          </Carousel>
+        </section>
+      )}
 
-      <div className="sticky top-0 z-10 mt-8 w-full bg-[#F5F5F5]">
+      <div
+        className={`sticky top-0 z-10 w-full bg-[#F5F5F5] ${
+          hasTrendingNews ? "mt-8" : ""
+        }`}
+      >
         <TabBar
           tabs={newsTabs}
           currentTab={currentTab}
@@ -116,9 +124,7 @@ export default function NewsPage() {
         />
       </div>
 
-      <section className="mt-6 flex flex-col gap-[12px] px-5 pb-24">
-        <h2 className="text-lg font-bold text-neutral-950">오늘의 뉴스</h2>
-
+      <section className="flex flex-col gap-[12px] px-5 py-5 pb-24">
         <div className="flex flex-col gap-[12px]">
           {newsItems.map((news) => (
             <NewsCard
@@ -138,7 +144,7 @@ export default function NewsPage() {
         {!isLoading && hasNextPage && (
           <div
             ref={loadMoreRef}
-            className="flex h-[40px] items-center justify-center text-caption-12-md text-neutral-400"
+            className="text-caption-12-md flex h-[40px] items-center justify-center text-neutral-400"
           >
             {isFetchingNextPage ? "불러오는 중…" : ""}
           </div>

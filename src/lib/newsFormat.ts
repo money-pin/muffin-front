@@ -14,15 +14,26 @@ const CATEGORY_FALLBACK_IMAGE: Record<string, string> = {
 };
 
 const DEFAULT_FALLBACK_IMAGE = newscardEconomy;
+const DEFAULT_CATEGORY_NAME = "경제";
 
-export function getCategoryFallbackImage(categoryName: string): string {
-  return CATEGORY_FALLBACK_IMAGE[categoryName] ?? DEFAULT_FALLBACK_IMAGE;
+export function getCategoryFallbackImage(
+  categoryName: string | null | undefined,
+): string {
+  return categoryName
+    ? (CATEGORY_FALLBACK_IMAGE[categoryName] ?? DEFAULT_FALLBACK_IMAGE)
+    : DEFAULT_FALLBACK_IMAGE;
+}
+
+export function formatCategoryName(
+  categoryName: string | null | undefined,
+): string {
+  return categoryName ?? DEFAULT_CATEGORY_NAME;
 }
 
 // thumbnailUrl 우선, 없으면 카테고리 fallback
 export function getNewsImage(
-  thumbnailUrl: string | undefined,
-  categoryName: string,
+  thumbnailUrl: string | null | undefined,
+  categoryName: string | null | undefined,
 ): string {
   return thumbnailUrl && thumbnailUrl.length > 0
     ? thumbnailUrl

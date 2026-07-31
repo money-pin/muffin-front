@@ -6,12 +6,12 @@ import { apiRequest } from "./api";
 export interface NewsListItem {
   newsId: number;
   categoryId: number;
-  categoryName: string;
+  categoryName: string | null;
   title: string;
   summary: string;
   publisher: string;
   publishedAt: string; // ISO date-time
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   viewCount: number;
   isScrapped: boolean;
 }
@@ -23,34 +23,29 @@ export interface NewsListResponse {
   hasNext: boolean;
 }
 
-// 본문 조각. type이 "term"이면 termId가 있고, 클릭 시 용어 바텀시트를 연다
+// 본문 조각. type이 "HIGHLIGHT"이면 termId가 있고, 클릭 시 용어 바텀시트를 연다
 export interface BodySegment {
-  type: string; // "text" | "term"
+  type: "TEXT" | "HIGHLIGHT";
   text: string;
   termId?: number;
 }
 
-// 뉴스 상세 (POST /api/news/{newsId})
+// 뉴스 상세 (GET /api/news/{newsId})
 export interface NewsDetailResponse {
   newsId: number;
   title: string;
-  categoryName: string;
+  categoryName: string | null;
   viewCount: number;
   publisher: string;
   publishedAt: string;
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   originalUrl: string;
   bodySegments: BodySegment[];
   isScrapped: boolean;
 }
 
-// 섹터 영향도 5단계
-export type SectorImpact =
-  | "STRONG_POSITIVE"
-  | "POSITIVE"
-  | "NEUTRAL"
-  | "NEGATIVE"
-  | "STRONG_NEGATIVE";
+// 섹터 영향도 3단계
+export type SectorImpact = "POSITIVE" | "NEUTRAL" | "NEGATIVE";
 
 export interface SectorImpactItem {
   sectorCode: string;
@@ -88,7 +83,7 @@ export interface TermResponse {
 export interface ScrapResponse {
   newsId: number;
   isScrapped: boolean;
-  scrappedAt: string;
+  scrappedAt: string | null;
 }
 
 // 용어 저장 토글 결과
@@ -96,7 +91,7 @@ export interface TermSaveResponse {
   termId: number;
   term: string;
   isSaved: boolean;
-  savedAt: string;
+  savedAt: string | null;
 }
 
 // ── API 함수 ──────────────────────────────────────────────────

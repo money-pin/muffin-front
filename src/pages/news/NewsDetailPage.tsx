@@ -6,6 +6,7 @@ import bookmarkLine from "@/assets/icon-24px/bookmark-line-gray5.svg";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
 import wordSaveIcon from "@/assets/icon-28px/wordsave.svg";
 import wordSaveActiveIcon from "@/assets/icon-28px/wordsave-active.svg";
+import { ApiError } from "@/lib/api";
 import {
   useNewsDetail,
   useReadNews,
@@ -15,17 +16,17 @@ import {
   useToggleScrap,
   useToggleTermSave,
 } from "./newsQueries";
-import { getNewsImage, formatRelativeDate } from "@/lib/newsFormat";
+import {
+  getNewsImage,
+  formatCategoryName,
+  formatRelativeDate,
+} from "@/lib/newsFormat";
 import type { SectorImpactItem } from "@/lib/newsApi";
 
-// 섹터 영향도 5단계 → 긍정/부정 박스로 분류. NEUTRAL은 제외.
+// 섹터 영향도 → 긍정/부정 박스로 분류. NEUTRAL은 Figma 기준 숨긴다.
 function splitImpacts(impacts: SectorImpactItem[]) {
-  const positive = impacts.filter(
-    (s) => s.impact === "STRONG_POSITIVE" || s.impact === "POSITIVE",
-  );
-  const negative = impacts.filter(
-    (s) => s.impact === "STRONG_NEGATIVE" || s.impact === "NEGATIVE",
-  );
+  const positive = impacts.filter((s) => s.impact === "POSITIVE");
+  const negative = impacts.filter((s) => s.impact === "NEGATIVE");
   return { positive, negative };
 }
 
@@ -44,12 +45,22 @@ export default function NewsDetailPage() {
   // ── 데이터 조회 ──
   const { data: detail, isLoading, isError } = useNewsDetail(idNum);
   const { data: impactData } = useSectorImpacts(idNum);
-  const { data: cardData } = useExplanationCards(idNum);
-  const { data: termData } = useTerm(selectedTermId);
+  const {
+    data: cardData,
+    isError: isCardError,
+    error: cardError,
+  } = useExplanationCards(idNum);
+  const {
+    data: termData,
+    isError: isTermError,
+    error: termError,
+  } = useTerm(selectedTermId);
 
   // ── 뮤테이션 ──
-  const { mutate: toggleScrap } = useToggleScrap(idNum);
-  const { mutate: toggleTermSave } = useToggleTermSave(selectedTermId ?? -1);
+  const { mutate: toggleScrap, isPending: isScrapPending } =
+    useToggleScrap(idNum);
+  const { mutate: toggleTermSave, isPending: isTermSavePending } =
+    useToggleTermSave(selectedTermId ?? -1);
   const { mutate: readNews } = useReadNews(idNum);
 
   // 상세 조회 성공 후 열람 처리(/read)를 화면 진입당 딱 1회 호출.
@@ -66,6 +77,19 @@ export default function NewsDetailPage() {
     }
   }, [detail, readNews]);
 
+  useEffect(() => {
+    if (
+      selectedTermId != null &&
+      termError instanceof ApiError &&
+      termError.code === "CONTENT_404_002"
+    ) {
+      console.error(termError);
+      queueMicrotask(() => {
+        setSelectedTermId(null);
+      });
+    }
+  }, [selectedTermId, termError]);
+
   const handleScroll = () => {
     if (!containerRef.current) return;
     setShowScrollBtn(containerRef.current.scrollTop > 300);
@@ -76,12 +100,12 @@ export default function NewsDetailPage() {
   };
 
   const handleBookmarkClick = () => {
-    if (!detail) return;
+    if (!detail || isScrapPending) return;
     toggleScrap(!detail.isScrapped);
   };
 
   const handleTermSaveClick = () => {
-    if (!termData) return;
+    if (!termData || isTermSavePending) return;
     toggleTermSave(!termData.isSaved);
   };
 
@@ -110,6 +134,9 @@ export default function NewsDetailPage() {
 
   const { positive, negative } = splitImpacts(impactData?.sectorImpacts ?? []);
   const cards = cardData?.cards ?? [];
+  const displayCategoryName = formatCategoryName(detail.categoryName);
+  const isExplanationPending =
+    cardError instanceof ApiError && cardError.code === "CONTENT_409_001";
 
   return (
     <div className="relative mx-auto flex min-h-dvh w-full max-w-[var(--max-width-app,450px)] flex-col bg-neutral-50 text-black">
@@ -146,8 +173,9 @@ export default function NewsDetailPage() {
             <button
               type="button"
               onClick={handleBookmarkClick}
+              disabled={isScrapPending}
               className="flex h-[24px] w-[24px] shrink-0 items-center justify-center"
-              aria-label="북마크"
+              aria-label={detail.isScrapped ? "북마크 해제" : "북마크"}
             >
               <img
                 src={detail.isScrapped ? bookmarkFill : bookmarkLine}
@@ -176,7 +204,7 @@ export default function NewsDetailPage() {
 
               <div className="flex h-[22px] items-center gap-[8px]">
                 <span className="bg-secondary-100 text-primary inline-flex items-center justify-center rounded-[4px] px-[6px] py-[4px] text-[12px] leading-[160%] font-medium">
-                  {detail.categoryName}
+                  {displayCategoryName}
                 </span>
                 <span className="flex h-[19px] items-center text-[12px] leading-[160%] font-medium text-neutral-100">
                   {formatRelativeDate(detail.publishedAt)}
@@ -188,7 +216,7 @@ export default function NewsDetailPage() {
             <div className="flex w-full flex-col gap-[8px] bg-white px-[20px] pt-[24px] pb-[20px]">
               <p className="w-full text-justify text-[16px] leading-[160%] font-normal text-neutral-900">
                 {detail.bodySegments.map((seg, i) =>
-                  seg.type === "term" && seg.termId != null ? (
+                  seg.type === "HIGHLIGHT" && seg.termId != null ? (
                     <span
                       key={i}
                       onClick={() => setSelectedTermId(seg.termId as number)}
@@ -302,7 +330,7 @@ export default function NewsDetailPage() {
             </div>
 
             {/* 해설 카드 (경제 상식) */}
-            {cards.length > 0 && (
+            {cards.length > 0 ? (
               <div className="flex w-full flex-col items-center gap-[16px] bg-white px-[20px] pb-[32px]">
                 {cards.map((card) => (
                   <div
@@ -323,7 +351,15 @@ export default function NewsDetailPage() {
                   </div>
                 ))}
               </div>
-            )}
+            ) : isCardError ? (
+              <div className="bg-neutral-50 px-5 py-6 pb-10">
+                <p className="text-body-14-md rounded-[16px] bg-white px-5 py-8 text-center text-neutral-400">
+                  {isExplanationPending
+                    ? "아직 해설 카드를 준비 중이에요."
+                    : "경제 상식 정보를 불러오지 못했어요."}
+                </p>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -345,7 +381,8 @@ export default function NewsDetailPage() {
         <div className="flex flex-col px-[21px] pt-[8px] pb-[32px] text-black">
           <div className="flex w-full items-center justify-between border-b border-neutral-100 py-[8px]">
             <h3 className="text-[20px] leading-[140%] font-bold text-neutral-900">
-              <span className="text-primary">{termData?.term}</span>란?
+              <span className="text-primary">{termData?.term ?? "용어"}</span>
+              란?
             </h3>
 
             <button
@@ -353,7 +390,7 @@ export default function NewsDetailPage() {
               onClick={handleTermSaveClick}
               className="flex h-[28px] w-[28px] shrink-0 items-center justify-center"
               aria-label="용어 저장하기"
-              disabled={!termData}
+              disabled={!termData || isTermSavePending}
             >
               <img
                 src={termData?.isSaved ? wordSaveActiveIcon : wordSaveIcon}
@@ -365,7 +402,9 @@ export default function NewsDetailPage() {
 
           <div className="pt-[16px]">
             <p className="text-[16px] leading-[160%] font-normal text-neutral-900">
-              {termData?.content ?? "불러오는 중…"}
+              {isTermError
+                ? "용어를 불러오지 못했습니다."
+                : (termData?.content ?? "불러오는 중…")}
             </p>
           </div>
         </div>
