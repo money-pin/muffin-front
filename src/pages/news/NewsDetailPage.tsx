@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BottomSheet from "@/components/common/BottomSheet";
 import Badge from "@/components/common/Badge";
@@ -213,11 +213,10 @@ export default function NewsDetailPage() {
               draggable={false}
             />
 
-            <header className="absolute top-0 left-0 z-10 flex w-full items-center justify-between px-5 pt-16">
+            <header className="absolute top-3 left-0 z-10 flex w-full items-center justify-between px-5">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex size-7 shrink-0 items-center justify-center"
                 aria-label="뒤로가기"
               >
                 <img
@@ -233,7 +232,6 @@ export default function NewsDetailPage() {
                 type="button"
                 onClick={handleBookmarkClick}
                 disabled={isScrapPending}
-                className="flex size-6 shrink-0 items-center justify-center disabled:opacity-60"
                 aria-label={detail.isScrapped ? "북마크 해제" : "북마크"}
               >
                 <img
@@ -347,7 +345,6 @@ export default function NewsDetailPage() {
         isOpen={isTermSheetOpen}
         onClose={() => setSelectedTermId(null)}
         ariaLabel="용어 설명"
-        snapMode="half-full"
       >
         <div className="flex min-h-full flex-col px-5 pt-2 pb-8 text-neutral-900">
           <div className="flex w-full items-center justify-between border-b border-neutral-100 py-2">
