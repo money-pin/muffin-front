@@ -8,6 +8,7 @@ import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 import rankingIcon from "@/assets/icon-20px/ranking.svg";
 
 import CharacterGreeting from "./components/CharacterGreeting";
+import HomePageSkeleton from "./components/HomePageSkeleton";
 import AssetCard from "./components/AssetCard";
 import QuizBanner from "./components/QuizBanner";
 import NewsCard from "./components/NewsCard";
@@ -61,7 +62,8 @@ function HomePage() {
   }, []);
 
   // 총자산은 서버(/api/investments/asset)에서 조회, 실패/로딩 시 기존 표시값 유지
-  const investmentAsset = useInvestmentAssetQuery().data;
+  const investmentAssetQuery = useInvestmentAssetQuery();
+  const investmentAsset = investmentAssetQuery.data;
   const homeAssets = investmentAsset
     ? {
         ...HOME_ASSETS,
@@ -91,6 +93,11 @@ function HomePage() {
       localStorage.setItem(INVEST_RESULT_SEEN_KEY, HOME_INVEST_RESULT.date);
     }
   }, [investResultOpen]);
+
+  // 총자산 최초 로딩 동안에는 스켈레톤을 노출 (mock 값 깜빡임 방지)
+  if (investmentAssetQuery.isLoading) {
+    return <HomePageSkeleton />;
+  }
 
   return (
     <div className="flex min-h-full flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.2)_23.6%,rgba(255,194,102,0.2)_36.4%),linear-gradient(#fff,#fff)]">
