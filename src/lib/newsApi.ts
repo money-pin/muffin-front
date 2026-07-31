@@ -186,18 +186,16 @@ export async function unscrapNews(newsId: number): Promise<ScrapResponse> {
 
 // 용어 저장 (학습 저장소).
 export async function saveTerm(termId: number): Promise<TermSaveResponse> {
-  return apiRequest<TermSaveResponse>(`/api/terms/${termId}/save`, {
-    method: "POST",
-    body: {},
+  return apiRequest<TermSaveResponse>(`/api/terms/${termId}/saved-term`, {
+    method: "PUT",
     auth: true,
   });
 }
 
 // 용어 저장 해제.
 export async function unsaveTerm(termId: number): Promise<TermSaveResponse> {
-  return apiRequest<TermSaveResponse>(`/api/terms/${termId}/save`, {
+  return apiRequest<TermSaveResponse>(`/api/terms/${termId}/saved-term`, {
     method: "DELETE",
-    body: {},
     auth: true,
   });
 }

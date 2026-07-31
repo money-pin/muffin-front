@@ -3,6 +3,7 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  type InfiniteData,
 } from "@tanstack/react-query";
 import {
   getNewsList,
@@ -17,6 +18,8 @@ import {
   saveTerm,
   unsaveTerm,
   type NewsDetailResponse,
+  type NewsListItem,
+  type NewsListResponse,
   type TermResponse,
 } from "@/lib/newsApi";
 
@@ -34,6 +37,8 @@ export const newsKeys = {
 };
 
 const PAGE_SIZE = 20;
+const NEWS_LIST_QUERY_KEY = ["news", "list"] as const;
+type TodayNewsResponse = { items: NewsListItem[] };
 
 // 뉴스 목록 (커서 기반 무한스크롤). categoryId를 넘기면 카테고리 필터.
 export function useNewsList(categoryId?: number) {
@@ -127,26 +132,83 @@ export function useToggleScrap(newsId: number) {
     mutationFn: (nextScrapped: boolean) =>
       nextScrapped ? scrapNews(newsId) : unscrapNews(newsId),
     onMutate: async (nextScrapped) => {
-      const key = newsKeys.detail(newsId);
-      await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData<NewsDetailResponse>(key);
-      if (previous) {
-        queryClient.setQueryData<NewsDetailResponse>(key, {
-          ...previous,
+      const detailKey = newsKeys.detail(newsId);
+      const todayKey = newsKeys.today();
+
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: detailKey }),
+        queryClient.cancelQueries({ queryKey: todayKey }),
+        queryClient.cancelQueries({ queryKey: NEWS_LIST_QUERY_KEY }),
+      ]);
+
+      const previousDetail =
+        queryClient.getQueryData<NewsDetailResponse>(detailKey);
+      const previousToday =
+        queryClient.getQueryData<TodayNewsResponse>(todayKey);
+      const previousLists = queryClient.getQueriesData<
+        InfiniteData<NewsListResponse>
+      >({
+        queryKey: NEWS_LIST_QUERY_KEY,
+      });
+
+      if (previousDetail) {
+        queryClient.setQueryData<NewsDetailResponse>(detailKey, {
+          ...previousDetail,
           isScrapped: nextScrapped,
         });
       }
-      return { previous };
+
+      if (previousToday) {
+        queryClient.setQueryData<TodayNewsResponse>(todayKey, {
+          ...previousToday,
+          items: previousToday.items.map((item) =>
+            item.newsId === newsId
+              ? { ...item, isScrapped: nextScrapped }
+              : item,
+          ),
+        });
+      }
+
+      queryClient.setQueriesData<InfiniteData<NewsListResponse>>(
+        { queryKey: NEWS_LIST_QUERY_KEY },
+        (previous) =>
+          previous
+            ? {
+                ...previous,
+                pages: previous.pages.map((page) => ({
+                  ...page,
+                  items: page.items.map((item) =>
+                    item.newsId === newsId
+                      ? { ...item, isScrapped: nextScrapped }
+                      : item,
+                  ),
+                })),
+              }
+            : previous,
+      );
+
+      return { previousDetail, previousToday, previousLists };
     },
     onError: (_err, _next, context) => {
-      // 실패 시 이전 상태로 롤백
-      if (context?.previous) {
-        queryClient.setQueryData(newsKeys.detail(newsId), context.previous);
+      if (context?.previousDetail) {
+        queryClient.setQueryData(
+          newsKeys.detail(newsId),
+          context.previousDetail,
+        );
       }
+
+      if (context?.previousToday) {
+        queryClient.setQueryData(newsKeys.today(), context.previousToday);
+      }
+
+      context?.previousLists.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
     },
     onSettled: () => {
-      // 서버 확정값으로 동기화 + 스크랩 목록도 갱신
       queryClient.invalidateQueries({ queryKey: newsKeys.detail(newsId) });
+      queryClient.invalidateQueries({ queryKey: newsKeys.today() });
+      queryClient.invalidateQueries({ queryKey: NEWS_LIST_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ["mypage", "scraps"] });
     },
   });

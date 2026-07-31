@@ -82,8 +82,8 @@ export default function NewsCard({
               type="button"
               onClick={handleBookmarkClick}
               disabled={isScrapPending}
-              aria-label={isBookmarked ? "북마크 해제" : "북마크"}
-              className="flex size-6 flex-shrink-0 items-center justify-center disabled:opacity-60"
+              aria-label={isBookmarked ? "스크랩 해제" : "스크랩"}
+              className="flex size-6 flex-shrink-0 items-center justify-center"
             >
               <img
                 src={isBookmarked ? bookmarkFill : bookmarkLine}
