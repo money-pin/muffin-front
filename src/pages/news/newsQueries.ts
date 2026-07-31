@@ -3,6 +3,7 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  type InfiniteData,
 } from "@tanstack/react-query";
 import {
   getNewsList,
@@ -17,6 +18,8 @@ import {
   saveTerm,
   unsaveTerm,
   type NewsDetailResponse,
+  type NewsListItem,
+  type NewsListResponse,
   type TermResponse,
 } from "@/lib/newsApi";
 
@@ -119,34 +122,98 @@ export function useTerm(termId: number | null) {
   });
 }
 
-// 스크랩 토글. 상세 캐시의 isScrapped를 낙관적으로 뒤집는다.
+// 스크랩 토글. 상세 + 리스트 + 오늘의뉴스 캐시의 isScrapped를 모두 낙관적으로 갱신한다.
+// (리스트 카드가 리스트 캐시값을 그대로 신뢰하므로, 여기서 리스트도 갱신해야 UI가 유지됨)
 export function useToggleScrap(newsId: number) {
   const queryClient = useQueryClient();
+
+  // 리스트/오늘의뉴스 캐시에서 해당 뉴스의 isScrapped만 바꿔치기
+  const patchListCaches = (nextScrapped: boolean) => {
+    // 무한스크롤 목록: 모든 list 쿼리(카테고리별 포함)의 pages > items 순회
+    queryClient.setQueriesData<InfiniteData<NewsListResponse>>(
+      { queryKey: ["news", "list"] },
+      (data) => {
+        if (!data) return data;
+        return {
+          ...data,
+          pages: data.pages.map((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.newsId === newsId
+                ? { ...item, isScrapped: nextScrapped }
+                : item,
+            ),
+          })),
+        };
+      },
+    );
+
+    // 오늘의 뉴스(캐러셀)
+    queryClient.setQueryData<{ items: NewsListItem[] }>(
+      newsKeys.today(),
+      (data) => {
+        if (!data) return data;
+        return {
+          ...data,
+          items: data.items.map((item) =>
+            item.newsId === newsId
+              ? { ...item, isScrapped: nextScrapped }
+              : item,
+          ),
+        };
+      },
+    );
+  };
 
   return useMutation({
     mutationFn: (nextScrapped: boolean) =>
       nextScrapped ? scrapNews(newsId) : unscrapNews(newsId),
     onMutate: async (nextScrapped) => {
-      const key = newsKeys.detail(newsId);
-      await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData<NewsDetailResponse>(key);
-      if (previous) {
-        queryClient.setQueryData<NewsDetailResponse>(key, {
-          ...previous,
+      const detailKey = newsKeys.detail(newsId);
+      await queryClient.cancelQueries({ queryKey: detailKey });
+      await queryClient.cancelQueries({ queryKey: ["news", "list"] });
+      await queryClient.cancelQueries({ queryKey: newsKeys.today() });
+
+      // 롤백용 스냅샷 보관
+      const previousDetail =
+        queryClient.getQueryData<NewsDetailResponse>(detailKey);
+      const previousLists = queryClient.getQueriesData<
+        InfiniteData<NewsListResponse>
+      >({ queryKey: ["news", "list"] });
+      const previousToday = queryClient.getQueryData<{ items: NewsListItem[] }>(
+        newsKeys.today(),
+      );
+
+      // 상세 캐시 낙관적 갱신
+      if (previousDetail) {
+        queryClient.setQueryData<NewsDetailResponse>(detailKey, {
+          ...previousDetail,
           isScrapped: nextScrapped,
         });
       }
-      return { previous };
+      // 리스트·오늘의뉴스 캐시 낙관적 갱신
+      patchListCaches(nextScrapped);
+
+      return { previousDetail, previousLists, previousToday };
     },
     onError: (_err, _next, context) => {
-      // 실패 시 이전 상태로 롤백
-      if (context?.previous) {
-        queryClient.setQueryData(newsKeys.detail(newsId), context.previous);
+      // 실패 시 스냅샷으로 전부 롤백
+      if (context?.previousDetail) {
+        queryClient.setQueryData(
+          newsKeys.detail(newsId),
+          context.previousDetail,
+        );
+      }
+      context?.previousLists?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
+      if (context?.previousToday) {
+        queryClient.setQueryData(newsKeys.today(), context.previousToday);
       }
     },
     onSettled: () => {
-      // 서버 확정값으로 동기화 + 스크랩 목록도 갱신
-      queryClient.invalidateQueries({ queryKey: newsKeys.detail(newsId) });
+      // 스크랩 목록(마이페이지)만 무효화. 뉴스 리스트/상세는 낙관적 갱신으로 이미 최신이라
+      // invalidate하지 않는다(불필요한 재조회·리렌더로 인한 UI 깜빡임 방지).
       queryClient.invalidateQueries({ queryKey: ["mypage", "scraps"] });
     },
   });
