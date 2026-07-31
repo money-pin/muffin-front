@@ -88,12 +88,12 @@ export default function ScrappedNewsTab() {
         {sortedNewsList.map((news) => (
           <NewCard
             key={news.id}
-            id={news.id}
+            newsId={news.id}
             title={news.title}
-            category={news.category}
-            date={news.date}
-            views={news.views}
-            imageType={news.imageType}
+            categoryName={news.category}
+            publishedAt={news.date}
+            viewCount={news.rawViews}
+            initialScrapped={true}
           />
         ))}
       </section>
