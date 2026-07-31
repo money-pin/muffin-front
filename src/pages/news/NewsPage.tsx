@@ -27,9 +27,9 @@ const TAB_CATEGORY_ID: Record<Exclude<NewsTabType, "all">, number> = {
 export default function NewsPage() {
   const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
 
-  const { data: todayData } = useTodayNews();
-  const trendingNewsList = todayData?.items ?? [];
-  const hasTrendingNews = trendingNewsList.length > 0;
+  const { data: todayData, isLoading: isTodayNewsLoading } = useTodayNews();
+  const todayNewsList = todayData?.items ?? [];
+  const hasTodayNews = todayNewsList.length > 0;
 
   const categoryId =
     currentTab === "all" ? undefined : TAB_CATEGORY_ID[currentTab];
@@ -52,36 +52,38 @@ export default function NewsPage() {
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-neutral-50 pt-5 text-neutral-900">
-      {hasTrendingNews && (
-        <section className="flex w-full flex-col gap-3">
-          <div className="px-5">
-            <SectionHeader
-              title="따끈한 금융 소식"
-              icon={
-                <img
-                  src={megaphoneIcon}
-                  alt=""
-                  aria-hidden="true"
-                  className="size-5 shrink-0 object-contain"
-                  draggable={false}
-                />
-              }
-            />
-          </div>
+      <section className="flex w-full flex-col gap-3">
+        <div className="px-5">
+          <SectionHeader
+            title="따끈한 금융 소식"
+            icon={
+              <img
+                src={megaphoneIcon}
+                alt=""
+                aria-hidden="true"
+                className="size-5 shrink-0 object-contain"
+                draggable={false}
+              />
+            }
+          />
+        </div>
 
+        {hasTodayNews ? (
           <Carousel>
-            {trendingNewsList.map((news) => (
+            {todayNewsList.map((news) => (
               <TodayNewsCarouselCard key={news.newsId} news={news} />
             ))}
           </Carousel>
-        </section>
-      )}
+        ) : (
+          <div className="bg-neutral-0 text-body-14-md mx-5 flex h-[331px] items-center justify-center rounded-[16px] border border-neutral-100 text-neutral-400">
+            {isTodayNewsLoading
+              ? "금융 소식을 불러오는 중이에요."
+              : "표시할 금융 소식이 없어요."}
+          </div>
+        )}
+      </section>
 
-      <div
-        className={`sticky top-0 z-10 w-full border-b border-neutral-100 bg-neutral-50 ${
-          hasTrendingNews ? "mt-4" : ""
-        }`}
-      >
+      <div className="sticky top-0 z-10 mt-4 w-full border-b border-neutral-100 bg-neutral-50">
         <TabBar
           tabs={newsTabs}
           currentTab={currentTab}

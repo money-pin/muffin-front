@@ -63,8 +63,8 @@ export default function TodayNewsCarouselCard({
           type="button"
           onClick={handleBookmarkClick}
           disabled={isScrapPending}
-          aria-label={isBookmarked ? "북마크 해제" : "북마크"}
-          className="absolute top-2 right-2 flex size-6 items-center justify-center disabled:opacity-60"
+          aria-label={isBookmarked ? "스크랩 해제" : "스크랩"}
+          className="absolute top-2 right-2 flex size-6 items-center justify-center"
         >
           <img
             src={isBookmarked ? bookmarkFill : bookmarkLineWhite}

@@ -2,31 +2,64 @@ import fireIcon from "@/assets/icon-20px/fire.svg";
 import calendarIcon from "@/assets/icon-20px/calendar.svg";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
 
-import PercentageBadge from "./PercentageBadge";
-import type { HomeAssets } from "../homeData";
+import type { InvestmentResultDate } from "@/pages/invest/stats/types";
+import type { InvestmentAssetResult } from "@/types/invest";
+import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
+import { getProfitColorClass } from "@/pages/invest/utils/profitFormat";
 
 interface AssetCardProps {
   nickname: string;
   streakDays: number;
-  assets: HomeAssets;
-  onRecentClick?: () => void; // 최근 투자 성과 → 수익 통계 이동
+  asset?: InvestmentAssetResult;
+  recentInvestedAt?: InvestmentResultDate;
+  isLoading?: boolean;
+  onRecentClick?: () => void;
 }
 
-// Figma Asset Details: 스트릭 배지(카드 좌측 16px 들여쓰기, 위쪽만 라운드)
-// + 총자산 카드(rounded-16, 그림자) + 최근 투자 성과 버튼 행
+function getSignedValueByDirection(value: number, direction: string) {
+  if (direction === "DOWN") return -Math.abs(value);
+  if (direction === "UP") return Math.abs(value);
+
+  return value;
+}
+
 export default function AssetCard({
   nickname,
   streakDays,
-  assets,
+  asset,
+  recentInvestedAt,
+  isLoading = false,
   onRecentClick,
 }: AssetCardProps) {
-  const up = assets.change >= 0;
-  const changeText = `${up ? "+" : "-"}${Math.abs(assets.change).toLocaleString()}원`;
+  const profitAmount =
+    asset === undefined
+      ? undefined
+      : getSignedValueByDirection(
+          asset.dailyChangeAmount,
+          asset.changeDirection,
+        );
+  const profitRate =
+    asset === undefined
+      ? undefined
+      : getSignedValueByDirection(asset.dailyChangeRate, asset.changeDirection);
+  const shouldShowSkeleton =
+    isLoading ||
+    asset === undefined ||
+    profitAmount === undefined ||
+    profitRate === undefined;
+
+  const changeText =
+    profitAmount === undefined
+      ? ""
+      : `${profitAmount > 0 ? "+" : profitAmount < 0 ? "-" : ""}${Math.abs(profitAmount).toLocaleString()}원`;
+  const recentInvestedAtText = recentInvestedAt
+    ? `${recentInvestedAt.month}월 ${recentInvestedAt.day}일`
+    : "이력 없음";
 
   return (
     <div className="flex w-full flex-col">
       <div className="px-4">
-        <span className="inline-flex h-7 items-center gap-1 rounded-t-[8px] bg-secondary-100 px-2">
+        <span className="bg-secondary-100 inline-flex h-7 items-center gap-1 rounded-t-[8px] px-2">
           <img
             src={fireIcon}
             alt=""
@@ -40,30 +73,44 @@ export default function AssetCard({
         </span>
       </div>
 
-      <div className="flex w-full flex-col gap-3 rounded-[16px] bg-white px-4 pb-4 pt-5 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
+      <div className="flex w-full flex-col gap-3 rounded-[16px] bg-white px-4 pt-5 pb-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
         <div className="flex flex-col gap-1 px-1">
           <p className="text-caption-12-md-tighter text-neutral-400">
             {nickname}님의 총 자산
           </p>
-          <div className="flex w-full items-center justify-between">
-            <p className="text-heading-24-md text-neutral-900">
-              {assets.total.toLocaleString()}원
-            </p>
-            <div
-              className={`flex items-center gap-2 ${
-                up ? "text-positive" : "text-negative"
-              }`}
-            >
-              <span className="text-body-16-bd-tighter">{changeText}</span>
-              <PercentageBadge rate={assets.changeRate} />
+
+          {shouldShowSkeleton ? (
+            <div className="flex w-full items-center justify-between gap-3">
+              <div
+                aria-hidden="true"
+                className="h-[29px] w-[132px] rounded bg-neutral-100"
+              />
+              <div
+                aria-hidden="true"
+                className="h-6 w-[118px] rounded bg-neutral-100"
+              />
             </div>
-          </div>
+          ) : (
+            <div className="flex w-full items-center justify-between">
+              <p className="text-heading-24-md text-neutral-900">
+                {asset.totalAsset.toLocaleString()}원
+              </p>
+              <div
+                className={`flex items-center gap-2 ${getProfitColorClass(
+                  profitAmount,
+                )}`}
+              >
+                <span className="text-body-16-bd-tighter">{changeText}</span>
+                <ProfitRateBadge rate={profitRate} />
+              </div>
+            </div>
+          )}
         </div>
 
         <button
           type="button"
           onClick={onRecentClick}
-          className="flex w-full items-center justify-between rounded-[8px] border border-neutral-100 py-[13px] pl-[13px] pr-[17px]"
+          className="flex w-full items-center justify-between rounded-[8px] border border-neutral-100 py-[13px] pr-[17px] pl-[13px]"
         >
           <span className="flex items-center gap-2">
             <img
@@ -78,8 +125,8 @@ export default function AssetCard({
             </span>
           </span>
           <span className="flex items-center">
-            <span className="flex h-[22px] items-center rounded-[4px] bg-neutral-50 p-1 text-caption-12-md-tighter text-neutral-700">
-              {assets.lastInvestedAt.month}월 {assets.lastInvestedAt.day}일
+            <span className="text-caption-12-md-tighter flex h-[22px] items-center rounded-[4px] bg-neutral-50 p-1 text-neutral-700">
+              {recentInvestedAtText}
             </span>
             <img
               src={chevronRightIcon}
