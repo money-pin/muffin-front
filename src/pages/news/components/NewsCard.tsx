@@ -32,9 +32,6 @@ export default function NewsCard({
   initialScrapped = false,
 }: NewsCardProps) {
   const navigate = useNavigate();
-  const [optimisticScrapped, setOptimisticScrapped] = useState<boolean | null>(
-    null,
-  );
   const [imgSrc, setImgSrc] = useState(() =>
     getNewsImage(thumbnailUrl, categoryName),
   );
@@ -42,18 +39,14 @@ export default function NewsCard({
     useToggleScrap(newsId);
 
   const displayCategoryName = formatCategoryName(categoryName);
-  const isBookmarked = optimisticScrapped ?? initialScrapped;
+  // 스크랩 상태는 리스트 캐시(initialScrapped)를 신뢰한다.
+  // useToggleScrap이 리스트 캐시를 낙관적으로 갱신하므로, 클릭 즉시 여기에 반영된다.
+  const isBookmarked = initialScrapped;
 
   const handleBookmarkClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (isScrapPending) return;
-
-    const next = !isBookmarked;
-    setOptimisticScrapped(next);
-    toggleScrap(next, {
-      onError: () => setOptimisticScrapped(null),
-      onSettled: () => setOptimisticScrapped(null),
-    });
+    toggleScrap(!isBookmarked);
   };
 
   return (
@@ -83,7 +76,7 @@ export default function NewsCard({
               onClick={handleBookmarkClick}
               disabled={isScrapPending}
               aria-label={isBookmarked ? "북마크 해제" : "북마크"}
-              className="flex size-6 flex-shrink-0 items-center justify-center disabled:opacity-60"
+              className="flex size-6 flex-shrink-0 items-center justify-center"
             >
               <img
                 src={isBookmarked ? bookmarkFill : bookmarkLine}
