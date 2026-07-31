@@ -6,82 +6,50 @@ import Carousel from "@/components/common/Carousel";
 import SectionHeader from "@/components/common/SectionHeader";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 import rankingIcon from "@/assets/icon-20px/ranking.svg";
+import BottomSheet from "@/components/common/BottomSheet";
+import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
+import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
+import { useStatsSummaryQuery } from "@/pages/invest/stats/api/queries";
+import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
+import { useMyHomeQuery } from "@/lib/mypageQueries";
+import TodayNewsCarouselCard from "@/pages/news/components/TodayNewsCarouselCard";
+import { useTodayNews } from "@/pages/news/newsQueries";
 
 import CharacterGreeting from "./components/CharacterGreeting";
 import HomePageSkeleton from "./components/HomePageSkeleton";
 import AssetCard from "./components/AssetCard";
 import QuizBanner from "./components/QuizBanner";
-import NewsCard from "./components/NewsCard";
 import TopSectorList from "./components/TopSectorList";
 import InvestResultSheet from "./components/InvestResultSheet";
-import BottomSheet from "@/components/common/BottomSheet";
-import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
-import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
-import { useMyHomeQuery } from "@/lib/mypageQueries";
-import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
-import {
-  HOME_USER,
-  HOME_ASSETS,
-  HOME_NEWS,
-  HOME_TOP_SECTORS,
-  HOME_INVEST_RESULT,
-} from "./homeData";
+import { HOME_USER, HOME_TOP_SECTORS, HOME_INVEST_RESULT } from "./homeData";
 
 const INVEST_RESULT_SEEN_KEY = "muffin:investResultSeenDate";
 
-// 변동 방향(UP/DOWN)에 따라 부호를 붙인다
-function signByDirection(value: number, direction: string) {
-  if (direction === "DOWN") return -Math.abs(value);
-  if (direction === "UP") return Math.abs(value);
-  return value;
-}
-
-// Figma Home: 위 흰색 → 아래 주황빛(secondary-300 20%) 그라데이션 위에
-// 캐릭터·총자산 카드, 그 아래 흰색 라운드 시트(퀴즈·뉴스·TOP3)가 얹히는 구조
 function HomePage() {
   const navigate = useNavigate();
-  // 최근 투자 성과 클릭 시 수익 통계와 동일한 상세 바텀시트 노출
   const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
 
-  // 닉네임은 서버(/api/mypage/home)에서 조회. 로딩 동안에는 스켈레톤을 노출해
-  // "님의 총 자산" → 닉네임 삽입 시 글자가 늘어나는 깜빡임을 막는다.
   const myHomeQuery = useMyHomeQuery();
   const nickname = myHomeQuery.data?.nickname ?? "";
 
-  // 총자산은 서버(/api/investments/asset)에서 조회, 실패/로딩 시 기존 표시값 유지
   const investmentAssetQuery = useInvestmentAssetQuery();
-  const investmentAsset = investmentAssetQuery.data;
-  const homeAssets = investmentAsset
-    ? {
-        ...HOME_ASSETS,
-        total: investmentAsset.totalAsset,
-        change: signByDirection(
-          investmentAsset.dailyChangeAmount,
-          investmentAsset.changeDirection,
-        ),
-        changeRate: signByDirection(
-          investmentAsset.dailyChangeRate,
-          investmentAsset.changeDirection,
-        ),
-      }
-    : HOME_ASSETS;
+  const statsSummaryQuery = useStatsSummaryQuery();
+  const todayNewsQuery = useTodayNews();
 
-  // 투자결과 모달 자동 노출: 오전 10시 이후 & 아직 확인 안 한 전날 정산 결과일 때만 열림
+  const todayNewsList = todayNewsQuery.data?.items ?? [];
+
   const [investResultOpen, setInvestResultOpen] = useState(
     () =>
       new Date().getHours() >= 10 &&
       localStorage.getItem(INVEST_RESULT_SEEN_KEY) !== HOME_INVEST_RESULT.date,
   );
 
-  // 자동 노출되면 '확인함'으로 기록 → 같은 결과는 하루 1회만
-  // TODO: 서버가 '어제 정산 결과 + 미확인 여부'를 내려주면 그 값으로 교체
   useEffect(() => {
     if (investResultOpen) {
       localStorage.setItem(INVEST_RESULT_SEEN_KEY, HOME_INVEST_RESULT.date);
     }
   }, [investResultOpen]);
 
-  // 총자산·닉네임 최초 로딩 동안에는 스켈레톤을 노출 (mock 값·닉네임 깜빡임 방지)
   if (investmentAssetQuery.isLoading || myHomeQuery.isLoading) {
     return <HomePageSkeleton />;
   }
@@ -100,12 +68,15 @@ function HomePage() {
         <AssetCard
           nickname={nickname}
           streakDays={HOME_USER.streakDays}
-          assets={homeAssets}
+          asset={investmentAssetQuery.data}
+          recentInvestedAt={statsSummaryQuery.data?.investDate}
+          isLoading={
+            investmentAssetQuery.isLoading || investmentAssetQuery.isError
+          }
           onRecentClick={() => setRecentPerformanceOpen(true)}
         />
       </div>
 
-      {/* 수익 통계(StatsPage)와 동일한 최근 투자 성과 상세 바텀시트 재사용 */}
       <BottomSheet
         isOpen={recentPerformanceOpen}
         onClose={() => setRecentPerformanceOpen(false)}
@@ -118,7 +89,6 @@ function HomePage() {
         />
       </BottomSheet>
 
-      {/* 전날 투자 결과 모달: 오전 10시 이후 첫 접속 시 1회 자동 노출 */}
       <InvestResultSheet
         isOpen={investResultOpen}
         onClose={() => setInvestResultOpen(false)}
@@ -127,7 +97,6 @@ function HomePage() {
         onInvestClick={() => navigate("/invest")}
       />
 
-      {/* 흰색 라운드 시트: 퀴즈·금융 소식·수익 TOP3 */}
       <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0px_-3px_7px_rgba(0,0,0,0.1)]">
         <div className="px-5">
           <QuizBanner onClick={() => navigate("/quiz")} />
@@ -148,15 +117,20 @@ function HomePage() {
               }
             />
           </div>
-          <Carousel>
-            {HOME_NEWS.map((news) => (
-              <NewsCard
-                key={news.id}
-                news={news}
-                onClick={() => navigate(`/news/${news.id}`)}
-              />
-            ))}
-          </Carousel>
+
+          {todayNewsList.length > 0 ? (
+            <Carousel>
+              {todayNewsList.map((news) => (
+                <TodayNewsCarouselCard key={news.newsId} news={news} />
+              ))}
+            </Carousel>
+          ) : (
+            <div className="bg-neutral-0 text-body-14-md mx-5 flex h-[331px] items-center justify-center rounded-[16px] border border-neutral-100 text-neutral-400">
+              {todayNewsQuery.isLoading
+                ? "금융 소식을 불러오는 중이에요."
+                : "표시할 금융 소식이 없어요."}
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-2 px-5">
