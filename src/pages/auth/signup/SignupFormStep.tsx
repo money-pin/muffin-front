@@ -1,5 +1,8 @@
+import { useState } from "react";
+
 import Button from "@/components/common/Button";
 import TextField from "@/components/common/TextField";
+import PrivacyPolicyModal from "@/pages/legal/PrivacyPolicyModal";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
 
 export interface SignupFormValues {
@@ -31,6 +34,7 @@ export default function SignupFormStep({
   error,
 }: SignupFormStepProps) {
   const { name, email, password, passwordConfirm, agreed } = values;
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   const emailError =
     email !== "" && !EMAIL_RE.test(email)
@@ -101,41 +105,50 @@ export default function SignupFormStep({
       </div>
 
       <div className="mt-auto flex flex-col gap-5 pt-8">
-        <button
-          type="button"
-          onClick={() => onChange({ agreed: !agreed })}
-          className="flex items-center gap-2"
-        >
-          <span
-            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
-              agreed
-                ? "border-primary bg-primary"
-                : "border-neutral-100 bg-white"
-            }`}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onChange({ agreed: !agreed })}
+            className="flex min-w-0 flex-1 items-center gap-2 text-left"
           >
-            {agreed && (
-              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-                <path
-                  d="M2.5 6.5 5 9l4.5-5.5"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
-          </span>
-          <span className="text-body-14-md-tighter flex-1 text-left text-neutral-700">
-            개인정보처리방침 동의 <span className="text-primary">(필수)</span>
-          </span>
-          <img
-            src={chevronRightIcon}
-            alt=""
-            aria-hidden="true"
-            className="h-5 w-5"
-            draggable={false}
-          />
-        </button>
+            <span
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
+                agreed
+                  ? "border-primary bg-primary"
+                  : "border-neutral-100 bg-white"
+              }`}
+            >
+              {agreed && (
+                <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M2.5 6.5 5 9l4.5-5.5"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </span>
+            <span className="text-body-14-md-tighter min-w-0 flex-1 text-neutral-700">
+              개인정보처리방침 동의 <span className="text-primary">(필수)</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPrivacyOpen(true)}
+            aria-label="개인정보처리방침 보기"
+            className="flex size-11 shrink-0 items-center justify-center"
+          >
+            <img
+              src={chevronRightIcon}
+              alt=""
+              aria-hidden="true"
+              className="h-5 w-5"
+              draggable={false}
+            />
+          </button>
+        </div>
 
         {error && (
           <p className="text-body-14-md-tighter text-positive text-center">
@@ -147,6 +160,11 @@ export default function SignupFormStep({
           다음
         </Button>
       </div>
+
+      <PrivacyPolicyModal
+        isOpen={privacyOpen}
+        onClose={() => setPrivacyOpen(false)}
+      />
     </div>
   );
 }
