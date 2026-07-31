@@ -1,35 +1,39 @@
-import { useState, useRef } from "react";
+import { Children, useRef, useState } from "react";
 
 interface CarouselProps {
-  children: React.ReactNode[];
+  children: React.ReactNode;
 }
 
 export default function Carousel({ children }: CarouselProps) {
+  const slides = Children.toArray(children);
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchEndX.current = e.touches[0].clientX;
+  const handleTouchStart = (event: React.TouchEvent) => {
+    touchStartX.current = event.touches[0].clientX;
+    touchEndX.current = event.touches[0].clientX;
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
+  const handleTouchMove = (event: React.TouchEvent) => {
+    touchEndX.current = event.touches[0].clientX;
   };
 
   const handleTouchEnd = () => {
     const diffX = touchStartX.current - touchEndX.current;
 
-    if (diffX > 50 && currentIndex < children.length - 1) {
+    if (diffX > 50 && currentIndex < slides.length - 1) {
       setCurrentIndex((prev) => prev + 1);
-    } else if (diffX < -50 && currentIndex > 0) {
+      return;
+    }
+
+    if (diffX < -50 && currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
     }
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-[16px]">
+    <div className="flex w-full flex-col items-center gap-3">
       <div
         className="w-full overflow-hidden px-5"
         onTouchStart={handleTouchStart}
@@ -37,38 +41,33 @@ export default function Carousel({ children }: CarouselProps) {
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="flex transition-transform duration-300 ease-out gap-[12px]"
+          className="flex gap-3 transition-transform duration-300 ease-out"
           style={{
-            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 12}px))`,
+            transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 12}px))`,
           }}
         >
-          {children.map((child, index) => (
-            <div key={index} className="w-[85%] shrink-0">
+          {slides.map((child, index) => (
+            <div key={index} className="w-full shrink-0">
               {child}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex items-center gap-[4px]">
-        {children.map((_, index) => {
+      <div className="flex h-2 items-center gap-1">
+        {slides.map((_, index) => {
           const isActive = currentIndex === index;
+
           return (
             <button
               key={index}
               type="button"
               onClick={() => setCurrentIndex(index)}
               aria-label={`${index + 1}번째 슬라이드로 이동`}
-              className="flex h-11 items-center justify-center p-1 border-none bg-transparent cursor-pointer outline-none"
-            >
-              <span
-                className={`h-[8px] transition-all duration-300 rounded-full ${
-                  isActive
-                    ? "w-[40px] bg-primary"
-                    : "w-[8px] bg-neutral-100 hover:bg-neutral-200"
-                }`}
-              />
-            </button>
+              className={`h-2 rounded-full border-none p-0 transition-all duration-300 outline-none ${
+                isActive ? "bg-primary w-10" : "w-2 bg-neutral-100"
+              }`}
+            />
           );
         })}
       </div>

@@ -1,38 +1,37 @@
+import arrowUpIcon from "@/assets/icon-24px/arrow-up.svg";
+
 interface ScrollToTopButtonProps {
   onClick?: () => void;
+  className?: string;
 }
 
-export default function ScrollToTopButton({ onClick }: ScrollToTopButtonProps) {
+export default function ScrollToTopButton({
+  onClick,
+  className = "",
+}: ScrollToTopButtonProps) {
   const scrollToTop = () => {
     if (onClick) {
       onClick();
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
     }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <button
       type="button"
       onClick={scrollToTop}
-      className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white shadow-[0_0_8px_0_rgba(0,0,0,0.2)] transition-opacity duration-200 hover:opacity-90"
+      className={`bg-neutral-0 flex size-10 items-center justify-center rounded-full p-1 shadow-[0_0_4px_0_rgba(0,0,0,0.25)] transition-opacity duration-200 hover:opacity-90 ${className}`}
       aria-label="맨 위로 이동"
     >
-      <svg
-        width="12"
-        height="16"
-        viewBox="0 0 12 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M6 15L6 1M6 1L1 6M6 1L11 6"
-          stroke="#999999"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <img
+        src={arrowUpIcon}
+        alt=""
+        aria-hidden="true"
+        className="size-6 object-contain"
+        draggable={false}
+      />
     </button>
   );
 }

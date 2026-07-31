@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Badge from "@/components/common/Badge";
-import bookmarkLine from "@/assets/icon-24px/bookmark-line-gray5.svg";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
-import { useToggleScrap } from "../newsQueries";
+import bookmarkLine from "@/assets/icon-24px/bookmark-line-gray5.svg";
 import {
-  getNewsImage,
-  getCategoryFallbackImage,
-  formatViewCount,
+  formatCategoryName,
   formatRelativeDate,
+  formatViewCount,
+  getCategoryFallbackImage,
+  getNewsImage,
 } from "@/lib/newsFormat";
+import { useToggleScrap } from "../newsQueries";
 
 export interface NewsCardProps {
   newsId: number;
   title: string;
-  categoryName: string;
-  publishedAt: string; // ISO date-time
+  categoryName: string | null;
+  publishedAt: string;
   viewCount: number;
-  thumbnailUrl?: string;
-  // 목록 응답의 스크랩 여부. 카드 북마크 아이콘 초기 상태로 사용.
+  thumbnailUrl?: string | null;
   initialScrapped?: boolean;
 }
 
@@ -32,67 +32,81 @@ export default function NewsCard({
   initialScrapped = false,
 }: NewsCardProps) {
   const navigate = useNavigate();
-  const [isBookmarked, setIsBookmarked] = useState(initialScrapped);
-  const { mutate: toggleScrap } = useToggleScrap(newsId);
-
+  const [optimisticScrapped, setOptimisticScrapped] = useState<boolean | null>(
+    null,
+  );
   const [imgSrc, setImgSrc] = useState(() =>
     getNewsImage(thumbnailUrl, categoryName),
   );
+  const { mutate: toggleScrap, isPending: isScrapPending } =
+    useToggleScrap(newsId);
 
-  const handleBookmarkClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const displayCategoryName = formatCategoryName(categoryName);
+  const isBookmarked = optimisticScrapped ?? initialScrapped;
+
+  const handleBookmarkClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (isScrapPending) return;
+
     const next = !isBookmarked;
-    setIsBookmarked(next); // 즉시 반영 (mutation 실패 시 아래에서 롤백)
+    setOptimisticScrapped(next);
     toggleScrap(next, {
-      onError: () => setIsBookmarked(!next),
+      onError: () => setOptimisticScrapped(null),
+      onSettled: () => setOptimisticScrapped(null),
     });
   };
 
   return (
     <div
       onClick={() => navigate(`/news/${newsId}`)}
-      className="bg-neutral-0 flex w-full cursor-pointer items-center gap-[12px] rounded-[16px] border border-neutral-100 px-[16px] pt-[8px] pb-[16px] shadow-sm"
+      className="bg-neutral-0 flex h-[100px] w-full cursor-pointer items-center gap-4 rounded-[12px] border border-neutral-100 px-3"
     >
-      <div className="h-[56px] w-[56px] flex-shrink-0 overflow-hidden rounded-[4px]">
+      <div className="size-[74px] flex-shrink-0 overflow-hidden rounded-[8px]">
         <img
           src={imgSrc}
           alt=""
           aria-hidden="true"
-          className="h-full w-full object-cover"
+          className="size-full object-cover"
           draggable={false}
           onError={() => setImgSrc(getCategoryFallbackImage(categoryName))}
         />
       </div>
 
-      <div className="flex flex-1 flex-col gap-[6px]">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-body-14-md line-clamp-2 text-neutral-900">
-            {title}
-          </h3>
-          <button
-            type="button"
-            onClick={handleBookmarkClick}
-            className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center"
-          >
-            <img
-              src={isBookmarked ? bookmarkFill : bookmarkLine}
-              alt="북마크"
-              className="h-full w-full object-contain"
-            />
-          </button>
-        </div>
-
-        <div className="flex h-[22px] w-full items-center justify-between">
-          <div className="flex items-center gap-[4px]">
-            <Badge variant="orange">{categoryName}</Badge>
-            <span className="text-caption-12-md text-neutral-400">
-              {formatRelativeDate(publishedAt)}
-            </span>
+      <div className="flex min-w-0 flex-1 self-stretch py-[13px]">
+        <div className="flex min-w-0 flex-1 flex-col justify-between">
+          <div className="flex max-h-10 items-start gap-2">
+            <h3 className="text-body-14-md line-clamp-2 min-w-0 flex-1 text-neutral-900">
+              {title}
+            </h3>
+            <button
+              type="button"
+              onClick={handleBookmarkClick}
+              disabled={isScrapPending}
+              aria-label={isBookmarked ? "북마크 해제" : "북마크"}
+              className="flex size-6 flex-shrink-0 items-center justify-center disabled:opacity-60"
+            >
+              <img
+                src={isBookmarked ? bookmarkFill : bookmarkLine}
+                alt=""
+                aria-hidden="true"
+                className="size-full object-contain"
+                draggable={false}
+              />
+            </button>
           </div>
 
-          <span className="text-caption-12-md text-neutral-400">
-            조회수 {formatViewCount(viewCount)}
-          </span>
+          <div className="flex h-[22px] w-full items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <Badge variant="orange">{displayCategoryName}</Badge>
+              <span className="text-caption-12-md shrink-0 text-neutral-400">
+                {formatRelativeDate(publishedAt)}
+              </span>
+            </div>
+
+            <span className="text-caption-12-md shrink-0 text-neutral-400">
+              조회수 {formatViewCount(viewCount)}
+            </span>
+          </div>
         </div>
       </div>
     </div>

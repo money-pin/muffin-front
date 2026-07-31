@@ -17,7 +17,7 @@ export default function TabBar<T extends string = string>({
   className = "",
 }: TabBarProps<T>) {
   return (
-    <nav className={`flex h-12 w-full items-center bg-neutral-0 ${className}`}>
+    <nav className={`flex h-12 w-full items-center ${className}`}>
       {tabs.map((tab) => {
         const isActive = tab.value === currentTab;
 
