@@ -3,54 +3,64 @@ import { useNavigate } from "react-router-dom";
 import Badge from "@/components/common/Badge";
 import bookmarkLine from "@/assets/icon-24px/bookmark-line-gray5.svg";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
-
-import newscardEconomy from "@/assets/newscard/newscard-economy.png";
-import newscardIT from "@/assets/newscard/newscard-IT.png";
-import newscardWorld from "@/assets/newscard/newscard-world.png";
-
-const NEWS_IMAGES = {
-  economy: newscardEconomy,
-  IT: newscardIT,
-  world: newscardWorld,
-} as const;
+import { useToggleScrap } from "../newsQueries";
+import {
+  getNewsImage,
+  getCategoryFallbackImage,
+  formatViewCount,
+  formatRelativeDate,
+} from "@/lib/newsFormat";
 
 export interface NewsCardProps {
-  id: number;
+  newsId: number;
   title: string;
-  category: string;
-  date: string;
-  views: string;
-  imageType: "economy" | "IT" | "world";
+  categoryName: string;
+  publishedAt: string; // ISO date-time
+  viewCount: number;
+  thumbnailUrl?: string;
+  // 목록 응답의 스크랩 여부. 카드 북마크 아이콘 초기 상태로 사용.
+  initialScrapped?: boolean;
 }
 
 export default function NewsCard({
-  id,
+  newsId,
   title,
-  category,
-  date,
-  views,
-  imageType,
+  categoryName,
+  publishedAt,
+  viewCount,
+  thumbnailUrl,
+  initialScrapped = false,
 }: NewsCardProps) {
   const navigate = useNavigate();
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(initialScrapped);
+  const { mutate: toggleScrap } = useToggleScrap(newsId);
+
+  const [imgSrc, setImgSrc] = useState(() =>
+    getNewsImage(thumbnailUrl, categoryName),
+  );
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsBookmarked((prev) => !prev);
+    const next = !isBookmarked;
+    setIsBookmarked(next); // 즉시 반영 (mutation 실패 시 아래에서 롤백)
+    toggleScrap(next, {
+      onError: () => setIsBookmarked(!next),
+    });
   };
 
   return (
     <div
-      onClick={() => navigate(`/news/${id}`)}
+      onClick={() => navigate(`/news/${newsId}`)}
       className="bg-neutral-0 flex w-full cursor-pointer items-center gap-[12px] rounded-[16px] border border-neutral-100 px-[16px] pt-[8px] pb-[16px] shadow-sm"
     >
       <div className="h-[56px] w-[56px] flex-shrink-0 overflow-hidden rounded-[4px]">
         <img
-          src={NEWS_IMAGES[imageType]}
+          src={imgSrc}
           alt=""
           aria-hidden="true"
           className="h-full w-full object-cover"
           draggable={false}
+          onError={() => setImgSrc(getCategoryFallbackImage(categoryName))}
         />
       </div>
 
@@ -74,12 +84,14 @@ export default function NewsCard({
 
         <div className="flex h-[22px] w-full items-center justify-between">
           <div className="flex items-center gap-[4px]">
-            <Badge variant="orange">{category}</Badge>
-            <span className="text-caption-12-md text-neutral-400">{date}</span>
+            <Badge variant="orange">{categoryName}</Badge>
+            <span className="text-caption-12-md text-neutral-400">
+              {formatRelativeDate(publishedAt)}
+            </span>
           </div>
 
           <span className="text-caption-12-md text-neutral-400">
-            조회수 {views}
+            조회수 {formatViewCount(viewCount)}
           </span>
         </div>
       </div>
