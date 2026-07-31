@@ -48,21 +48,21 @@ export default function SavedWordsTab() {
             className="flex w-full flex-col gap-[11px] rounded-[16px] border border-neutral-100 bg-white p-[16px] shadow-sm"
           >
             {/* 상단: 용어 제목 + 주황색 북마크 아이콘 */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               {/* 📌 디자인 토큰 적용: text-primary */}
-              <h3 className="text-primary text-[16px] leading-[160%] font-bold">
+              <h3 className="text-primary min-w-0 flex-1 text-[16px] leading-[160%] font-bold break-keep">
                 {item.term}
               </h3>
               <button
                 type="button"
                 onClick={() => handleRemoveWord(item.id)}
-                className="flex h-[28px] w-[28px] shrink-0 items-center justify-center"
+                className="-mr-2 flex size-11 shrink-0 items-center justify-center"
                 aria-label="용어 저장 해제"
               >
                 <img
                   src={wordSaveActiveIcon}
                   alt="저장됨"
-                  className="h-full w-full object-contain"
+                  className="h-7 w-7 object-contain"
                 />
               </button>
             </div>

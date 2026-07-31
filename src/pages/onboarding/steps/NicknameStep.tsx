@@ -18,8 +18,8 @@ export default function NicknameStep({
   const canSubmit = nickname.trim() !== "";
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-8 pt-5">
-      <div className="text-heading-20-bd text-neutral-1000">
+    <div className="flex flex-1 flex-col px-5 pt-5 pb-8">
+      <div className="text-heading-20-bd text-neutral-1000 break-keep">
         <p>가입이 완료됐어요!</p>
         <p>앞으로 사용할 닉네임을 설정해 주세요.</p>
       </div>

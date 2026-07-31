@@ -18,7 +18,7 @@ export default function MyProfile({
     <section className="flex flex-col items-center">
       <div className="relative">
         <CharacterAvatar size="large" variant={characterVariant} />
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[4px] bg-secondary-400 px-1.5 py-0.5 text-caption-12-bd text-white">
+        <span className="bg-secondary-400 text-caption-12-bd absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-[4px] px-1.5 py-0.5 whitespace-nowrap text-white">
           {characterLabel}
         </span>
       </div>
@@ -26,12 +26,15 @@ export default function MyProfile({
       <button
         type="button"
         onClick={onEditNickname}
-        className="mt-3 flex items-center gap-1"
+        className="mt-3 flex max-w-full items-center gap-1 px-5"
         aria-label="닉네임 변경"
       >
-        <span className="text-heading-20-bd text-neutral-900">{nickname}</span>
+        <span className="text-heading-20-bd min-w-0 truncate text-neutral-900">
+          {nickname}
+        </span>
         <svg
           aria-hidden="true"
+          className="shrink-0"
           width="20"
           height="20"
           viewBox="0 0 24 24"

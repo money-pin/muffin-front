@@ -23,16 +23,17 @@ export default function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="absolute inset-0 mx-auto max-w-[390px] bg-neutral-1000/45"
+        aria-hidden="true"
+        className="bg-neutral-1000/45 absolute inset-0"
         onClick={onCancel}
       />
 
-      <div className="relative z-10 w-[326px] rounded-[16px] bg-white px-4 pb-4 pt-7">
-        <p className="text-center text-heading-18-bd text-neutral-900">
+      <div className="relative z-10 w-[calc(100%-40px)] max-w-[326px] rounded-[16px] bg-white px-4 pt-7 pb-4">
+        <p className="text-heading-18-bd text-center text-neutral-900">
           {title}
         </p>
         {description && (
-          <p className="mt-3 whitespace-pre-line text-center text-body-14-md text-neutral-600">
+          <p className="text-body-14-md mt-3 text-center whitespace-pre-line text-neutral-600">
             {description}
           </p>
         )}
@@ -41,17 +42,15 @@ export default function ConfirmModal({
           <button
             type="button"
             onClick={onCancel}
-            className="h-[48px] flex-1 rounded-[12px] bg-neutral-50 text-body-16-bd-tighter text-neutral-400"
+            className="text-body-16-bd-tighter h-[48px] flex-1 rounded-[12px] bg-neutral-50 text-neutral-400"
           >
             취소
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`h-[48px] flex-1 rounded-[12px] text-body-16-bd-tighter ${
-              danger
-                ? "bg-positive-50 text-positive"
-                : "bg-primary text-white"
+            className={`text-body-16-bd-tighter h-[48px] flex-1 rounded-[12px] ${
+              danger ? "bg-positive-50 text-positive" : "bg-primary text-white"
             }`}
           >
             {confirmLabel}
