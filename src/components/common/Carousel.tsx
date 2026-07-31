@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { Children, useRef, useState } from "react";
 
 interface CarouselProps {
-  children: React.ReactNode[];
+  children: React.ReactNode;
 }
 
 export default function Carousel({ children }: CarouselProps) {
+  const slides = Children.toArray(children);
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
@@ -21,7 +22,7 @@ export default function Carousel({ children }: CarouselProps) {
   const handleTouchEnd = () => {
     const diffX = touchStartX.current - touchEndX.current;
 
-    if (diffX > 50 && currentIndex < children.length - 1) {
+    if (diffX > 50 && currentIndex < slides.length - 1) {
       setCurrentIndex((prev) => prev + 1);
     } else if (diffX < -50 && currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
@@ -29,7 +30,7 @@ export default function Carousel({ children }: CarouselProps) {
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-[16px]">
+    <div className="flex w-full flex-col items-center gap-4">
       <div
         className="w-full overflow-hidden px-5"
         onTouchStart={handleTouchStart}
@@ -37,13 +38,13 @@ export default function Carousel({ children }: CarouselProps) {
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="flex transition-transform duration-300 ease-out gap-[12px]"
+          className="flex gap-3 transition-transform duration-300 ease-out"
           style={{
-            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 12}px))`,
+            transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 12}px))`,
           }}
         >
-          {children.map((child, index) => (
-            <div key={index} className="w-[85%] shrink-0">
+          {slides.map((child, index) => (
+            <div key={index} className="w-full shrink-0">
               {child}
             </div>
           ))}
@@ -51,7 +52,7 @@ export default function Carousel({ children }: CarouselProps) {
       </div>
 
       <div className="flex items-center gap-[4px]">
-        {children.map((_, index) => {
+        {slides.map((_, index) => {
           const isActive = currentIndex === index;
           return (
             <button
@@ -59,12 +60,12 @@ export default function Carousel({ children }: CarouselProps) {
               type="button"
               onClick={() => setCurrentIndex(index)}
               aria-label={`${index + 1}번째 슬라이드로 이동`}
-              className="flex h-11 items-center justify-center p-1 border-none bg-transparent cursor-pointer outline-none"
+              className="flex h-2 items-center justify-center border-none bg-transparent p-0 outline-none"
             >
               <span
-                className={`h-[8px] transition-all duration-300 rounded-full ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   isActive
-                    ? "w-[40px] bg-primary"
+                    ? "bg-primary w-[40px]"
                     : "w-[8px] bg-neutral-100 hover:bg-neutral-200"
                 }`}
               />
