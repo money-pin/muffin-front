@@ -1,79 +1,111 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import wordSaveActiveIcon from "@/assets/icon-28px/wordsave-active.svg";
 import SortDropdown from "@/components/common/SortDropdown";
-import { SAVED_WORDS_MOCK_DATA, type SavedWord } from "../savedWordsData";
+import type { SavedTermListResult } from "@/lib/mypageApi";
+import { mypageQueryKeys, useSavedTermsQuery } from "@/lib/mypageQueries";
+import { unsaveTerm } from "@/lib/newsApi";
 
 type SortValue = "korean" | "recent";
 
+const SORT_OPTIONS = [
+  { value: "korean", label: "가나다순" },
+  { value: "recent", label: "최근 저장순" },
+] as const;
+
+function StorageMessage({ children }: { children: string }) {
+  return (
+    <p className="text-body-14-md px-5 py-16 text-center text-neutral-400">
+      {children}
+    </p>
+  );
+}
+
 export default function SavedWordsTab() {
   const [sortValue, setSortValue] = useState<SortValue>("korean");
-  const [words, setWords] = useState<SavedWord[]>(SAVED_WORDS_MOCK_DATA);
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError } = useSavedTermsQuery();
+  const terms = data?.savedTerms ?? [];
 
-  const sortOptions = [
-    { value: "korean", label: "가나다순" },
-    { value: "recent", label: "최근 저장순" },
-  ] as const;
+  const { mutate: removeTerm } = useMutation({
+    mutationFn: (termId: number) => unsaveTerm(termId),
+    // 낙관적으로 목록에서 제거, 실패 시 재조회로 복구
+    onMutate: (termId) => {
+      queryClient.setQueryData<SavedTermListResult>(
+        mypageQueryKeys.savedTerms(),
+        (old) =>
+          old
+            ? {
+                ...old,
+                savedTerms: old.savedTerms.filter((t) => t.termId !== termId),
+              }
+            : old,
+      );
+    },
+    onError: () => {
+      void queryClient.invalidateQueries({
+        queryKey: mypageQueryKeys.savedTerms(),
+      });
+    },
+  });
 
-  const handleRemoveWord = (id: number) => {
-    setWords((prev) => prev.filter((word) => word.id !== id));
-  };
-
-  const sortedWords = [...words].sort((a, b) => {
-    if (sortValue === "korean") {
-      return a.term.localeCompare(b.term, "ko");
-    }
+  const sortedTerms = [...terms].sort((a, b) => {
     if (sortValue === "recent") {
       return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime();
     }
-    return 0;
+    return a.term.localeCompare(b.term, "ko");
   });
 
   return (
-    <div className="mt-0 flex w-full flex-col pt-0">
-      {/* 상단 정렬 드롭다운 영역 */}
-      <div className="mt-0 flex w-full justify-end px-5 py-2">
+    <div className="flex w-full flex-col">
+      <div className="flex w-full justify-end px-5 py-2">
         <SortDropdown
-          options={sortOptions}
+          options={SORT_OPTIONS}
           value={sortValue}
           onChange={(val) => setSortValue(val as SortValue)}
           align="end"
         />
       </div>
 
-      {/* 저장된 용어 리스트 영역 */}
-      <section className="mt-1 flex flex-col gap-[12px] px-5 pb-10">
-        {sortedWords.map((item) => (
-          <div
-            key={item.id}
-            className="flex w-full flex-col gap-[11px] rounded-[16px] border border-neutral-100 bg-white p-[16px] shadow-sm"
-          >
-            {/* 상단: 용어 제목 + 주황색 북마크 아이콘 */}
-            <div className="flex items-center justify-between gap-2">
-              {/* 📌 디자인 토큰 적용: text-primary */}
-              <h3 className="text-primary min-w-0 flex-1 text-[16px] leading-[160%] font-bold break-keep">
-                {item.term}
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleRemoveWord(item.id)}
-                className="-mr-2 flex size-11 shrink-0 items-center justify-center"
-                aria-label="용어 저장 해제"
-              >
-                <img
-                  src={wordSaveActiveIcon}
-                  alt="저장됨"
-                  className="h-7 w-7 object-contain"
-                />
-              </button>
-            </div>
+      {isLoading ? (
+        <StorageMessage>저장한 용어를 불러오는 중이에요.</StorageMessage>
+      ) : isError ? (
+        <StorageMessage>저장한 용어를 불러오지 못했어요.</StorageMessage>
+      ) : sortedTerms.length === 0 ? (
+        <StorageMessage>저장한 용어가 없어요.</StorageMessage>
+      ) : (
+        <section className="mt-1 flex flex-col gap-3 px-5 pb-10">
+          {sortedTerms.map((item) => (
+            <div
+              key={item.termId}
+              className="flex w-full flex-col gap-[11px] rounded-[16px] border border-neutral-100 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-primary min-w-0 flex-1 text-[16px] leading-[160%] font-bold break-keep">
+                  {item.term}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => removeTerm(item.termId)}
+                  className="-mr-2 flex size-11 shrink-0 items-center justify-center"
+                  aria-label="용어 저장 해제"
+                >
+                  <img
+                    src={wordSaveActiveIcon}
+                    alt="저장됨"
+                    className="h-7 w-7 object-contain"
+                  />
+                </button>
+              </div>
 
-            {/* 하단: 용어 설명 텍스트 */}
-            <p className="word-keep-all text-[16px] leading-[160%] font-normal break-keep text-neutral-900">
-              {item.description}
-            </p>
-          </div>
-        ))}
-      </section>
+              <p className="text-[16px] leading-[160%] font-normal break-keep text-neutral-900">
+                {item.content}
+              </p>
+            </div>
+          ))}
+        </section>
+      )}
     </div>
   );
 }

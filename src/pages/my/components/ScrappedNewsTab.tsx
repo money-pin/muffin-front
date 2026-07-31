@@ -1,102 +1,76 @@
 import { useState } from "react";
-import SortDropdown from "../../../components/common/SortDropdown";
-import NewCard from "../../news/components/NewsCard";
+
+import SortDropdown from "@/components/common/SortDropdown";
+import { useScrapsQuery } from "@/lib/mypageQueries";
+import NewsCard from "@/pages/news/components/NewsCard";
 
 type SortValue = "recent" | "upload" | "views";
 
+const SORT_OPTIONS = [
+  { value: "recent", label: "최근 저장순" },
+  { value: "upload", label: "업로드순" },
+  { value: "views", label: "조회수순" },
+] as const;
+
+function StorageMessage({ children }: { children: string }) {
+  return (
+    <p className="text-body-14-md px-5 py-16 text-center text-neutral-400">
+      {children}
+    </p>
+  );
+}
+
 export default function ScrappedNewsTab() {
   const [sortValue, setSortValue] = useState<SortValue>("recent");
+  const { data, isLoading, isError } = useScrapsQuery();
+  const scraps = data?.items ?? [];
 
-  const sortOptions = [
-    { value: "recent", label: "최근 저장순" },
-    { value: "upload", label: "업로드순" },
-    { value: "views", label: "조회수순" },
-  ] as const;
-
-  const scrappedNewsList = [
-    {
-      id: 1,
-      title: "국내 테크 기업 실적 발표 앞두고 기대감 고조",
-      category: "IT",
-      date: "2026-05-06",
-      views: "1,567회",
-      imageType: "IT" as const,
-      timestamp: 1778092800000,
-      rawViews: 1567,
-    },
-    {
-      id: 2,
-      title: "에너지 섹터 투자 포인트",
-      category: "경제",
-      date: "2026-05-08",
-      views: "1,203회",
-      imageType: "economy" as const,
-      timestamp: 1778265600000,
-      rawViews: 1203,
-    },
-    {
-      id: 3,
-      title: "국내 증시 외국인 순매수세 지속",
-      category: "경제",
-      date: "2026-05-06",
-      views: "2,890회",
-      imageType: "economy" as const,
-      timestamp: 1778092800000,
-      rawViews: 2890,
-    },
-    {
-      id: 4,
-      title: "미국 금리 동결 전망 분석",
-      category: "세계",
-      date: "2026-05-07",
-      views: "3,421회",
-      imageType: "world" as const,
-      timestamp: 1778179200000,
-      rawViews: 3421,
-    },
-    {
-      id: 5,
-      title: "코인 시장 변동성 확대 대응 전략",
-      category: "경제",
-      date: "2026-05-08",
-      views: "6,000회",
-      imageType: "economy" as const,
-      timestamp: 1778265600000,
-      rawViews: 6000,
-    },
-  ];
-
-  const sortedNewsList = [...scrappedNewsList].sort((a, b) => {
-    if (sortValue === "recent") return b.id - a.id;
-    if (sortValue === "upload") return b.timestamp - a.timestamp;
-    if (sortValue === "views") return b.rawViews - a.rawViews;
-    return 0;
+  const sortedScraps = [...scraps].sort((a, b) => {
+    if (sortValue === "upload") {
+      return (
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      );
+    }
+    if (sortValue === "views") {
+      return b.viewCount - a.viewCount;
+    }
+    // recent: 저장 시각 최신순
+    return new Date(b.scrappedAt).getTime() - new Date(a.scrappedAt).getTime();
   });
 
   return (
-    <div className="mt-0 flex w-full flex-col pt-0">
-      <div className="mt-0 flex w-full justify-end px-5 py-2">
+    <div className="flex w-full flex-col">
+      <div className="flex w-full justify-end px-5 py-2">
         <SortDropdown
-          options={sortOptions}
+          options={SORT_OPTIONS}
           value={sortValue}
           onChange={(val) => setSortValue(val as SortValue)}
           align="end"
         />
       </div>
 
-      <section className="mt-1 flex flex-col gap-[12px] px-5">
-        {sortedNewsList.map((news) => (
-          <NewCard
-            key={news.id}
-            newsId={news.id}
-            title={news.title}
-            categoryName={news.category}
-            publishedAt={news.date}
-            viewCount={news.rawViews}
-            initialScrapped={true}
-          />
-        ))}
-      </section>
+      {isLoading ? (
+        <StorageMessage>스크랩한 뉴스를 불러오는 중이에요.</StorageMessage>
+      ) : isError ? (
+        <StorageMessage>스크랩한 뉴스를 불러오지 못했어요.</StorageMessage>
+      ) : sortedScraps.length === 0 ? (
+        <StorageMessage>스크랩한 뉴스가 없어요.</StorageMessage>
+      ) : (
+        <section className="mt-1 flex flex-col gap-3 px-5 pb-10">
+          {sortedScraps.map((news) => (
+            <NewsCard
+              key={news.newsId}
+              newsId={news.newsId}
+              title={news.title}
+              categoryName={news.categoryName}
+              publishedAt={news.publishedAt}
+              viewCount={news.viewCount}
+              thumbnailUrl={news.thumbnailUrl}
+              initialScrapped={true}
+            />
+          ))}
+        </section>
+      )}
     </div>
   );
 }

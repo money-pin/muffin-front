@@ -58,3 +58,44 @@ export interface QuizResult {
     claimed: boolean;
   };
 }
+
+// ── 지난 퀴즈 복습 (GET /api/quizzes/history, /history/{date}) ──
+export interface QuizHistorySummary {
+  quizDate: string;
+  totalCount: number;
+  correctCount: number;
+  incorrectCount: number;
+}
+
+export interface QuizHistoryList {
+  histories: QuizHistorySummary[];
+}
+
+export interface QuizHistoryOption {
+  optionId: number;
+  optionOrder: number;
+  content: string;
+  isSelected: boolean;
+  isCorrect: boolean;
+}
+
+export interface QuizHistoryQuestion {
+  quizId: number;
+  questionOrder: number;
+  question: string;
+  isCorrect: boolean;
+  selectedOptionId: number;
+  correctOptionId: number;
+  options: QuizHistoryOption[];
+  explanation: string;
+}
+
+export interface QuizHistoryDetail {
+  quizDate: string;
+  summary: {
+    totalCount: number;
+    correctCount: number;
+    incorrectCount: number;
+  };
+  questions: QuizHistoryQuestion[];
+}

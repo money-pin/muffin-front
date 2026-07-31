@@ -71,3 +71,107 @@ export async function resolveEntryRoute(): Promise<"/home" | "/onboarding"> {
     return "/home";
   }
 }
+
+function toQuery(params: Record<string, string | number | undefined>): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
+// ── 스크랩한 뉴스 목록 (GET /api/mypage/scraps, 커서 페이지네이션) ──
+export interface ScrapItem {
+  newsId: number;
+  title: string;
+  categoryName: string | null;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  publishedAt: string;
+  scrappedAt: string;
+}
+
+export interface ScrapListResult {
+  items: ScrapItem[];
+  nextCursor: string | null;
+  hasNext: boolean;
+}
+
+export function getScraps(params?: {
+  cursor?: string;
+  size?: number;
+  sort?: string;
+}): Promise<ScrapListResult> {
+  return apiRequest<ScrapListResult>(
+    `/api/mypage/scraps${toQuery({ ...params })}`,
+    { auth: true },
+  );
+}
+
+// ── 저장한 용어 목록 (GET /api/mypage/saved-terms, page 페이지네이션) ──
+export interface SavedTermItem {
+  termId: number;
+  term: string;
+  content: string;
+  savedAt: string;
+}
+
+export interface SavedTermListResult {
+  savedTerms: SavedTermItem[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+}
+
+export function getSavedTerms(params?: {
+  page?: number;
+  size?: number;
+  sort?: string;
+}): Promise<SavedTermListResult> {
+  return apiRequest<SavedTermListResult>(
+    `/api/mypage/saved-terms${toQuery({ ...params })}`,
+    { auth: true },
+  );
+}
+
+// ── 알림 설정 (GET/PATCH /api/mypage/settings/notifications) ──
+export interface NotificationSettings {
+  newsUpdate: boolean;
+  dailyQuiz: boolean;
+  investResult: boolean;
+  rankingChange: boolean;
+}
+
+// 응답은 { notifications: {...} } 로 래핑되어 온다
+interface MyPageSettings {
+  notifications: NotificationSettings;
+}
+
+export async function getNotificationSettings(): Promise<NotificationSettings> {
+  const result = await apiRequest<MyPageSettings>(
+    "/api/mypage/settings/notifications",
+    { auth: true },
+  );
+  return result.notifications;
+}
+
+export async function updateNotificationSettings(
+  body: NotificationSettings,
+): Promise<NotificationSettings> {
+  const result = await apiRequest<MyPageSettings>(
+    "/api/mypage/settings/notifications",
+    { method: "PATCH", body, auth: true },
+  );
+  return result.notifications;
+}
+
+// ── 닉네임 중복 확인 (GET /api/mypage/nickname/check) ──
+export function checkNickname(
+  nickname: string,
+): Promise<{ available: boolean }> {
+  return apiRequest<{ available: boolean }>(
+    `/api/mypage/nickname/check${toQuery({ nickname })}`,
+    { auth: true },
+  );
+}
