@@ -78,7 +78,7 @@ export default function NewsPage() {
       )}
 
       <div
-        className={`sticky top-0 z-10 w-full bg-neutral-50 ${
+        className={`sticky top-0 z-10 w-full border-b border-neutral-100 bg-neutral-50 ${
           hasTrendingNews ? "mt-8" : ""
         }`}
       >

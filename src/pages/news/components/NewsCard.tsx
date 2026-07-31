@@ -1,25 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Badge from "@/components/common/Badge";
-import bookmarkLine from "@/assets/icon-24px/bookmark-line-gray5.svg";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
-import { useToggleScrap } from "../newsQueries";
+import bookmarkLine from "@/assets/icon-24px/bookmark-line-gray5.svg";
 import {
-  getNewsImage,
-  getCategoryFallbackImage,
   formatCategoryName,
-  formatViewCount,
   formatRelativeDate,
+  formatViewCount,
+  getCategoryFallbackImage,
+  getNewsImage,
 } from "@/lib/newsFormat";
+import { useToggleScrap } from "../newsQueries";
 
 export interface NewsCardProps {
   newsId: number;
   title: string;
   categoryName: string | null;
-  publishedAt: string; // ISO date-time
+  publishedAt: string;
   viewCount: number;
   thumbnailUrl?: string | null;
-  // 목록 응답의 스크랩 여부. 카드 북마크 아이콘 초기 상태로 사용.
   initialScrapped?: boolean;
 }
 
@@ -33,29 +32,27 @@ export default function NewsCard({
   initialScrapped = false,
 }: NewsCardProps) {
   const navigate = useNavigate();
-  const [isBookmarked, setIsBookmarked] = useState(initialScrapped);
-  const { mutate: toggleScrap, isPending: isScrapPending } =
-    useToggleScrap(newsId);
-  const displayCategoryName = formatCategoryName(categoryName);
-
+  const [optimisticScrapped, setOptimisticScrapped] = useState<boolean | null>(
+    null,
+  );
   const [imgSrc, setImgSrc] = useState(() =>
     getNewsImage(thumbnailUrl, categoryName),
   );
+  const { mutate: toggleScrap, isPending: isScrapPending } =
+    useToggleScrap(newsId);
 
-  useEffect(() => {
-    queueMicrotask(() => {
-      setIsBookmarked(initialScrapped);
-    });
-  }, [initialScrapped]);
+  const displayCategoryName = formatCategoryName(categoryName);
+  const isBookmarked = optimisticScrapped ?? initialScrapped;
 
-  const handleBookmarkClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleBookmarkClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
     if (isScrapPending) return;
 
     const next = !isBookmarked;
-    setIsBookmarked(next); // 즉시 반영 (mutation 실패 시 아래에서 롤백)
+    setOptimisticScrapped(next);
     toggleScrap(next, {
-      onError: () => setIsBookmarked(!next),
+      onError: () => setOptimisticScrapped(null),
+      onSettled: () => setOptimisticScrapped(null),
     });
   };
 
@@ -64,12 +61,12 @@ export default function NewsCard({
       onClick={() => navigate(`/news/${newsId}`)}
       className="bg-neutral-0 flex h-[100px] w-full cursor-pointer items-center gap-4 rounded-[12px] border border-neutral-100 px-3"
     >
-      <div className="h-[74px] w-[74px] flex-shrink-0 overflow-hidden rounded-[8px]">
+      <div className="size-[74px] flex-shrink-0 overflow-hidden rounded-[8px]">
         <img
           src={imgSrc}
           alt=""
           aria-hidden="true"
-          className="h-full w-full object-cover"
+          className="size-full object-cover"
           draggable={false}
           onError={() => setImgSrc(getCategoryFallbackImage(categoryName))}
         />
@@ -86,25 +83,27 @@ export default function NewsCard({
               onClick={handleBookmarkClick}
               disabled={isScrapPending}
               aria-label={isBookmarked ? "북마크 해제" : "북마크"}
-              className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center"
+              className="flex size-6 flex-shrink-0 items-center justify-center disabled:opacity-60"
             >
               <img
                 src={isBookmarked ? bookmarkFill : bookmarkLine}
-                alt="북마크"
-                className="h-full w-full object-contain"
+                alt=""
+                aria-hidden="true"
+                className="size-full object-contain"
+                draggable={false}
               />
             </button>
           </div>
 
           <div className="flex h-[22px] w-full items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <Badge variant="orange">{displayCategoryName}</Badge>
-              <span className="text-caption-12-md text-neutral-400">
+              <span className="text-caption-12-md shrink-0 text-neutral-400">
                 {formatRelativeDate(publishedAt)}
               </span>
             </div>
 
-            <span className="text-caption-12-md text-neutral-400">
+            <span className="text-caption-12-md shrink-0 text-neutral-400">
               조회수 {formatViewCount(viewCount)}
             </span>
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Badge from "@/components/common/Badge";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
@@ -21,7 +21,9 @@ export default function TodayNewsCarouselCard({
   news,
 }: TodayNewsCarouselCardProps) {
   const navigate = useNavigate();
-  const [isBookmarked, setIsBookmarked] = useState(news.isScrapped);
+  const [optimisticScrapped, setOptimisticScrapped] = useState<boolean | null>(
+    null,
+  );
   const [imgSrc, setImgSrc] = useState(() =>
     getNewsImage(news.thumbnailUrl, news.categoryName),
   );
@@ -29,20 +31,17 @@ export default function TodayNewsCarouselCard({
     news.newsId,
   );
 
-  useEffect(() => {
-    queueMicrotask(() => {
-      setIsBookmarked(news.isScrapped);
-    });
-  }, [news.isScrapped]);
+  const isBookmarked = optimisticScrapped ?? news.isScrapped;
 
   const handleBookmarkClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (isScrapPending) return;
 
     const next = !isBookmarked;
-    setIsBookmarked(next);
+    setOptimisticScrapped(next);
     toggleScrap(next, {
-      onError: () => setIsBookmarked(!next),
+      onError: () => setOptimisticScrapped(null),
+      onSettled: () => setOptimisticScrapped(null),
     });
   };
 
@@ -56,7 +55,7 @@ export default function TodayNewsCarouselCard({
           src={imgSrc}
           alt=""
           aria-hidden="true"
-          className="h-full w-full object-cover"
+          className="size-full object-cover"
           draggable={false}
           onError={() => setImgSrc(getCategoryFallbackImage(news.categoryName))}
         />

@@ -60,7 +60,7 @@ export default function Carousel({ children }: CarouselProps) {
               type="button"
               onClick={() => setCurrentIndex(index)}
               aria-label={`${index + 1}번째 슬라이드로 이동`}
-              className="flex h-2 items-center justify-center border-none bg-transparent p-0 outline-none"
+              className="flex h-11 items-center justify-center border-none bg-transparent p-1 outline-none"
             >
               <span
                 className={`h-2 rounded-full transition-all duration-300 ${
