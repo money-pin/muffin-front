@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
 import SectionHeader from "@/components/common/SectionHeader";
-import { useCharacter, CHARACTER_LABELS } from "@/lib/character";
-import { updateNickname, type MyHome } from "@/lib/mypageApi";
+import { CHARACTER_LABELS, characterTypeToVariant } from "@/lib/character";
+import { updateNickname, type MyHome, type WeekDay } from "@/lib/mypageApi";
 import { mypageQueryKeys, useMyHomeQuery } from "@/lib/mypageQueries";
+import { getNewsImage } from "@/lib/newsFormat";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
 
 import MyPageSkeleton from "./components/MyPageSkeleton";
@@ -14,28 +15,52 @@ import StreakWeekCard from "./components/StreakWeekCard";
 import StorageShortcuts from "./components/StorageShortcuts";
 import RecentNewsList from "./components/RecentNewsList";
 import NicknameModal from "./components/NicknameModal";
-import {
-  MY_RECENT_NEWS,
-  MY_TODAY_INDEX,
-  MY_USER,
-  MY_WEEK_CHECKS,
-} from "./myData";
+import type { MyRecentNews } from "./myData";
+
+// 스트릭 주간 카드는 일~토 순서를 기대한다 (API weeklyActivity를 이 순서로 정렬)
+const WEEK_ORDER: WeekDay[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 // Figma 마이: 프로필·스트릭 영역(주황빛 배경) + 학습 저장소·최근 읽은 뉴스(흰 배경)
 function MyPage() {
   const navigate = useNavigate();
-  const character = useCharacter();
   const queryClient = useQueryClient();
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
 
-  // 닉네임은 홈과 같은 캐시(useMyHomeQuery)에서 조회. 로딩 동안엔 스켈레톤을
-  // 노출해 닉네임 칸이 비었다가 채워지는 깜빡임을 막는다.
+  // 닉네임·캐릭터·스트릭·최근뉴스 모두 /api/mypage/home 응답에서 조회 (홈과 캐시 공유).
+  // 로딩 동안엔 스켈레톤을 노출해 mock/빈 값 깜빡임을 막는다.
   const myHomeQuery = useMyHomeQuery();
-  const nickname = myHomeQuery.data?.nickname ?? "";
+  const home = myHomeQuery.data;
+  const nickname = home?.nickname ?? "";
 
   if (myHomeQuery.isLoading) {
     return <MyPageSkeleton />;
   }
+
+  // 캐릭터: 서버 characterType(대문자) → 화면 variant, 라벨은 서버 캐릭터명 우선
+  const characterVariant = home?.character
+    ? characterTypeToVariant(home.character.characterType)
+    : "plain";
+  const characterLabel =
+    home?.character?.characterName ?? CHARACTER_LABELS[characterVariant];
+
+  // 스트릭: weeklyActivity(요일 무순) → 일~토 참여 여부 배열
+  const streakDays = home?.streak?.currentStreak ?? 0;
+  const weekChecks = WEEK_ORDER.map(
+    (weekDay) =>
+      home?.streak?.weeklyActivity.find((activity) => activity.day === weekDay)
+        ?.participated ?? false,
+  );
+  const todayIndex = new Date().getDay(); // 0=일 … 6=토 (WEEK_ORDER와 동일)
+
+  // 최근 읽은 뉴스: API 응답 → 카드 목록 형태로 매핑
+  const recentNewsList: MyRecentNews[] = (home?.recentNews ?? []).map(
+    (news) => ({
+      id: news.newsId,
+      title: news.title,
+      image: getNewsImage(news.thumbnailUrl, news.categoryName),
+      bookmarked: false,
+    }),
+  );
 
   return (
     <div className="flex min-h-full flex-col">
@@ -66,16 +91,16 @@ function MyPage() {
 
         <MyProfile
           nickname={nickname}
-          characterVariant={character}
-          characterLabel={CHARACTER_LABELS[character]}
+          characterVariant={characterVariant}
+          characterLabel={characterLabel}
           onEditNickname={() => setNicknameModalOpen(true)}
         />
 
         <div className="mt-5 px-5">
           <StreakWeekCard
-            streakDays={MY_USER.streakDays}
-            weekChecks={MY_WEEK_CHECKS}
-            todayIndex={MY_TODAY_INDEX}
+            streakDays={streakDays}
+            weekChecks={weekChecks}
+            todayIndex={todayIndex}
           />
         </div>
       </div>
@@ -109,7 +134,7 @@ function MyPage() {
             }
           />
           <RecentNewsList
-            newsList={MY_RECENT_NEWS}
+            newsList={recentNewsList}
             onNewsClick={(newsId) => navigate(`/news/${newsId}`)}
           />
         </section>

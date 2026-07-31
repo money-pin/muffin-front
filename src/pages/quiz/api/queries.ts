@@ -1,11 +1,20 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { getQuizResult, getTodayQuiz, submitQuizAttempt } from "./quizApi";
+import {
+  getQuizHistory,
+  getQuizHistoryDetail,
+  getQuizResult,
+  getTodayQuiz,
+  submitQuizAttempt,
+} from "./quizApi";
 
 export const quizQueryKeys = {
   all: ["quiz"] as const,
   today: () => [...quizQueryKeys.all, "today"] as const,
   result: () => [...quizQueryKeys.all, "result"] as const,
+  history: () => [...quizQueryKeys.all, "history"] as const,
+  historyDetail: (date: string) =>
+    [...quizQueryKeys.all, "history", date] as const,
 };
 
 export function useTodayQuizQuery() {
@@ -21,6 +30,23 @@ export function useQuizResultQuery(enabled = true) {
     queryKey: quizQueryKeys.result(),
     queryFn: getQuizResult,
     enabled,
+    retry: false,
+  });
+}
+
+export function useQuizHistoryQuery() {
+  return useQuery({
+    queryKey: quizQueryKeys.history(),
+    queryFn: getQuizHistory,
+    retry: false,
+  });
+}
+
+export function useQuizHistoryDetailQuery(date: string | null) {
+  return useQuery({
+    queryKey: quizQueryKeys.historyDetail(date ?? ""),
+    queryFn: () => getQuizHistoryDetail(date as string),
+    enabled: date !== null,
     retry: false,
   });
 }

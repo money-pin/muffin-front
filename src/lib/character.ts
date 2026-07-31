@@ -14,6 +14,20 @@ export const CHARACTER_LABELS: Record<CharacterVariant, string> = {
   cream: "생크림 머핀",
 };
 
+// 서버 characterType(대문자 enum) → 화면 variant(소문자)
+const CHARACTER_TYPE_TO_VARIANT: Record<string, CharacterVariant> = {
+  PLAIN: "plain",
+  SPRINKLE: "sprinkle",
+  BUTTER: "butter",
+  CREAM: "cream",
+};
+
+export function characterTypeToVariant(
+  characterType: string,
+): CharacterVariant {
+  return CHARACTER_TYPE_TO_VARIANT[characterType] ?? DEFAULT_VARIANT;
+}
+
 function isCharacterVariant(value: unknown): value is CharacterVariant {
   return (
     value === "plain" ||

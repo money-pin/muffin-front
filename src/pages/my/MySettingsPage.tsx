@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { clearAccessToken } from "@/lib/auth";
 import { logout, withdraw } from "@/lib/authApi";
+import {
+  updateNotificationSettings,
+  type NotificationSettings,
+} from "@/lib/mypageApi";
+import {
+  mypageQueryKeys,
+  useNotificationSettingsQuery,
+} from "@/lib/mypageQueries";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 
 import PrivacyPolicyModal from "@/pages/legal/PrivacyPolicyModal";
@@ -12,13 +21,13 @@ import SettingToggle from "./components/SettingToggle";
 import ConfirmModal from "./components/ConfirmModal";
 import { APP_VERSION } from "./myData";
 
-type NotificationKey = "news" | "quiz" | "invest" | "ranking";
+type NotificationKey = keyof NotificationSettings;
 
 const NOTIFICATION_ROWS: { key: NotificationKey; label: string }[] = [
-  { key: "news", label: "뉴스 업데이트 알림" },
-  { key: "quiz", label: "일일 퀴즈 알림" },
-  { key: "invest", label: "투자 결과 알림" },
-  { key: "ranking", label: "랭킹 변동 알림" },
+  { key: "newsUpdate", label: "뉴스 업데이트 알림" },
+  { key: "dailyQuiz", label: "일일 퀴즈 알림" },
+  { key: "investResult", label: "투자 결과 알림" },
+  { key: "rankingChange", label: "랭킹 변동 알림" },
 ];
 
 interface SectionProps {
@@ -72,13 +81,16 @@ function MySettingsPage() {
   const navigate = useNavigate();
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
 
-  const [notifications, setNotifications] = useState<
-    Record<NotificationKey, boolean>
-  >({
-    news: true,
-    quiz: true,
-    invest: true,
-    ranking: false,
+  const queryClient = useQueryClient();
+  const { data: notifications } = useNotificationSettingsQuery();
+  const { mutate: saveNotifications } = useMutation({
+    mutationFn: updateNotificationSettings,
+    // 실패 시 서버 상태로 되돌리기 위해 재조회
+    onError: () => {
+      void queryClient.invalidateQueries({
+        queryKey: mypageQueryKeys.notifications(),
+      });
+    },
   });
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
@@ -113,7 +125,14 @@ function MySettingsPage() {
   }, [setTopBar, resetTopBar]);
 
   const toggleNotification = (key: NotificationKey) => {
-    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
+    if (!notifications) return;
+    const next: NotificationSettings = {
+      ...notifications,
+      [key]: !notifications[key],
+    };
+    // 낙관적으로 즉시 반영 후 서버 저장
+    queryClient.setQueryData(mypageQueryKeys.notifications(), next);
+    saveNotifications(next);
   };
 
   return (
@@ -126,7 +145,7 @@ function MySettingsPage() {
           >
             <span className="text-body-14-md text-neutral-900">{label}</span>
             <SettingToggle
-              checked={notifications[key]}
+              checked={notifications?.[key] ?? false}
               onToggle={() => toggleNotification(key)}
               label={label}
             />

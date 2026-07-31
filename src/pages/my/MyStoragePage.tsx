@@ -4,7 +4,6 @@ import TopBar from "../../components/common/TopBar";
 import ScrappedNewsTab from "./components/ScrappedNewsTab";
 import SavedWordsTab from "./components/SavedWordsTab";
 import QuizReviewTab from "./components/QuizReviewTab";
-import { type QuizHistoryItem } from "./quizReviewData";
 
 type TabType = "news" | "word" | "quiz";
 
@@ -13,9 +12,8 @@ export default function MyStoragePage() {
   const [searchParams] = useSearchParams();
   const currentTab = (searchParams.get("tab") || "news") as TabType;
 
-  // 퀴즈 복습 상세 선택 상태를 부모에서 관리
-  const [selectedQuizHistory, setSelectedQuizHistory] =
-    useState<QuizHistoryItem | null>(null);
+  // 퀴즈 복습 상세는 날짜(quizDate) 기준으로 선택 (상세는 QuizReviewTab에서 조회)
+  const [selectedQuizDate, setSelectedQuizDate] = useState<string | null>(null);
 
   const tabTitleMap: Record<TabType, string> = {
     news: "스크랩한 뉴스",
@@ -24,15 +22,15 @@ export default function MyStoragePage() {
   };
 
   const getTitle = () => {
-    if (currentTab === "quiz" && selectedQuizHistory) {
-      return `${selectedQuizHistory.date} 퀴즈 복습`;
+    if (currentTab === "quiz" && selectedQuizDate) {
+      return `${selectedQuizDate} 퀴즈 복습`;
     }
     return tabTitleMap[currentTab] || "학습 저장소";
   };
 
   const handleBack = () => {
-    if (currentTab === "quiz" && selectedQuizHistory) {
-      setSelectedQuizHistory(null);
+    if (currentTab === "quiz" && selectedQuizDate) {
+      setSelectedQuizDate(null);
       return;
     }
     navigate(-1);
@@ -56,8 +54,8 @@ export default function MyStoragePage() {
         {currentTab === "word" && <SavedWordsTab />}
         {currentTab === "quiz" && (
           <QuizReviewTab
-            selectedHistory={selectedQuizHistory}
-            onSelectHistory={setSelectedQuizHistory}
+            selectedDate={selectedQuizDate}
+            onSelectDate={setSelectedQuizDate}
           />
         )}
       </div>

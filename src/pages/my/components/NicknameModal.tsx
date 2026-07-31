@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Button from "@/components/common/Button";
+import { checkNickname } from "@/lib/mypageApi";
 import closeIcon from "@/assets/icon-24px/close.svg";
 import closeButtonIcon from "@/assets/icon-24px/close-button.svg";
-import { NICKNAME_MAX_LENGTH, TAKEN_NICKNAMES } from "@/pages/my/myData";
+import { NICKNAME_MAX_LENGTH } from "@/pages/my/myData";
 
 interface NicknameModalProps {
   isOpen: boolean;
@@ -12,10 +13,10 @@ interface NicknameModalProps {
   onChange: (nickname: string) => void;
 }
 
-type NicknameStatus = "idle" | "taken" | "available";
+type NicknameStatus = "idle" | "checking" | "taken" | "available";
 
 // Figma 닉네임 변경 모달: 입력 + 중복/사용 가능 헬퍼 텍스트 + 변경 버튼
-// 중복 검사는 API 연동 전 목데이터(TAKEN_NICKNAMES) 기준
+// 중복 검사는 GET /api/mypage/nickname/check (입력 디바운스 후 조회)
 export default function NicknameModal({
   isOpen,
   currentNickname,
@@ -23,16 +24,42 @@ export default function NicknameModal({
   onChange,
 }: NicknameModalProps) {
   const [value, setValue] = useState(currentNickname);
+  // 조회 결과만 상태로 두고, 표시 status는 렌더에서 파생한다
+  // (effect 내 동기 setState 금지 규칙 대응)
+  const [checked, setChecked] = useState<{
+    nickname: string;
+    available: boolean;
+  } | null>(null);
+  const trimmed = value.trim();
+  const isCheckable = trimmed !== "" && trimmed !== currentNickname;
+
+  // 입력이 멈추면(400ms) 중복 조회. 결과는 checked에 저장(비동기 콜백에서만 setState).
+  useEffect(() => {
+    if (!isCheckable) return;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      checkNickname(trimmed)
+        .then((res) => {
+          if (active)
+            setChecked({ nickname: trimmed, available: res.available });
+        })
+        .catch(() => {});
+    }, 400);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [trimmed, isCheckable]);
 
   if (!isOpen) return null;
 
-  const trimmed = value.trim();
-  const getStatus = (): NicknameStatus => {
-    if (trimmed === "" || trimmed === currentNickname) return "idle";
-    if (TAKEN_NICKNAMES.includes(trimmed)) return "taken";
-    return "available";
-  };
-  const status = getStatus();
+  const status: NicknameStatus = !isCheckable
+    ? "idle"
+    : checked?.nickname === trimmed
+      ? checked.available
+        ? "available"
+        : "taken"
+      : "checking";
 
   const helperByStatus: Record<
     NicknameStatus,
@@ -40,6 +67,10 @@ export default function NicknameModal({
   > = {
     idle: {
       text: `최대 ${NICKNAME_MAX_LENGTH}자 설정 가능`,
+      className: "text-neutral-400",
+    },
+    checking: {
+      text: "닉네임 확인 중이에요...",
       className: "text-neutral-400",
     },
     taken: { text: "이미 사용 중인 닉네임이에요!", className: "text-positive" },

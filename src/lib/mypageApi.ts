@@ -14,15 +14,42 @@ export async function updateNickname(
   });
 }
 
-// 홈 화면 프로필 정보. streak·recentNews 등은 후속 PR에서 사용 예정
+export interface MyHomeCharacter {
+  characterId: number;
+  characterType: "PLAIN" | "SPRINKLE" | "BUTTER" | (string & {});
+  characterName: string;
+  characterImageUrl: string;
+}
+
+export type WeekDay = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
+
+export interface MyHomeWeeklyDay {
+  day: WeekDay | (string & {});
+  participated: boolean;
+}
+
+export interface MyHomeStreak {
+  currentStreak: number;
+  maxStreak: number;
+  weeklyActivity: MyHomeWeeklyDay[];
+}
+
+export interface MyHomeRecentNews {
+  newsId: number;
+  title: string;
+  categoryName: string | null;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  publishedAt: string;
+  viewedAt: string;
+}
+
+// 마이페이지 홈 (GET /api/mypage/home): 닉네임·캐릭터·스트릭·최근 읽은 뉴스
 export interface MyHome {
   nickname: string;
-  character: {
-    characterId: number;
-    characterType: string;
-    characterName: string;
-    characterImageUrl: string;
-  };
+  character: MyHomeCharacter;
+  streak?: MyHomeStreak;
+  recentNews?: MyHomeRecentNews[];
 }
 
 // 홈 프로필 조회 (GET /api/mypage/home)
@@ -43,4 +70,108 @@ export async function resolveEntryRoute(): Promise<"/home" | "/onboarding"> {
     // 그 외 오류(네트워크 등)는 일단 홈으로 — 홈에서 재조회/처리
     return "/home";
   }
+}
+
+function toQuery(params: Record<string, string | number | undefined>): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
+// ── 스크랩한 뉴스 목록 (GET /api/mypage/scraps, 커서 페이지네이션) ──
+export interface ScrapItem {
+  newsId: number;
+  title: string;
+  categoryName: string | null;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  publishedAt: string;
+  scrappedAt: string;
+}
+
+export interface ScrapListResult {
+  items: ScrapItem[];
+  nextCursor: string | null;
+  hasNext: boolean;
+}
+
+export function getScraps(params?: {
+  cursor?: string;
+  size?: number;
+  sort?: string;
+}): Promise<ScrapListResult> {
+  return apiRequest<ScrapListResult>(
+    `/api/mypage/scraps${toQuery({ ...params })}`,
+    { auth: true },
+  );
+}
+
+// ── 저장한 용어 목록 (GET /api/mypage/saved-terms, page 페이지네이션) ──
+export interface SavedTermItem {
+  termId: number;
+  term: string;
+  content: string;
+  savedAt: string;
+}
+
+export interface SavedTermListResult {
+  savedTerms: SavedTermItem[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+}
+
+export function getSavedTerms(params?: {
+  page?: number;
+  size?: number;
+  sort?: string;
+}): Promise<SavedTermListResult> {
+  return apiRequest<SavedTermListResult>(
+    `/api/mypage/saved-terms${toQuery({ ...params })}`,
+    { auth: true },
+  );
+}
+
+// ── 알림 설정 (GET/PATCH /api/mypage/settings/notifications) ──
+export interface NotificationSettings {
+  newsUpdate: boolean;
+  dailyQuiz: boolean;
+  investResult: boolean;
+  rankingChange: boolean;
+}
+
+// 응답은 { notifications: {...} } 로 래핑되어 온다
+interface MyPageSettings {
+  notifications: NotificationSettings;
+}
+
+export async function getNotificationSettings(): Promise<NotificationSettings> {
+  const result = await apiRequest<MyPageSettings>(
+    "/api/mypage/settings/notifications",
+    { auth: true },
+  );
+  return result.notifications;
+}
+
+export async function updateNotificationSettings(
+  body: NotificationSettings,
+): Promise<NotificationSettings> {
+  const result = await apiRequest<MyPageSettings>(
+    "/api/mypage/settings/notifications",
+    { method: "PATCH", body, auth: true },
+  );
+  return result.notifications;
+}
+
+// ── 닉네임 중복 확인 (GET /api/mypage/nickname/check) ──
+export function checkNickname(
+  nickname: string,
+): Promise<{ available: boolean }> {
+  return apiRequest<{ available: boolean }>(
+    `/api/mypage/nickname/check${toQuery({ nickname })}`,
+    { auth: true },
+  );
 }
