@@ -101,7 +101,6 @@ export default function NewsDetailPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasReadRef = useRef(false);
 
-  const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [selectedTermId, setSelectedTermId] = useState<number | null>(null);
   const isTermSheetOpen = selectedTermId != null;
 
@@ -148,13 +147,9 @@ export default function NewsDetailPage() {
     }
   }, [selectedTermId, termError]);
 
-  const handleScroll = () => {
-    if (!containerRef.current) return;
-    setShowScrollBtn(containerRef.current.scrollTop > 300);
-  };
-
   const handleScrollToTop = () => {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleBookmarkClick = () => {
@@ -200,7 +195,6 @@ export default function NewsDetailPage() {
     <div className="relative mx-auto flex min-h-dvh w-full max-w-[var(--max-width-app)] flex-col bg-neutral-50 text-neutral-900">
       <div
         ref={containerRef}
-        onScroll={handleScroll}
         className="relative w-full flex-1 overflow-y-auto"
       >
         <article className="bg-neutral-0 flex w-full flex-col">
@@ -331,15 +325,12 @@ export default function NewsDetailPage() {
             </p>
           </section>
         ) : null}
-
-        {showScrollBtn && (
-          <div className="pointer-events-none sticky bottom-6 z-50 flex justify-end pr-5">
-            <div className="pointer-events-auto">
-              <ScrollToTopButton onClick={handleScrollToTop} />
-            </div>
-          </div>
-        )}
       </div>
+
+      <ScrollToTopButton
+        onClick={handleScrollToTop}
+        className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-6 z-40"
+      />
 
       <BottomSheet
         isOpen={isTermSheetOpen}

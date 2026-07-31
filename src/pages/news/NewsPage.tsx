@@ -79,7 +79,7 @@ export default function NewsPage() {
 
       <div
         className={`sticky top-0 z-10 w-full border-b border-neutral-100 bg-neutral-50 ${
-          hasTrendingNews ? "mt-8" : ""
+          hasTrendingNews ? "mt-4" : ""
         }`}
       >
         <TabBar
@@ -121,7 +121,7 @@ export default function NewsPage() {
         )}
       </section>
 
-      <ScrollToTopButton />
+      <ScrollToTopButton className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-[112px] z-40" />
     </div>
   );
 }
