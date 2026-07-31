@@ -17,7 +17,7 @@ import InvestResultSheet from "./components/InvestResultSheet";
 import BottomSheet from "@/components/common/BottomSheet";
 import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
 import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
-import { getMyHome } from "@/lib/mypageApi";
+import { useMyHomeQuery } from "@/lib/mypageQueries";
 import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
 import {
   HOME_USER,
@@ -43,23 +43,10 @@ function HomePage() {
   // 최근 투자 성과 클릭 시 수익 통계와 동일한 상세 바텀시트 노출
   const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
 
-  // 닉네임은 서버(/api/mypage/home)에서 조회. 초기값을 목으로 두면 틀린 이름이
-  // 잠깐 노출되므로(예: 예은) 빈 값으로 시작해 응답 후 채운다.
-  const [nickname, setNickname] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    getMyHome()
-      .then((home) => {
-        if (active) setNickname(home.nickname);
-      })
-      .catch(() => {
-        // 조회 실패 — 기존 닉네임 유지
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+  // 닉네임은 서버(/api/mypage/home)에서 조회. 로딩 동안에는 스켈레톤을 노출해
+  // "님의 총 자산" → 닉네임 삽입 시 글자가 늘어나는 깜빡임을 막는다.
+  const myHomeQuery = useMyHomeQuery();
+  const nickname = myHomeQuery.data?.nickname ?? "";
 
   // 총자산은 서버(/api/investments/asset)에서 조회, 실패/로딩 시 기존 표시값 유지
   const investmentAssetQuery = useInvestmentAssetQuery();
@@ -94,8 +81,8 @@ function HomePage() {
     }
   }, [investResultOpen]);
 
-  // 총자산 최초 로딩 동안에는 스켈레톤을 노출 (mock 값 깜빡임 방지)
-  if (investmentAssetQuery.isLoading) {
+  // 총자산·닉네임 최초 로딩 동안에는 스켈레톤을 노출 (mock 값·닉네임 깜빡임 방지)
+  if (investmentAssetQuery.isLoading || myHomeQuery.isLoading) {
     return <HomePageSkeleton />;
   }
 
