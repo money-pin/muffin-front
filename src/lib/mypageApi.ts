@@ -14,15 +14,42 @@ export async function updateNickname(
   });
 }
 
-// 홈 화면 프로필 정보. streak·recentNews 등은 후속 PR에서 사용 예정
+export interface MyHomeCharacter {
+  characterId: number;
+  characterType: "PLAIN" | "SPRINKLE" | "BUTTER" | (string & {});
+  characterName: string;
+  characterImageUrl: string;
+}
+
+export type WeekDay = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
+
+export interface MyHomeWeeklyDay {
+  day: WeekDay | (string & {});
+  participated: boolean;
+}
+
+export interface MyHomeStreak {
+  currentStreak: number;
+  maxStreak: number;
+  weeklyActivity: MyHomeWeeklyDay[];
+}
+
+export interface MyHomeRecentNews {
+  newsId: number;
+  title: string;
+  categoryName: string | null;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  publishedAt: string;
+  viewedAt: string;
+}
+
+// 마이페이지 홈 (GET /api/mypage/home): 닉네임·캐릭터·스트릭·최근 읽은 뉴스
 export interface MyHome {
   nickname: string;
-  character: {
-    characterId: number;
-    characterType: string;
-    characterName: string;
-    characterImageUrl: string;
-  };
+  character: MyHomeCharacter;
+  streak?: MyHomeStreak;
+  recentNews?: MyHomeRecentNews[];
 }
 
 // 홈 프로필 조회 (GET /api/mypage/home)
