@@ -7,6 +7,7 @@ import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 import NewsCard from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import TodayNewsCarouselCard from "./components/TodayNewsCarouselCard";
+import NewsPageSkeleton from "./components/NewsPageSkeleton";
 import { useNewsList, useTodayNews } from "./newsQueries";
 
 type NewsTabType = "all" | "economy" | "stock" | "world";
@@ -49,6 +50,12 @@ export default function NewsPage() {
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // 초기 로딩(캐러셀·리스트 첫 조회) 동안 페이지 전체 스켈레톤 노출.
+  // 홈/마이페이지와 동일한 "페이지 통째 교체" 패턴.
+  if (isTodayNewsLoading || isLoading) {
+    return <NewsPageSkeleton />;
+  }
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-neutral-50 pt-5 text-neutral-900">
