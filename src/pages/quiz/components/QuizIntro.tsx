@@ -1,6 +1,7 @@
 import Button from "@/components/common/Button";
-import CharacterAvatar from "@/components/common/CharacterAvatar";
+import MuffinVideo from "@/components/common/MuffinVideo";
 import { useCharacter } from "@/lib/character";
+import { QUIZ_CHARACTER_VIDEOS } from "@/lib/characterVideos";
 
 interface QuizIntroProps {
   nickname: string;
@@ -19,7 +20,10 @@ export default function QuizIntro({
   return (
     <div className="flex min-h-[calc(100dvh-56px)] flex-col px-5 pb-12">
       <div className="flex flex-1 flex-col items-center justify-center gap-10">
-        <CharacterAvatar size="large" variant={character} />
+        <MuffinVideo
+          src={QUIZ_CHARACTER_VIDEOS[character]}
+          className="h-[180px] w-[180px] object-contain"
+        />
         <p className="text-heading-20-bd text-center break-keep whitespace-pre-line text-neutral-900">
           {`${nickname}님, 오늘 구운 뉴스들로\n반죽을 만들어볼까요?`}
         </p>
