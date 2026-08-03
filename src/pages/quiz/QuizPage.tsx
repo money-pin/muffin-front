@@ -63,9 +63,13 @@ function QuizPage() {
   const resultQuery = useQuizResultQuery(phase === "result" || alreadyFinished);
 
   useEffect(() => {
-    setTopBar({ title: "오늘의 한 입 퀴즈" });
+    setTopBar({
+      title: "오늘의 한 입 퀴즈",
+      showBack: true,
+      onBack: () => navigate("/home"),
+    });
     return resetTopBar;
-  }, [setTopBar, resetTopBar]);
+  }, [setTopBar, resetTopBar, navigate]);
 
   // 인트로 문구에 쓸 닉네임 (홈·마이와 동일하게 서버 조회)
   useEffect(() => {
