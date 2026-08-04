@@ -16,6 +16,7 @@ import {
   formatRelativeDate,
   getNewsImage,
 } from "@/lib/newsFormat";
+import NewsDetailPageSkeleton from "./components/NewsDetailPageSkeleton";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import {
   useExplanationCards,
@@ -163,11 +164,7 @@ export default function NewsDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center text-neutral-400">
-        불러오는 중...
-      </div>
-    );
+    return <NewsDetailPageSkeleton />;
   }
 
   if (isError || !detail) {
