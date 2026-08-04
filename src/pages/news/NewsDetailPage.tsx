@@ -34,6 +34,20 @@ function splitImpacts(impacts: SectorImpactItem[]) {
   return { positive, negative };
 }
 
+// 마지막 글자의 받침 유무로 "이란?"/"란?" 선택.
+// 한글 음절(가~힣) 받침은 (코드 - 0xAC00) % 28 != 0 이면 존재.
+function getTermSuffix(term: string) {
+  const lastChar = term.at(-1);
+  if (!lastChar) return "란?";
+
+  const code = lastChar.charCodeAt(0);
+  const isHangul = code >= 0xac00 && code <= 0xd7a3;
+  if (!isHangul) return "란?";
+
+  const hasFinalConsonant = (code - 0xac00) % 28 !== 0;
+  return hasFinalConsonant ? "이란?" : "란?";
+}
+
 function renderMarkdownBold(content: string) {
   const parts = content.split(/(\*\*[^*]+\*\*)/g);
 
@@ -338,7 +352,7 @@ export default function NewsDetailPage() {
           <div className="flex w-full items-center justify-between border-b border-neutral-100 py-2">
             <h3 className="text-heading-20-bd min-w-0 flex-1">
               <span className="text-primary">{termData?.term ?? "용어"}</span>
-              란?
+              {getTermSuffix(termData?.term ?? "용어")}
             </h3>
 
             <button
