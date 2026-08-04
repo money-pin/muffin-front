@@ -210,7 +210,7 @@ function OnboardingPage() {
           media={
             <MuffinVideo
               src={ONBOARDING_START_VIDEO}
-              className="h-[148px] w-[148px] object-contain"
+              className="aspect-square w-[calc(min(100vw,var(--max-width-app))*0.354)] object-contain"
             />
           }
           title={`반가워요, ${displayName}님!`}
@@ -251,7 +251,7 @@ function OnboardingPage() {
               media={
                 <MuffinVideo
                   src={ONBOARDING_CHARACTER_VIDEOS[resultType]}
-                  className="h-[148px] w-[148px] object-contain"
+                  className="aspect-square w-[calc(min(100vw,var(--max-width-app))*0.73)] object-contain"
                 />
               }
               title={renderResultTitle(
