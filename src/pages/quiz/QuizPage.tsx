@@ -95,6 +95,23 @@ function QuizPage() {
 
   const goHome = () => navigate("/home");
 
+  // 재진입(PROGRESS)이면 인트로는 그대로 두고 시작 버튼 문구만 바꾼다.
+  const isResume = todayQuizQuery.data?.sessionStatus === "PROGRESS";
+
+  // 인트로 "시작" 시 진입 위치를 정한다. 재진입이면 이어 풀 문항(nextQuestionOrder,
+  // 1-indexed)에 해당하는 quizOrder 위치부터, 아니면 0번부터 시작.
+  const handleStart = () => {
+    const data = todayQuizQuery.data;
+    if (isResume && data) {
+      const resumeOrder = data.progress?.nextQuestionOrder ?? 1;
+      const resumeIndex = data.questions.findIndex(
+        (question) => question.quizOrder === resumeOrder,
+      );
+      setQuestionIndex(resumeIndex >= 0 ? resumeIndex : 0);
+    }
+    setPhase("question");
+  };
+
   if (todayQuizQuery.isLoading) {
     return <QuizStateMessage>퀴즈를 불러오는 중입니다.</QuizStateMessage>;
   }
@@ -126,7 +143,8 @@ function QuizPage() {
       <QuizIntro
         nickname={nickname}
         character={character}
-        onStart={() => setPhase("question")}
+        startLabel={isResume ? "남은 퀴즈 계속하기" : "퀴즈 시작하기"}
+        onStart={handleStart}
         onLater={goHome}
       />
     );

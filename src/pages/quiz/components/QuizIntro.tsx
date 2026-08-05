@@ -8,6 +8,8 @@ interface QuizIntroProps {
   character: CharacterVariant;
   onStart: () => void;
   onLater: () => void;
+  // 재진입(PROGRESS) 시 "남은 퀴즈 계속하기" 등으로 시작 버튼 문구를 바꾼다.
+  startLabel?: string;
 }
 
 // Figma 퀴즈 인트로: 캐릭터 + 인사 문구 + 시작/나중에 버튼
@@ -17,6 +19,7 @@ export default function QuizIntro({
   character,
   onStart,
   onLater,
+  startLabel = "퀴즈 시작하기",
 }: QuizIntroProps) {
   return (
     <div className="flex min-h-[calc(100dvh-56px)] flex-col px-5 pb-12">
@@ -31,7 +34,7 @@ export default function QuizIntro({
       </div>
 
       <div className="flex flex-col gap-3">
-        <Button onClick={onStart}>퀴즈 시작하기</Button>
+        <Button onClick={onStart}>{startLabel}</Button>
         <button
           type="button"
           onClick={onLater}
