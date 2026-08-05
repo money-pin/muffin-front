@@ -3,7 +3,10 @@ import bronzeCrown from "@/assets/crown/crown-bronze.svg";
 import goldCrown from "@/assets/crown/crown-gold.svg";
 import silverCrown from "@/assets/crown/crown-silver.svg";
 import type { WeeklyRankingItem } from "@/pages/invest/ranking/types";
-import { formatSignedWon } from "@/pages/invest/ranking/utils/rankingFormat";
+import {
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 type PodiumRank = 1 | 2 | 3;
 
@@ -61,6 +64,8 @@ export default function PodiumRankingCard({
 }: PodiumRankingCardProps) {
   const style = rankStyleMap[rank];
   const isClickable = Boolean(onClick);
+  const profitColorClass = getProfitColorClass(item.weeklyProfit);
+  const profitRateColorClass = getProfitColorClass(item.weeklyProfitRate);
 
   return (
     <button
@@ -86,14 +91,18 @@ export default function PodiumRankingCard({
           <h3 className="text-body-16-md-tighter w-full truncate text-center text-neutral-900">
             {item.nickname}
           </h3>
-          <div className="text-positive mt-1 flex flex-col items-center">
-            <p className="text-caption-12-bd">
-              {formatSignedWon(item.weeklyProfit)}
+          <div className="mt-1 flex flex-col items-center">
+            <p className={`text-caption-12-bd ${profitColorClass}`}>
+              {formatSignedCurrency(item.weeklyProfit)}
             </p>
-            <p className="text-caption-12-bd flex items-center gap-1">
-              <span aria-hidden="true" className="text-[8px] leading-none">
-                ▲
-              </span>
+            <p
+              className={`text-caption-12-bd flex items-center gap-1 ${profitRateColorClass}`}
+            >
+              {item.weeklyProfitRate !== 0 && (
+                <span aria-hidden="true" className="text-[8px] leading-none">
+                  {item.weeklyProfitRate > 0 ? "▲" : "▼"}
+                </span>
+              )}
               <span>{Math.abs(item.weeklyProfitRate).toFixed(1)}%</span>
             </p>
           </div>
