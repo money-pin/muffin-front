@@ -2,9 +2,9 @@ import ProfitRateBadge from "@/pages/invest/components/ProfitRateBadge";
 import RankingBadge from "@/pages/invest/ranking/components/RankingBadge";
 import type { WeeklyRankingItem } from "@/pages/invest/ranking/types";
 import {
-  formatSignedWon,
-  getRankingProfitColorClass,
-} from "@/pages/invest/ranking/utils/rankingFormat";
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 interface RankingListProps {
   items: WeeklyRankingItem[];
@@ -22,7 +22,7 @@ export default function RankingList({
   return (
     <div className="bg-neutral-0 flex w-full flex-col">
       {listItems.map((item) => {
-        const profitColorClass = getRankingProfitColorClass(item.weeklyProfit);
+        const profitColorClass = getProfitColorClass(item.weeklyProfit);
 
         return (
           <button
@@ -41,7 +41,7 @@ export default function RankingList({
 
             <div className="flex shrink-0 items-center gap-2">
               <p className={`text-body-14-bd ${profitColorClass}`}>
-                {formatSignedWon(item.weeklyProfit)}
+                {formatSignedCurrency(item.weeklyProfit)}
               </p>
               <ProfitRateBadge rate={item.weeklyProfitRate} size="md" />
             </div>

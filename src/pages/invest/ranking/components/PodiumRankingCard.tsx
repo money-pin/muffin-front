@@ -4,9 +4,9 @@ import goldCrown from "@/assets/crown/crown-gold.svg";
 import silverCrown from "@/assets/crown/crown-silver.svg";
 import type { WeeklyRankingItem } from "@/pages/invest/ranking/types";
 import {
-  formatSignedWon,
-  getRankingProfitColorClass,
-} from "@/pages/invest/ranking/utils/rankingFormat";
+  formatSignedCurrency,
+  getProfitColorClass,
+} from "@/pages/invest/utils/profitFormat";
 
 type PodiumRank = 1 | 2 | 3;
 
@@ -64,10 +64,8 @@ export default function PodiumRankingCard({
 }: PodiumRankingCardProps) {
   const style = rankStyleMap[rank];
   const isClickable = Boolean(onClick);
-  const profitColorClass = getRankingProfitColorClass(item.weeklyProfit);
-  const profitRateColorClass = getRankingProfitColorClass(
-    item.weeklyProfitRate,
-  );
+  const profitColorClass = getProfitColorClass(item.weeklyProfit);
+  const profitRateColorClass = getProfitColorClass(item.weeklyProfitRate);
 
   return (
     <button
@@ -95,7 +93,7 @@ export default function PodiumRankingCard({
           </h3>
           <div className="mt-1 flex flex-col items-center">
             <p className={`text-caption-12-bd ${profitColorClass}`}>
-              {formatSignedWon(item.weeklyProfit)}
+              {formatSignedCurrency(item.weeklyProfit)}
             </p>
             <p
               className={`text-caption-12-bd flex items-center gap-1 ${profitRateColorClass}`}
