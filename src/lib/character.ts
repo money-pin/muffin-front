@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 // 머핀 캐릭터 종류. 온보딩에서 지정되는 건 plain/sprinkle/butter 3종이며,
 // cream(샘크림)은 추후 레벨업 언락 전용이라 온보딩 결과에는 포함되지 않는다.
 export type CharacterVariant = "plain" | "sprinkle" | "cream" | "butter";
@@ -54,10 +52,4 @@ export function getCharacter(): CharacterVariant {
     // 접근 실패 시 기본값
   }
   return DEFAULT_VARIANT;
-}
-
-// 컴포넌트에서 현재 캐릭터를 읽는 훅 (마운트 시 1회 읽기)
-export function useCharacter(): CharacterVariant {
-  const [variant] = useState(getCharacter);
-  return variant;
 }
