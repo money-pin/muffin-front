@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { getMyHome } from "@/lib/mypageApi";
 import { characterTypeToVariant, type CharacterVariant } from "@/lib/character";
+import { mypageQueryKeys } from "@/lib/mypageQueries";
 import QuizIntro from "@/pages/quiz/components/QuizIntro";
 import QuizQuestionView from "@/pages/quiz/components/QuizQuestionView";
 import QuizFeedbackSheet from "@/pages/quiz/components/QuizFeedbackSheet";
@@ -43,6 +45,7 @@ function QuizStateMessage({
 
 function QuizPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
 
   const [nickname, setNickname] = useState("");
@@ -62,9 +65,13 @@ function QuizPage() {
   const resultQuery = useQuizResultQuery(phase === "result" || alreadyFinished);
 
   useEffect(() => {
-    setTopBar({ title: "오늘의 한 입 퀴즈" });
+    setTopBar({
+      title: "오늘의 한 입 퀴즈",
+      showBack: true,
+      onBack: () => navigate("/home"),
+    });
     return resetTopBar;
-  }, [setTopBar, resetTopBar]);
+  }, [setTopBar, resetTopBar, navigate]);
 
   // 인트로 문구에 쓸 닉네임 (홈·마이와 동일하게 서버 조회)
   useEffect(() => {
@@ -173,7 +180,18 @@ function QuizPage() {
     if (selectedId === null || submitAttemptMutation.isPending) return;
     submitAttemptMutation.mutate(
       { quizId: currentQuestion.quizId, optionId: Number(selectedId) },
-      { onSuccess: (data) => setAttempt(data) },
+      {
+        onSuccess: (data) => {
+          setAttempt(data);
+          // 마지막 문제까지 풀면 오늘 학습 참여로 기록되므로, 스트릭이 걸린
+          // 마이/홈 캐시(mypage/home)를 무효화해 요일 색칠이 바로 반영되게 한다.
+          if (data.isLastQuestion) {
+            queryClient.invalidateQueries({
+              queryKey: mypageQueryKeys.home(),
+            });
+          }
+        },
+      },
     );
   };
 

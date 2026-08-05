@@ -75,7 +75,7 @@ function HomePage() {
       <div className="mt-1 px-5">
         <AssetCard
           nickname={nickname}
-          streakDays={HOME_USER.streakDays}
+          streakDays={myHomeQuery.data?.streak?.currentStreak ?? 0}
           asset={investmentAssetQuery.data}
           recentInvestedAt={statsSummaryQuery.data?.investDate}
           isLoading={

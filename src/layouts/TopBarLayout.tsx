@@ -13,6 +13,7 @@ import TopBar from "@/components/common/TopBar";
 export interface TopBarOptions {
   title?: string;
   showBack?: boolean;
+  onBack?: () => void; // 지정 시 뒤로가기 동작 override (기본: history back)
   rightIcon?: ReactNode;
   background?: "white" | "transparent";
 }
@@ -49,7 +50,7 @@ function TopBarLayout() {
         <TopBar
           title={topBar.title}
           showBack={topBar.showBack}
-          onBack={() => navigate(-1)}
+          onBack={topBar.onBack ?? (() => navigate(-1))}
           rightIcon={topBar.rightIcon}
           background={topBar.background}
         />
