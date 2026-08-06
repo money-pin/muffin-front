@@ -120,8 +120,8 @@ function MyPage() {
             right={
               <button
                 type="button"
-                onClick={() => navigate("/news")}
-                aria-label="뉴스 더보기"
+                onClick={() => navigate("/my/storage?tab=read")}
+                aria-label="최근 읽은 뉴스 더보기"
                 className="-mr-3 flex size-11 shrink-0 items-center justify-center"
               >
                 <img
