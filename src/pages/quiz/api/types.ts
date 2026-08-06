@@ -19,18 +19,20 @@ export interface QuizApiQuestion {
   options: QuizApiOption[];
 }
 
-// GET /api/quizzes/today — 문제/보기만 내려오고 정답·해설은 없음
-export interface TodayQuizResult {
-  quizSetStatus: QuizSetStatus;
-  sessionStatus: QuizSessionStatus;
-  questions: QuizApiQuestion[];
-}
-
 export interface QuizProgress {
   totalCount: number;
   solvedCount: number;
   correctCount: number;
   nextQuestionOrder: number;
+}
+
+// GET /api/quizzes/today — 문제/보기만 내려오고 정답·해설은 없음.
+// progress로 진행도(이어 풀 문항)를 함께 내려줘 재진입 시 이어풀기에 사용한다.
+export interface TodayQuizResult {
+  quizSetStatus: QuizSetStatus;
+  sessionStatus: QuizSessionStatus;
+  progress: QuizProgress;
+  questions: QuizApiQuestion[];
 }
 
 // POST /api/quizzes/{quizId}/attempt — 제출 시 정답·해설·진행도 반환
