@@ -20,34 +20,13 @@ interface ProfitHistorySectorSectionProps {
   onSortChange: (value: ProfitHistorySortKey) => void;
 }
 
-function sortSectors(
-  sectors: ProfitHistorySector[],
-  sortKey: ProfitHistorySortKey,
-) {
-  return [...sectors].sort((a, b) => {
-    switch (sortKey) {
-      case "AMOUNT_DESC":
-        return b.investmentAmount - a.investmentAmount;
-      case "AMOUNT_ASC":
-        return a.investmentAmount - b.investmentAmount;
-      case "RATE_ASC":
-        return a.profitRate - b.profitRate;
-      case "RATE_DESC":
-      default:
-        return b.profitRate - a.profitRate;
-    }
-  });
-}
-
 export default function ProfitHistorySectorSection({
   sectors,
   sortKey,
   onSortChange,
 }: ProfitHistorySectorSectionProps) {
-  const sortedSectors = sortSectors(sectors, sortKey);
-
   return (
-    <section className="flex flex-col gap-4 bg-neutral-0 px-5 pb-9 pt-5">
+    <section className="bg-neutral-0 flex flex-col gap-4 px-5 pt-5 pb-9">
       <div className="flex items-center justify-between">
         <h2 className="text-body-16-bd-tighter text-neutral-900">
           섹터별 상세 내역
@@ -62,7 +41,7 @@ export default function ProfitHistorySectorSection({
       </div>
 
       <div className="flex flex-col gap-2">
-        {sortedSectors.map((sector) => (
+        {sectors.map((sector) => (
           <ProfitHistorySectorCard key={sector.sectorCode} sector={sector} />
         ))}
       </div>
