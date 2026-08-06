@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
   getStatsHistory,
@@ -28,6 +28,7 @@ export function useStatsHistoryQuery(params: StatsHistoryParams) {
   return useQuery({
     queryKey: statsQueryKeys.history(params),
     queryFn: () => getStatsHistory(params),
+    placeholderData: keepPreviousData,
     retry: false,
   });
 }

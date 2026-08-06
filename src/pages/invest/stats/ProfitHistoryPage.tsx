@@ -51,7 +51,6 @@ export default function ProfitHistoryPage() {
 
   const changeSort = (nextSortKey: ProfitHistorySortKey) => {
     setSortKey(nextSortKey);
-    setSelectedDate(undefined);
   };
 
   const movePeriod = (amount: -1 | 1) => {
