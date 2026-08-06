@@ -28,11 +28,7 @@ export interface InvestAssetSection {
 }
 
 export type InvestmentAssetChangeDirection =
-  | "UP"
-  | "DOWN"
-  | "FLAT"
-  | "NONE"
-  | (string & {});
+  "UP" | "DOWN" | "FLAT" | "NONE" | (string & {});
 
 export interface InvestmentAssetResult {
   totalAsset: number;

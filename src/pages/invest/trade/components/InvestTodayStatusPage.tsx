@@ -101,7 +101,7 @@ function InvestTodayStatusPage({
 
   return (
     <div className="flex flex-1 flex-col bg-[var(--color-neutral-50)] px-5 pt-5 pb-[100px]">
-      <section className="flex h-[66px] w-full items-center rounded-[12px] bg-[var(--color-neutral-0)] py-[14px] pr-4 pl-5 ring-1 ring-inset ring-[var(--color-neutral-100)]">
+      <section className="flex h-[66px] w-full items-center rounded-[12px] bg-[var(--color-neutral-0)] py-[14px] pr-4 pl-5 ring-1 ring-[var(--color-neutral-100)] ring-inset">
         {isClosed ? (
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-secondary-200)]">
             <img src={lockIcon} alt="" className="h-6 w-6" />
@@ -119,12 +119,12 @@ function InvestTodayStatusPage({
                 : "text-[var(--color-primary)]",
             ].join(" ")}
           >
-            {isClosed ? "투자가 마감됐어요" : "오늘 투자 진행 중"}
+            {isClosed ? "투자가 마감됐어요." : "오늘 투자 진행 중"}
           </strong>
 
           <span className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-neutral-600)]">
             {isClosed
-              ? `${nextAvailableTimeText}부터 새 투자를 시작할 수 있어요`
+              ? `${nextAvailableTimeText}부터 새 투자를 시작할 수 있어요.`
               : "수정 마감까지 남은 시간"}
           </span>
         </div>
@@ -136,20 +136,19 @@ function InvestTodayStatusPage({
         )}
       </section>
 
-      {/* 투자하지 않은 사용자는 마감 안내만 보여주고 빈 현황 박스는 숨김 */}
-      {hasInvestment && (
-        <section className="mt-6">
-          <h2
-            className={[
-              "text-[length:var(--text-body-14-md-tighter)] leading-[var(--text-body-14-md-tighter--line-height)] font-[var(--text-body-14-md-tighter--font-weight)] tracking-[var(--text-body-14-md-tighter--letter-spacing)] text-[var(--color-neutral-600)]",
-              isClosed && "opacity-50",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            오늘 투자 현황
-          </h2>
+      <section className="mt-6">
+        <h2
+          className={[
+            "text-[length:var(--text-body-14-md-tighter)] leading-[var(--text-body-14-md-tighter--line-height)] font-[var(--text-body-14-md-tighter--font-weight)] tracking-[var(--text-body-14-md-tighter--letter-spacing)] text-[var(--color-neutral-600)]",
+            isClosed && "opacity-50",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          오늘 투자 현황
+        </h2>
 
+        {hasInvestment ? (
           <div
             className={[
               "mt-2 rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-4 py-5",
@@ -213,8 +212,18 @@ function InvestTodayStatusPage({
               );
             })}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="mt-4 flex h-[73px] w-full flex-col items-center justify-center rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-8 py-3 text-center">
+            <p className="text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
+              오늘은 투자를 진행하지 않았어요!
+            </p>
+
+            <p className="mt-1 text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-neutral-600)]">
+              {nextAvailableTimeText} 이후에 투자에 다시 도전할 수 있어요.
+            </p>
+          </div>
+        )}
+      </section>
 
       {isClosed && hasInvestment ? (
         <section className="mt-4 flex h-[73px] w-full flex-col justify-center rounded-[12px] border border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] px-8 py-3 text-center">

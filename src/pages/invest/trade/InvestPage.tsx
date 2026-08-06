@@ -28,10 +28,8 @@ import type {
 type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
 type InvestScreenMode = "weekend" | "trade" | "status";
 
-// 개발 중 강제로 투자 선택 화면을 확인해야 할 때만 true
 const FORCE_TRADE_VIEW_FOR_DEV = false;
 
-// 서버가 투자 가능한 시간에 내려줄 수 있는 상태들
 const INVESTMENT_AVAILABLE_STATUSES = new Set([
   "AVAILABLE",
   "CONFIRMED",
@@ -113,7 +111,6 @@ function InvestPage() {
     useState("");
   const [isSubmittingInvestment, setIsSubmittingInvestment] = useState(false);
 
-  // 페이지를 계속 열어둔 상태에서도 자정·오전 10시·주말 전환을 반영
   useEffect(() => {
     const refreshTimeAndStatus = () => {
       setNow(new Date());
@@ -162,32 +159,40 @@ function InvestPage() {
   const unitAmount = sectorData?.unitAmount ?? 100000;
   const todayStatus = todayInvestmentData?.status ?? "";
 
-  // 실제 응답에서 sectors가 생략될 수 있으므로 항상 배열로 정규화
   const todayInvestmentSectors = useMemo(
-    () => todayInvestmentData?.sectors ?? [],
-    [todayInvestmentData?.sectors],
+    () =>
+      todayInvestmentData?.sectors ??
+      todayInvestmentData?.previousInvestment?.sectors ??
+      [],
+    [
+      todayInvestmentData?.sectors,
+      todayInvestmentData?.previousInvestment?.sectors,
+    ],
   );
 
   const hasServerInvestment = todayInvestmentSectors.some(
     (item) => item.quantity > 0,
   );
 
-  const hasLocalConfirmedInvestment = Object.values(confirmedQuantities).some(
-    (quantity) => (quantity ?? 0) > 0,
-  );
+  const isInvestmentAvailable = INVESTMENT_AVAILABLE_STATUSES.has(todayStatus);
 
-  // 서버 내역이 있으면 서버를 우선하고, 서버가 내역 필드를 생략하면 로컬 확정값 사용
+  const hasLocalConfirmedInvestment =
+    isInvestmentAvailable &&
+    Object.values(confirmedQuantities).some((quantity) => (quantity ?? 0) > 0);
+
   const hasConfirmedInvestment =
     hasServerInvestment || hasLocalConfirmedInvestment;
 
-  const isInvestmentAvailable = INVESTMENT_AVAILABLE_STATUSES.has(todayStatus);
   const canEditTodayInvestment =
     hasConfirmedInvestment && isInvestmentAvailable;
-
-  // 서버가 sectors 배열을 실제로 내려준 경우에만 로컬 확정값과 동기화
   useEffect(() => {
     if (!todayInvestmentData || isEditMode) return;
-    if (!Array.isArray(todayInvestmentData.sectors)) return;
+
+    const hasInvestmentResponse =
+      Array.isArray(todayInvestmentData.sectors) ||
+      Array.isArray(todayInvestmentData.previousInvestment?.sectors);
+
+    if (!hasInvestmentResponse) return;
 
     const nextConfirmedQuantities = todayInvestmentSectors.reduce(
       (acc, item) => {
@@ -213,8 +218,6 @@ function InvestPage() {
         return;
       }
 
-      // 투자 가능 상태에서 명시적으로 빈 배열이 왔다면 이전 확정 내역만 초기화
-      // 사용자가 현재 고르고 있는 assetQuantities는 지우지 않음
       if (todayStatus === "AVAILABLE") {
         setConfirmedQuantities({});
       }
@@ -227,7 +230,6 @@ function InvestPage() {
     todayStatus,
   ]);
 
-  // 투자 불가능 시간이나 주말로 넘어가면 편집/확정 UI를 닫음
   useEffect(() => {
     if (!isWeekend && isInvestmentAvailable) return;
 
@@ -254,7 +256,9 @@ function InvestPage() {
   );
 
   const responseRemainingAmount = todayInvestmentData?.remainingAmount;
-  const responseTotalAmount = todayInvestmentData?.totalAmount;
+  const responseTotalAmount =
+    todayInvestmentData?.totalAmount ??
+    todayInvestmentData?.previousInvestment?.totalAmount;
 
   const serverTotalBudget =
     typeof responseRemainingAmount === "number" &&
@@ -322,12 +326,14 @@ function InvestPage() {
   const todayStatusItems =
     serverTodayStatusItems.length > 0
       ? serverTodayStatusItems
-      : localTodayStatusItems;
+      : isInvestmentAvailable
+        ? localTodayStatusItems
+        : [];
 
   const screenMode: InvestScreenMode = (() => {
     if (FORCE_TRADE_VIEW_FOR_DEV) return "trade";
 
-    // 1순위: 주말
+    // 주말
     if (isWeekend) return "weekend";
 
     // 투자 가능한 시간에 사용자가 수정 화면에 진입한 경우
@@ -339,7 +345,6 @@ function InvestPage() {
     // 투자하지 않았고 투자 가능한 시간이면 투자 선택 화면
     if (isInvestmentAvailable) return "trade";
 
-    // 평일 투자 불가능 시간 + 미투자: 내역 없는 마감 현황 화면
     return "status";
   })();
 
@@ -475,9 +480,6 @@ function InvestPage() {
       } else {
         await confirmInvestmentMutation.mutateAsync(requestBody);
       }
-
-      // 확정/수정 API 응답은 today 조회 응답과 구조가 다르므로
-      // today 캐시에 직접 넣지 않고 조회 API를 다시 호출한다.
       void queryClient.invalidateQueries({
         queryKey: investmentQueryKeys.today(),
       });
@@ -530,11 +532,7 @@ function InvestPage() {
   };
 
   const handleEditSubmit = () => {
-    if (
-      !hasAnyInvestment ||
-      !isEditChanged ||
-      !canEditTodayInvestment
-    ) {
+    if (!hasAnyInvestment || !isEditChanged || !canEditTodayInvestment) {
       return;
     }
 
@@ -542,7 +540,6 @@ function InvestPage() {
     setIsConfirmSheetOpen(true);
   };
 
-  // 주말은 API 상태와 관계없이 주말 전용 화면을 우선 노출
   if (screenMode === "weekend") {
     return (
       <div className="-mb-[80px] flex flex-1 flex-col">
@@ -551,7 +548,7 @@ function InvestPage() {
     );
   }
 
-  // weekday에서 today API의 최초 응답을 기다리는 동안 잘못된 화면 노출 방지
+  //로딩 임시
   if (todayInvestmentQuery.isPending && !todayInvestmentData) {
     return (
       <div className="-mb-[80px] flex flex-1 items-center justify-center bg-[var(--color-neutral-50)] px-5">
@@ -572,7 +569,6 @@ function InvestPage() {
     );
   }
 
-  // 투자하기/수정 화면은 섹터 목록이 필요하므로 최초 섹터 응답도 기다림
   if (
     screenMode === "trade" &&
     investmentSectorsQuery.isPending &&
