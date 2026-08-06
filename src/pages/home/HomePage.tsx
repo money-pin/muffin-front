@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Logo from "@/components/common/Logo";
@@ -8,9 +8,12 @@ import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 import rankingIcon from "@/assets/icon-20px/ranking.svg";
 import BottomSheet from "@/components/common/BottomSheet";
 import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
-import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
-import { useStatsSummaryQuery } from "@/pages/invest/stats/api/queries";
+import {
+  useStatsRecentDetailQuery,
+  useStatsSummaryQuery,
+} from "@/pages/invest/stats/api/queries";
 import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
+import { useSettlementResultQuery } from "@/pages/invest/settlementResultQueries";
 import { useMyHomeQuery } from "@/lib/mypageQueries";
 import { characterTypeToVariant } from "@/lib/character";
 import TodayNewsCarouselCard from "@/pages/news/components/TodayNewsCarouselCard";
@@ -22,7 +25,7 @@ import AssetCard from "./components/AssetCard";
 import QuizBanner from "./components/QuizBanner";
 import TopSectorList from "./components/TopSectorList";
 import InvestResultSheet from "./components/InvestResultSheet";
-import { HOME_USER, HOME_TOP_SECTORS, HOME_INVEST_RESULT } from "./homeData";
+import { HOME_USER } from "./homeData";
 
 const INVEST_RESULT_SEEN_KEY = "muffin:investResultSeenDate";
 
@@ -40,20 +43,31 @@ function HomePage() {
   const investmentAssetQuery = useInvestmentAssetQuery();
   const statsSummaryQuery = useStatsSummaryQuery();
   const todayNewsQuery = useTodayNews();
+  // 최근 투자 성과 상세는 시트를 열 때만 조회
+  const recentDetailQuery = useStatsRecentDetailQuery(recentPerformanceOpen);
+  const settlementResultQuery = useSettlementResultQuery();
 
   const todayNewsList = todayNewsQuery.data?.items ?? [];
+  const topSectors = statsSummaryQuery.data?.topSectors ?? [];
+  const settlementResult = settlementResultQuery.data ?? null;
 
-  const [investResultOpen, setInvestResultOpen] = useState(
-    () =>
-      new Date().getHours() >= 10 &&
-      localStorage.getItem(INVEST_RESULT_SEEN_KEY) !== HOME_INVEST_RESULT.date,
-  );
+  const [investResultOpen, setInvestResultOpen] = useState(false);
+  const resultShownRef = useRef(false);
 
+  // 정산 결과가 있고, 오전 10시 이후이며, 해당 날짜를 아직 안 봤을 때 1회 자동 노출.
   useEffect(() => {
-    if (investResultOpen) {
-      localStorage.setItem(INVEST_RESULT_SEEN_KEY, HOME_INVEST_RESULT.date);
-    }
-  }, [investResultOpen]);
+    if (resultShownRef.current || !settlementResult) return;
+
+    const isAfterReveal = new Date().getHours() >= 10;
+    const alreadySeen =
+      localStorage.getItem(INVEST_RESULT_SEEN_KEY) === settlementResult.date;
+    if (!isAfterReveal || alreadySeen) return;
+
+    resultShownRef.current = true;
+    localStorage.setItem(INVEST_RESULT_SEEN_KEY, settlementResult.date);
+    // setState-in-effect 룰 회피: 팀 컨벤션대로 queueMicrotask로 감싼다
+    queueMicrotask(() => setInvestResultOpen(true));
+  }, [settlementResult]);
 
   if (investmentAssetQuery.isLoading || myHomeQuery.isLoading) {
     return <HomePageSkeleton />;
@@ -92,18 +106,22 @@ function HomePage() {
         snapMode="half-full"
       >
         <RecentPerformanceSheetContent
-          summary={statsMock.recentPerformance}
-          sectors={statsMock.sectorDetails}
+          summary={recentDetailQuery.data?.summary}
+          sectors={recentDetailQuery.data?.sectors ?? []}
+          isLoading={recentDetailQuery.isLoading}
+          isError={recentDetailQuery.isError}
         />
       </BottomSheet>
 
-      <InvestResultSheet
-        isOpen={investResultOpen}
-        onClose={() => setInvestResultOpen(false)}
-        result={HOME_INVEST_RESULT}
-        onDetailClick={() => navigate("/invest/stats")}
-        onInvestClick={() => navigate("/invest")}
-      />
+      {settlementResult && (
+        <InvestResultSheet
+          isOpen={investResultOpen}
+          onClose={() => setInvestResultOpen(false)}
+          result={settlementResult}
+          onDetailClick={() => navigate("/invest/stats")}
+          onInvestClick={() => navigate("/invest")}
+        />
+      )}
 
       <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0px_-3px_7px_rgba(0,0,0,0.1)]">
         <div className="px-5">
@@ -156,7 +174,7 @@ function HomePage() {
               }
             />
           </div>
-          <TopSectorList sectors={HOME_TOP_SECTORS} />
+          <TopSectorList sectors={topSectors} />
         </section>
       </div>
     </div>

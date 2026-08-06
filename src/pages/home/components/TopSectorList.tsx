@@ -1,5 +1,6 @@
+import type { TopSector } from "@/pages/invest/stats/types";
+
 import PercentageBadge from "./PercentageBadge";
-import type { TopSector } from "../homeData";
 
 // Figma RankBadge: 1위 금색(#ffd400)+진갈색 텍스트 / 2위 은색(#bababa) / 3위 동색(#de7813)
 const RANK_STYLE: Record<TopSector["rank"], string> = {
@@ -14,10 +15,18 @@ interface TopSectorListProps {
 
 // Figma Top 3 Container: 카드 안에 랭크 배지 + 섹터명 + 수익액·수익률 3행
 export default function TopSectorList({ sectors }: TopSectorListProps) {
+  if (sectors.length === 0) {
+    return (
+      <div className="text-body-14-md flex w-full items-center justify-center rounded-[16px] border border-neutral-100 bg-white px-5 py-8 text-neutral-400">
+        아직 표시할 섹터가 없어요.
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col rounded-[16px] border border-neutral-100 bg-white px-5 py-2">
       {sectors.map((sector) => {
-        const up = sector.change >= 0;
+        const up = sector.profitAmount >= 0;
         return (
           <div
             key={sector.rank}
@@ -25,7 +34,7 @@ export default function TopSectorList({ sectors }: TopSectorListProps) {
           >
             <div className="flex items-center gap-3">
               <span
-                className={`flex h-7 w-7 items-center justify-center rounded-[8px] text-[16px] font-bold leading-none ${RANK_STYLE[sector.rank]}`}
+                className={`flex h-7 w-7 items-center justify-center rounded-[8px] text-[16px] leading-none font-bold ${RANK_STYLE[sector.rank]}`}
               >
                 {sector.rank}
               </span>
@@ -40,9 +49,9 @@ export default function TopSectorList({ sectors }: TopSectorListProps) {
             >
               <span className="text-body-16-bd-tighter">
                 {up ? "+" : "-"}
-                {Math.abs(sector.change).toLocaleString()}원
+                {Math.abs(sector.profitAmount).toLocaleString()}원
               </span>
-              <PercentageBadge rate={sector.changeRate} />
+              <PercentageBadge rate={sector.profitRate} />
             </div>
           </div>
         );
