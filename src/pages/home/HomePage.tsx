@@ -61,7 +61,7 @@ function HomePage() {
 
   return (
     <div className="flex min-h-full flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.2)_23.6%,rgba(255,194,102,0.2)_36.4%),linear-gradient(#fff,#fff)]">
-      <header className="flex h-[52px] shrink-0 items-center px-5">
+      <header className="sticky top-0 z-30 flex h-[52px] shrink-0 items-center bg-white px-5">
         <Logo size="xs" />
       </header>
 

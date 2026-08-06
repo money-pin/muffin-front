@@ -26,23 +26,26 @@ export default function HomePageSkeleton() {
       aria-label="홈 정보를 불러오는 중"
       className="flex min-h-full flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.2)_23.6%,rgba(255,194,102,0.2)_36.4%),linear-gradient(#fff,#fff)]"
     >
-      <header className="flex h-[52px] shrink-0 items-center px-5">
+      <header className="sticky top-0 z-30 flex h-[52px] shrink-0 items-center bg-white px-5">
         <Logo size="xs" />
       </header>
 
-      {/* 인사말 */}
-      <div className="px-5 pt-4">
-        <SkeletonBlock className="h-6 w-48" />
+      {/* 인사말: 실제 CharacterGreeting(말풍선 + large 아바타 103×105)와 동일한 공간 확보 */}
+      <div className="flex flex-col px-5 pt-4">
+        <div className="flex flex-col items-center">
+          <SkeletonBlock className="h-9 w-40 rounded-[8px]" />
+          <SkeletonBlock className="mt-[13px] h-[105px] w-[103px] rounded-[24px]" />
+        </div>
       </div>
 
-      {/* 총자산 카드 */}
-      <div className="mt-3 px-5">
+      {/* 총자산 카드 (실제와 동일하게 mt-1) */}
+      <div className="mt-1 px-5">
         <div className="flex w-full flex-col">
           <div className="px-4">
             <SkeletonBlock className="h-7 w-28 rounded-t-[8px]" />
           </div>
           <div className="flex w-full flex-col gap-3 rounded-[16px] bg-white px-4 pt-5 pb-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
-            <div className="flex flex-col gap-2 px-1">
+            <div className="flex flex-col gap-1 px-1">
               <SkeletonBlock className="h-4 w-24" />
               <div className="flex w-full items-center justify-between">
                 <SkeletonBlock className="h-8 w-40" />
