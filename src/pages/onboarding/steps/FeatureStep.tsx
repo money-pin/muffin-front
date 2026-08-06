@@ -1,22 +1,23 @@
-import { TbNews, TbCoins } from "react-icons/tb";
+import { TbNews, TbCoins, TbClock } from "react-icons/tb";
 import type { IconType } from "react-icons";
 
 import Button from "@/components/common/Button";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
-import clockIcon from "@/assets/tabler_clock.svg";
 
 interface FeatureStepProps {
   onNext: () => void;
 }
 
-type Feature =
-  | { icon: IconType; label: string }
-  | { iconSrc: string; label: string };
+interface Feature {
+  icon: IconType;
+  label: string;
+}
 
+// 세 아이콘 모두 Tabler 컴포넌트로 통일해 stroke 두께·색상을 맞춘다.
 const FEATURES: Feature[] = [
   { icon: TbNews, label: "뉴스 읽기" },
   { icon: TbCoins, label: "베팅하기" },
-  { iconSrc: clockIcon, label: "오전 10시 확인" },
+  { icon: TbClock, label: "오전 10시 확인" },
 ];
 
 export default function FeatureStep({ onNext }: FeatureStepProps) {
@@ -27,20 +28,10 @@ export default function FeatureStep({ onNext }: FeatureStepProps) {
           {FEATURES.map((feature, i) => (
             <div key={feature.label} className="flex items-start gap-4">
               <div className="flex flex-col items-center gap-2">
-                <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[16px] bg-secondary-50">
-                  {"iconSrc" in feature ? (
-                    <img
-                      src={feature.iconSrc}
-                      alt=""
-                      aria-hidden="true"
-                      className="h-10 w-10"
-                      draggable={false}
-                    />
-                  ) : (
-                    <feature.icon className="h-10 w-10 text-primary" />
-                  )}
+                <div className="bg-secondary-50 flex h-[68px] w-[68px] items-center justify-center rounded-[16px]">
+                  <feature.icon className="text-primary h-10 w-10" />
                 </div>
-                <span className="whitespace-nowrap text-body-14-bd text-neutral-1000">
+                <span className="text-body-14-bd text-neutral-1000 whitespace-nowrap">
                   {feature.label}
                 </span>
               </div>
