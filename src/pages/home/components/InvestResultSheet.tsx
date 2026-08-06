@@ -2,13 +2,14 @@ import BottomSheet from "@/components/common/BottomSheet";
 import Button from "@/components/common/Button";
 import closeIcon from "@/assets/icon-24px/close.svg";
 
+import type { SettlementResult } from "@/pages/invest/settlementResultApi";
+
 import PercentageBadge from "./PercentageBadge";
-import type { InvestResult } from "../homeData";
 
 interface InvestResultSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  result: InvestResult;
+  result: SettlementResult;
   onDetailClick?: () => void; // 섹터별 상세 내역 → 수익 통계
   onInvestClick?: () => void; // 오늘 투자하러 가기 → 모의투자
 }
@@ -32,7 +33,7 @@ export default function InvestResultSheet({
           type="button"
           onClick={onClose}
           aria-label="닫기"
-          className="absolute right-5 top-5 flex h-6 w-6 items-center justify-center"
+          className="absolute top-5 right-5 flex h-6 w-6 items-center justify-center"
         >
           <img
             src={closeIcon}
