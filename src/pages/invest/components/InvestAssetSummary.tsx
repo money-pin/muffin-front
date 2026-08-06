@@ -25,14 +25,14 @@ export default function InvestAssetSummary({
     profitRate === undefined;
 
   return (
-    <section className="flex w-full flex-col gap-1 bg-neutral-0 px-5 py-4">
+    <section className="bg-neutral-0 flex w-full flex-col gap-1 px-5 py-4">
       <p className="text-caption-12-md text-neutral-400">총 자산</p>
 
       {shouldShowSkeleton ? (
-        <div className="flex w-full items-center justify-between gap-3">
+        <div className="flex min-h-[36px] w-full items-center justify-between gap-3">
           <div
             aria-hidden="true"
-            className="h-[29px] w-[155px] rounded bg-neutral-100"
+            className="h-7 w-[155px] rounded bg-neutral-100"
           />
 
           <div
@@ -41,7 +41,7 @@ export default function InvestAssetSummary({
           />
         </div>
       ) : (
-        <div className="flex w-full items-center justify-between gap-3">
+        <div className="flex min-h-[36px] w-full items-center justify-between gap-3">
           <p className="text-heading-28-md text-neutral-900">
             {formatCurrency(totalAsset)}
           </p>

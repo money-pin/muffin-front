@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { getMyHome } from "@/lib/mypageApi";
+import { characterTypeToVariant, type CharacterVariant } from "@/lib/character";
 import { mypageQueryKeys } from "@/lib/mypageQueries";
 import QuizIntro from "@/pages/quiz/components/QuizIntro";
 import QuizQuestionView from "@/pages/quiz/components/QuizQuestionView";
@@ -48,6 +49,7 @@ function QuizPage() {
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
 
   const [nickname, setNickname] = useState("");
+  const [character, setCharacter] = useState<CharacterVariant>("plain");
   const [phase, setPhase] = useState<QuizPhase>("intro");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -76,7 +78,14 @@ function QuizPage() {
     let active = true;
     getMyHome()
       .then((home) => {
-        if (active) setNickname(home.nickname);
+        if (!active) return;
+        setNickname(home.nickname);
+        // 캐릭터도 서버값 사용 (홈·마이·퀴즈 일치)
+        setCharacter(
+          home.character
+            ? characterTypeToVariant(home.character.characterType)
+            : "plain",
+        );
       })
       .catch(() => {});
     return () => {
@@ -116,6 +125,7 @@ function QuizPage() {
     return (
       <QuizIntro
         nickname={nickname}
+        character={character}
         onStart={() => setPhase("question")}
         onLater={goHome}
       />

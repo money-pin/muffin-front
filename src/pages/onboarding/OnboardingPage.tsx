@@ -2,19 +2,20 @@ import { Fragment, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Indicator from "@/components/common/Indicator";
+import MuffinVideo from "@/components/common/MuffinVideo";
 import { saveCharacter } from "@/lib/character";
+import {
+  ONBOARDING_CHARACTER_VIDEOS,
+  ONBOARDING_START_VIDEO,
+} from "@/lib/characterVideos";
 import { completeOnboarding, saveOnboardingCharacter } from "@/lib/authApi";
 import { getMyHome, updateNickname } from "@/lib/mypageApi";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
-import muffinPlain from "@/assets/avatars/muffin-plain.png";
-import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
-import muffinButter from "@/assets/avatars/muffin-butter.png";
 
 import {
   ONBOARDING_QUESTIONS,
   ONBOARDING_RESULTS,
   resolveOnboardingResult,
-  type OnboardingResultType,
 } from "./onboardingData";
 import NicknameStep from "./steps/NicknameStep";
 import MessageStep from "./steps/MessageStep";
@@ -46,13 +47,6 @@ const PROGRESS: Partial<Record<Step, number>> = {
   complete: 6,
 };
 const PROGRESS_TOTAL = 6;
-
-// 결과 타입별 캐릭터 이미지
-const RESULT_IMAGES: Record<OnboardingResultType, string> = {
-  plain: muffinPlain,
-  sprinkle: muffinSprinkle,
-  butter: muffinButter,
-};
 
 // titleTemplate({name}/{char}/\n) → JSX. \n은 <br/>, {char}는 primary 강조.
 function renderResultTitle(
@@ -214,12 +208,9 @@ function OnboardingPage() {
       {step === "welcome" && (
         <MessageStep
           media={
-            <img
-              src={muffinPlain}
-              alt=""
-              aria-hidden="true"
-              className="h-[142px] w-[148px] object-contain"
-              draggable={false}
+            <MuffinVideo
+              src={ONBOARDING_START_VIDEO}
+              className="aspect-square w-[calc(min(100vw,var(--max-width-app))*0.354)] object-contain"
             />
           }
           title={`반가워요, ${displayName}님!`}
@@ -258,12 +249,9 @@ function OnboardingPage() {
           return (
             <MessageStep
               media={
-                <img
-                  src={RESULT_IMAGES[resultType]}
-                  alt=""
-                  aria-hidden="true"
-                  className="h-[142px] w-[148px] object-contain"
-                  draggable={false}
+                <MuffinVideo
+                  src={ONBOARDING_CHARACTER_VIDEOS[resultType]}
+                  className="aspect-square w-[calc(min(100vw,var(--max-width-app))*0.73)] object-contain"
                 />
               }
               title={renderResultTitle(

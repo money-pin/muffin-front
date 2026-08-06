@@ -12,6 +12,7 @@ import { statsMock } from "@/pages/invest/stats/mocks/statsMock";
 import { useStatsSummaryQuery } from "@/pages/invest/stats/api/queries";
 import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
 import { useMyHomeQuery } from "@/lib/mypageQueries";
+import { characterTypeToVariant } from "@/lib/character";
 import TodayNewsCarouselCard from "@/pages/news/components/TodayNewsCarouselCard";
 import { useTodayNews } from "@/pages/news/newsQueries";
 
@@ -31,6 +32,10 @@ function HomePage() {
 
   const myHomeQuery = useMyHomeQuery();
   const nickname = myHomeQuery.data?.nickname ?? "";
+  // 캐릭터는 마이페이지와 동일하게 서버값을 사용 (localStorage 불일치 방지)
+  const characterVariant = myHomeQuery.data?.character
+    ? characterTypeToVariant(myHomeQuery.data.character.characterType)
+    : "plain";
 
   const investmentAssetQuery = useInvestmentAssetQuery();
   const statsSummaryQuery = useStatsSummaryQuery();
@@ -61,7 +66,10 @@ function HomePage() {
       </header>
 
       <div className="flex flex-col px-5 pt-4">
-        <CharacterGreeting message={HOME_USER.message} />
+        <CharacterGreeting
+          message={HOME_USER.message}
+          variant={characterVariant}
+        />
       </div>
 
       <div className="mt-1 px-5">
