@@ -58,7 +58,8 @@ export default function AssetCard({
 
   return (
     <div className="flex w-full flex-col">
-      <div className="px-4">
+      {/* 배너 탭이 카드에 틈 없이 붙도록 래퍼를 flex로 (inline 요소 baseline 여백 제거) */}
+      <div className="flex px-4">
         <span className="bg-secondary-100 inline-flex h-7 items-center gap-1 rounded-t-[8px] px-2">
           <img
             src={fireIcon}

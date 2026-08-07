@@ -109,6 +109,33 @@ export function getScraps(params?: {
   );
 }
 
+// ── 최근 읽은 뉴스 목록 (GET /api/mypage/recent-news, 커서 페이지네이션, viewedAt 최신순) ──
+export interface RecentNewsListItem {
+  newsId: number;
+  title: string;
+  categoryName: string | null;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  publishedAt: string;
+  viewedAt: string;
+}
+
+export interface RecentNewsListResult {
+  items: RecentNewsListItem[];
+  nextCursor: string | null;
+  hasNext: boolean;
+}
+
+export function getRecentNews(params?: {
+  cursor?: string;
+  size?: number;
+}): Promise<RecentNewsListResult> {
+  return apiRequest<RecentNewsListResult>(
+    `/api/mypage/recent-news${toQuery({ ...params })}`,
+    { auth: true },
+  );
+}
+
 // ── 저장한 용어 목록 (GET /api/mypage/saved-terms, page 페이지네이션) ──
 export interface SavedTermItem {
   termId: number;
