@@ -33,7 +33,7 @@ export default function HomePageSkeleton() {
       {/* 인사말: 실제 CharacterGreeting(말풍선 + large 아바타 103×105)와 동일한 공간 확보 */}
       <div className="flex flex-col px-5 pt-4">
         <div className="flex flex-col items-center">
-          <SkeletonBlock className="h-9 w-40 rounded-[8px]" />
+          <SkeletonBlock className="h-10 w-40 rounded-[8px]" />
           <SkeletonBlock className="mt-[13px] h-[105px] w-[103px] rounded-[24px]" />
         </div>
       </div>
@@ -66,7 +66,7 @@ export default function HomePageSkeleton() {
                   최근 투자 성과
                 </span>
               </span>
-              <SkeletonBlock className="h-[22px] w-14" />
+              <SkeletonBlock className="h-6 w-14" />
             </div>
           </div>
         </div>
