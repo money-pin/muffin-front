@@ -244,7 +244,7 @@ function InvestTodayStatusPage({
           <button
             type="button"
             onClick={onEdit}
-            className="mt-4 h-[52px] w-full rounded-[12px] border border-[var(--color-primary-300)] bg-[var(--color-primary-100)] text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-primary)]"
+            className="bg-primary text-body-16-bd-tighter mt-4 h-[52px] w-full rounded-[12px] text-white"
           >
             투자 수정하기
           </button>
