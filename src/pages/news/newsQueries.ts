@@ -214,6 +214,37 @@ export function useToggleScrap(newsId: number) {
   });
 }
 
+// 용어 해제(undo) 전용. termId를 mutate 인자로 받아, 저장 시점에 캡처한 id로
+// 안전하게 해제할 수 있다(바텀시트가 닫혀 selectedTermId가 바뀌어도 무관).
+export function useUnsaveTermById() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (termId: number) => unsaveTerm(termId),
+    onMutate: async (termId) => {
+      const key = newsKeys.term(termId);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<TermResponse>(key);
+      if (previous) {
+        queryClient.setQueryData<TermResponse>(key, {
+          ...previous,
+          isSaved: false,
+        });
+      }
+      return { previous };
+    },
+    onError: (_err, termId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(newsKeys.term(termId), context.previous);
+      }
+    },
+    onSettled: (_data, _err, termId) => {
+      queryClient.invalidateQueries({ queryKey: newsKeys.term(termId) });
+      queryClient.invalidateQueries({ queryKey: ["mypage", "saved-terms"] });
+    },
+  });
+}
+
 // 용어 저장 토글. 용어 캐시의 isSaved를 낙관적으로 뒤집는다.
 export function useToggleTermSave(termId: number) {
   const queryClient = useQueryClient();
