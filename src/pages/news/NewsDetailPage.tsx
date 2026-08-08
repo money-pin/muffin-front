@@ -18,6 +18,7 @@ import {
 } from "@/lib/newsFormat";
 import NewsDetailPageSkeleton from "./components/NewsDetailPageSkeleton";
 import ScrollToTopButton from "./components/ScrollToTopButton";
+import TermBottomSheetSkeleton from "./components/TermBottomSheetSkeleton";
 import Toast from "./components/Toast";
 import {
   useExplanationCards,
@@ -371,38 +372,42 @@ export default function NewsDetailPage() {
         onClose={() => setSelectedTermId(null)}
         ariaLabel="용어 설명"
       >
-        <div className="flex min-h-full flex-col px-5 pt-2 pb-8 text-neutral-900">
-          <div className="flex w-full items-center justify-between border-b border-neutral-100 py-2">
-            <h3 className="text-heading-20-bd min-w-0 flex-1">
-              <span className="text-primary">{termData?.term ?? "용어"}</span>
-              {getTermSuffix(termData?.term ?? "용어")}
-            </h3>
+        {!isTermError && !termData ? (
+          <TermBottomSheetSkeleton />
+        ) : (
+          <div className="flex min-h-full flex-col px-5 pt-2 pb-8 text-neutral-900">
+            <div className="flex w-full items-center justify-between border-b border-neutral-100 py-2">
+              <h3 className="text-heading-20-bd min-w-0 flex-1">
+                <span className="text-primary">{termData?.term ?? "용어"}</span>
+                {getTermSuffix(termData?.term ?? "용어")}
+              </h3>
 
-            <button
-              type="button"
-              onClick={handleTermSaveClick}
-              className="flex size-7 shrink-0 items-center justify-center"
-              aria-label="용어 저장하기"
-              disabled={!termData || isTermSavePending}
-            >
-              <img
-                src={termData?.isSaved ? wordSaveActiveIcon : wordSaveIcon}
-                alt=""
-                aria-hidden="true"
-                className="size-7 object-contain"
-                draggable={false}
-              />
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={handleTermSaveClick}
+                className="flex size-7 shrink-0 items-center justify-center"
+                aria-label="용어 저장하기"
+                disabled={!termData || isTermSavePending}
+              >
+                <img
+                  src={termData?.isSaved ? wordSaveActiveIcon : wordSaveIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="size-7 object-contain"
+                  draggable={false}
+                />
+              </button>
+            </div>
 
-          <div className="pt-4">
-            <p className="text-body-16-rg-tighter break-keep whitespace-pre-wrap text-neutral-900">
-              {isTermError
-                ? "용어를 불러오지 못했습니다."
-                : (termData?.content ?? "불러오는 중...")}
-            </p>
+            <div className="pt-4">
+              <p className="text-body-16-rg-tighter break-keep whitespace-pre-wrap text-neutral-900">
+                {isTermError
+                  ? "용어를 불러오지 못했습니다."
+                  : termData?.content}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </BottomSheet>
 
       {savedToast && (
