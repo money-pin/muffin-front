@@ -1,23 +1,25 @@
-import { TbNews, TbCoins, TbClock } from "react-icons/tb";
-import type { IconType } from "react-icons";
-
 import Button from "@/components/common/Button";
 import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
+import newsIcon from "@/assets/onboarding/feature-news.svg";
+import coinsIcon from "@/assets/onboarding/feature-coins.svg";
+import clockIcon from "@/assets/onboarding/feature-clock.svg";
 
 interface FeatureStepProps {
   onNext: () => void;
 }
 
 interface Feature {
-  icon: IconType;
+  iconSrc: string;
+  // Figma 실측 크기 (뉴스 40, 코인·시계 32)
+  iconClass: string;
   label: string;
 }
 
-// 세 아이콘 모두 Tabler 컴포넌트로 통일해 stroke 두께·색상을 맞춘다.
+// 아이콘은 Figma 시안 SVG 원본 사용 (primary 컬러 내장, 뉴스=커스텀 / 코인·시계=tabler)
 const FEATURES: Feature[] = [
-  { icon: TbNews, label: "뉴스 읽기" },
-  { icon: TbCoins, label: "베팅하기" },
-  { icon: TbClock, label: "오전 10시 확인" },
+  { iconSrc: newsIcon, iconClass: "h-10 w-10", label: "뉴스 읽기" },
+  { iconSrc: coinsIcon, iconClass: "h-8 w-8", label: "베팅하기" },
+  { iconSrc: clockIcon, iconClass: "h-8 w-8", label: "오전 10시 확인" },
 ];
 
 export default function FeatureStep({ onNext }: FeatureStepProps) {
@@ -29,7 +31,13 @@ export default function FeatureStep({ onNext }: FeatureStepProps) {
             <div key={feature.label} className="flex items-start gap-4">
               <div className="flex flex-col items-center gap-2">
                 <div className="bg-secondary-50 flex h-[68px] w-[68px] items-center justify-center rounded-[16px]">
-                  <feature.icon className="text-primary h-10 w-10" />
+                  <img
+                    src={feature.iconSrc}
+                    alt=""
+                    aria-hidden="true"
+                    className={`${feature.iconClass} object-contain`}
+                    draggable={false}
+                  />
                 </div>
                 <span className="text-body-14-bd text-neutral-1000 whitespace-nowrap">
                   {feature.label}

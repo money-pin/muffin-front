@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import TopBar from "../../components/common/TopBar";
 import ScrappedNewsTab from "./components/ScrappedNewsTab";
+import RecentNewsTab from "./components/RecentNewsTab";
 import SavedWordsTab from "./components/SavedWordsTab";
 import QuizReviewTab from "./components/QuizReviewTab";
 
-type TabType = "news" | "word" | "quiz";
+type TabType = "news" | "read" | "word" | "quiz";
 
 export default function MyStoragePage() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function MyStoragePage() {
 
   const tabTitleMap: Record<TabType, string> = {
     news: "스크랩한 뉴스",
+    read: "최근 읽은 뉴스",
     word: "저장한 용어",
     quiz: "퀴즈 복습",
   };
@@ -51,6 +53,7 @@ export default function MyStoragePage() {
 
       <div className="min-h-0 w-full flex-1 overflow-y-auto">
         {currentTab === "news" && <ScrappedNewsTab />}
+        {currentTab === "read" && <RecentNewsTab />}
         {currentTab === "word" && <SavedWordsTab />}
         {currentTab === "quiz" && (
           <QuizReviewTab
