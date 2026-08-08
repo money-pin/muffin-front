@@ -1,5 +1,10 @@
 import Button from "@/components/common/Button";
 import TextField from "@/components/common/TextField";
+import {
+  getNicknameFormatStatus,
+  NICKNAME_INVALID_TEXT,
+  NICKNAME_MAX_LENGTH,
+} from "@/lib/nickname";
 
 interface NicknameStepProps {
   nickname: string;
@@ -7,15 +12,14 @@ interface NicknameStepProps {
   onNext: () => void;
 }
 
-// 영문·한글 상관없이 최대 6글자
-const MAX_NICKNAME_LENGTH = 6;
-
 export default function NicknameStep({
   nickname,
   onChange,
   onNext,
 }: NicknameStepProps) {
-  const canSubmit = nickname.trim() !== "";
+  // 형식(2~6자·특수문자 제외)이 유효할 때만 다음 단계로 진행 가능. 중복은 서버에서 처리.
+  const formatStatus = getNicknameFormatStatus(nickname);
+  const canSubmit = formatStatus === "valid";
 
   return (
     <div className="flex flex-1 flex-col px-5 pt-5 pb-8">
@@ -28,9 +32,10 @@ export default function NicknameStep({
         <TextField
           placeholder="최대 6자 설정 가능"
           hint="나중에 언제든지 변경할 수 있어요."
-          maxLength={MAX_NICKNAME_LENGTH}
+          error={formatStatus === "invalid" ? NICKNAME_INVALID_TEXT : undefined}
+          maxLength={NICKNAME_MAX_LENGTH}
           value={nickname}
-          onChange={(v) => onChange(v.slice(0, MAX_NICKNAME_LENGTH))}
+          onChange={(v) => onChange(v.slice(0, NICKNAME_MAX_LENGTH))}
         />
       </div>
 
