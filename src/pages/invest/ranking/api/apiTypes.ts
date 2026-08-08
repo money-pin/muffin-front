@@ -20,9 +20,16 @@ export interface WeeklyRankingUserDetailApi {
   sectors: WeeklyRankingSectorDetailApi[];
 }
 
+export interface WeeklyRankingCharacterApi {
+  characterId: number;
+  characterType: string;
+  characterName: string;
+}
+
 export interface WeeklyRankingItemApi {
   rank: number;
   nickname: string;
+  character?: WeeklyRankingCharacterApi | null;
   profitAmount: number;
   profitRate: number;
   detail?: WeeklyRankingUserDetailApi;

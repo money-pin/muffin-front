@@ -23,7 +23,7 @@ export interface WeeklyRankingItem {
   nickname: string;
   weeklyProfit: number;
   weeklyProfitRate: number;
-  characterImageUrl?: string;
+  characterType?: string;
   sectors?: SectorPerformanceDetail[];
 }
 

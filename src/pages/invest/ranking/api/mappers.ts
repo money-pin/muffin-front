@@ -52,6 +52,7 @@ function mapWeeklyRankingItem(item: WeeklyRankingItemApi): WeeklyRankingItem {
     nickname: item.nickname,
     weeklyProfit: item.profitAmount,
     weeklyProfitRate: item.profitRate,
+    characterType: item.character?.characterType,
     sectors: item.detail?.sectors.map(mapRankingSectorDetail) ?? [],
   };
 }
