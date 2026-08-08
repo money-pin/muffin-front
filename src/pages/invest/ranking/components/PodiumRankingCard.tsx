@@ -1,4 +1,7 @@
+import muffinButter from "@/assets/avatars/muffin-butter.png";
+import muffinCream from "@/assets/avatars/muffin-cream.png";
 import muffinPlain from "@/assets/avatars/muffin-plain.png";
+import muffinSprinkle from "@/assets/avatars/muffin-sprinkle.png";
 import bronzeCrown from "@/assets/crown/crown-bronze.svg";
 import goldCrown from "@/assets/crown/crown-gold.svg";
 import silverCrown from "@/assets/crown/crown-silver.svg";
@@ -9,6 +12,7 @@ import {
 } from "@/pages/invest/utils/profitFormat";
 
 type PodiumRank = 1 | 2 | 3;
+type MuffinCharacterType = "PLAIN" | "SPRINKLE" | "BUTTER" | "CREAM";
 
 interface PodiumRankingCardProps {
   rank: PodiumRank;
@@ -57,6 +61,34 @@ const rankStyleMap: Record<
   },
 };
 
+const muffinImageMap: Record<MuffinCharacterType, string> = {
+  PLAIN: muffinPlain,
+  SPRINKLE: muffinSprinkle,
+  BUTTER: muffinButter,
+  CREAM: muffinCream,
+};
+
+function getMuffinImageSrc(item: WeeklyRankingItem) {
+  const characterType = item.characterType?.toUpperCase();
+
+  if (isMuffinCharacterType(characterType)) {
+    return muffinImageMap[characterType];
+  }
+
+  return item.characterImageUrl || muffinPlain;
+}
+
+function isMuffinCharacterType(
+  value: string | undefined,
+): value is MuffinCharacterType {
+  return (
+    value === "PLAIN" ||
+    value === "SPRINKLE" ||
+    value === "BUTTER" ||
+    value === "CREAM"
+  );
+}
+
 export default function PodiumRankingCard({
   rank,
   item,
@@ -66,6 +98,7 @@ export default function PodiumRankingCard({
   const isClickable = Boolean(onClick);
   const profitColorClass = getProfitColorClass(item.weeklyProfit);
   const profitRateColorClass = getProfitColorClass(item.weeklyProfitRate);
+  const muffinImageSrc = getMuffinImageSrc(item);
 
   return (
     <button
@@ -78,7 +111,7 @@ export default function PodiumRankingCard({
         className={`relative flex min-w-0 flex-col overflow-hidden rounded-xl ${style.card} ${style.contentTop}`}
       >
         <img
-          src={item.characterImageUrl || muffinPlain}
+          src={muffinImageSrc}
           alt=""
           aria-hidden="true"
           className={`absolute left-1/2 h-[73px] w-[72px] -translate-x-1/2 object-contain ${style.imageTop}`}
