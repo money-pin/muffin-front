@@ -31,7 +31,7 @@ interface SectorMeta {
   iconSrc: string;
 }
 
-const SECTOR_META_BY_CODE: Record<string, SectorMeta> = {
+const SECTOR_META_BY_CODE: Record<InvestSectorCode, SectorMeta> = {
   AUTO: {
     code: "AUTO",
     name: "자동차",
@@ -59,13 +59,8 @@ const SECTOR_META_BY_CODE: Record<string, SectorMeta> = {
   },
   DEPOSIT: {
     code: "DEPOSIT",
-    name: "예적금",
+    name: "예금",
     iconSrc: depositIcon,
-  },
-  USD: {
-    code: "USD",
-    name: "달러",
-    iconSrc: dollarIcon,
   },
   ENERGY: {
     code: "ENERGY",
@@ -92,27 +87,19 @@ const SECTOR_META_BY_CODE: Record<string, SectorMeta> = {
     name: "테크",
     iconSrc: technologyIcon,
   },
-};
-
-// TODO: 기존 mock data와 이전 섹터 코드 호환용 alias입니다.
-// mock data를 API 표준 sectorCode로 정리한 뒤 제거를 검토합니다.
-const SECTOR_CODE_ALIASES: Record<string, InvestSectorCode> = {
-  AUTOMOBILE: "AUTO",
-  BIOTECH: "BIO",
-  BIOTECH_PHARMA: "BIO",
-  BONDS: "BOND",
-  COIN: "CRYPTO",
-  DOLLAR: "USD",
-  FINANCIALS: "FINANCE",
-  IT: "TECH",
-  TECHNOLOGY: "TECH",
+  USD: {
+    code: "USD",
+    name: "달러",
+    iconSrc: dollarIcon,
+  },
 };
 
 export function getSectorMeta(sectorCode: string, fallbackName?: string) {
   const normalizedCode = sectorCode.trim().toUpperCase();
-  const code = SECTOR_CODE_ALIASES[normalizedCode] ?? normalizedCode;
 
-  if (isInvestSectorCode(code)) return SECTOR_META_BY_CODE[code];
+  if (isInvestSectorCode(normalizedCode)) {
+    return SECTOR_META_BY_CODE[normalizedCode];
+  }
 
   return {
     code: normalizedCode,
