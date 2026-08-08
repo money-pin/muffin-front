@@ -1,6 +1,7 @@
 // 닉네임 형식 규칙 (온보딩·수정 공용)
-// - 최대 6자, 한글/영문/숫자/공백만 허용 (특수문자·이모지 불가)
+// - 2~6자, 한글/영문/숫자/공백만 허용 (특수문자·이모지 불가)
 // - 중복 검사는 별도(GET /api/mypage/nickname/check)로 처리한다.
+export const NICKNAME_MIN_LENGTH = 2;
 export const NICKNAME_MAX_LENGTH = 6;
 
 // 완성형 한글 + 자모(입력 중 상태) + 영문/숫자/공백. 그 외(특수문자·이모지)는 불가.
@@ -12,6 +13,7 @@ export type NicknameFormatStatus = "empty" | "invalid" | "valid";
 export function getNicknameFormatStatus(value: string): NicknameFormatStatus {
   const trimmed = value.trim();
   if (trimmed === "") return "empty";
+  if (trimmed.length < NICKNAME_MIN_LENGTH) return "invalid";
   if (trimmed.length > NICKNAME_MAX_LENGTH) return "invalid";
   if (!NICKNAME_ALLOWED_RE.test(trimmed)) return "invalid";
   return "valid";
