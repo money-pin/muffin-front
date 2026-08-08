@@ -24,7 +24,6 @@ export interface WeeklyRankingCharacterApi {
   characterId: number;
   characterType: string;
   characterName: string;
-  characterImageUrl: string | null;
 }
 
 export interface WeeklyRankingItemApi {

@@ -75,7 +75,7 @@ function getMuffinImageSrc(item: WeeklyRankingItem) {
     return muffinImageMap[characterType];
   }
 
-  return item.characterImageUrl || muffinPlain;
+  return muffinPlain;
 }
 
 function isMuffinCharacterType(
