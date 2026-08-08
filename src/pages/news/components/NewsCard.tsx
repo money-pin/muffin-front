@@ -75,7 +75,7 @@ export default function NewsCard({
       <div className="flex min-w-0 flex-1 self-stretch py-[13px]">
         <div className="flex min-w-0 flex-1 flex-col justify-between">
           <div className="flex max-h-10 items-start gap-2">
-            <h3 className="text-body-14-md line-clamp-2 min-w-0 flex-1 text-neutral-900">
+            <h3 className="text-body-14-md-tighter line-clamp-2 min-w-0 flex-1 leading-[1.35] text-neutral-900">
               {title}
             </h3>
             <button
