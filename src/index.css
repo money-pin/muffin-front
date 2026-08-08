@@ -75,7 +75,7 @@
 
   --color-gold: #ffdd00;
   --color-silver: #a5a5a5;
-  --color-bronze: #c66200;
+  --color-bronze: #a07e53;
 
   /* Heading */
   --text-heading-28-md: 1.75rem;
@@ -228,7 +228,7 @@
 }
 
 .animate-splash-logo {
-  animation: splash-logo-in 2.0s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: splash-logo-in 2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
