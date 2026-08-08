@@ -65,10 +65,6 @@ export const router = createBrowserRouter([
             element: <NewsDetailPage />,
           },
           {
-            path: "my/storage",
-            element: <MyStoragePage />,
-          },
-          {
             element: <NavLayout />,
             children: [
               {
@@ -117,6 +113,10 @@ export const router = createBrowserRouter([
               {
                 path: "my/settings",
                 element: <MySettingsPage />,
+              },
+              {
+                path: "my/storage",
+                element: <MyStoragePage />,
               },
             ],
           },
