@@ -2,9 +2,14 @@ import { useEffect, useState } from "react";
 
 import Button from "@/components/common/Button";
 import { checkNickname } from "@/lib/mypageApi";
+import {
+  getNicknameFormatStatus,
+  NICKNAME_GUIDE_TEXT,
+  NICKNAME_INVALID_TEXT,
+  NICKNAME_MAX_LENGTH,
+} from "@/lib/nickname";
 import closeIcon from "@/assets/icon-24px/close.svg";
 import closeButtonIcon from "@/assets/icon-24px/close-button.svg";
-import { NICKNAME_MAX_LENGTH } from "@/pages/my/myData";
 
 interface NicknameModalProps {
   isOpen: boolean;
@@ -13,7 +18,7 @@ interface NicknameModalProps {
   onChange: (nickname: string) => void;
 }
 
-type NicknameStatus = "idle" | "checking" | "taken" | "available";
+type NicknameStatus = "idle" | "invalid" | "checking" | "taken" | "available";
 
 // Figma 닉네임 변경 모달: 입력 + 중복/사용 가능 헬퍼 텍스트 + 변경 버튼
 // 중복 검사는 GET /api/mypage/nickname/check (입력 디바운스 후 조회)
@@ -31,7 +36,9 @@ export default function NicknameModal({
     available: boolean;
   } | null>(null);
   const trimmed = value.trim();
-  const isCheckable = trimmed !== "" && trimmed !== currentNickname;
+  const formatStatus = getNicknameFormatStatus(value);
+  // 형식(최대 6자·특수문자 제외)이 유효하고, 현재 닉네임과 다를 때만 중복 조회한다.
+  const isCheckable = formatStatus === "valid" && trimmed !== currentNickname;
 
   // 입력이 멈추면(400ms) 중복 조회. 결과는 checked에 저장(비동기 콜백에서만 setState).
   useEffect(() => {
@@ -53,22 +60,26 @@ export default function NicknameModal({
 
   if (!isOpen) return null;
 
-  const status: NicknameStatus = !isCheckable
-    ? "idle"
-    : checked?.nickname === trimmed
-      ? checked.available
-        ? "available"
-        : "taken"
-      : "checking";
+  const status: NicknameStatus =
+    formatStatus === "invalid"
+      ? "invalid"
+      : !isCheckable
+        ? "idle"
+        : checked?.nickname === trimmed
+          ? checked.available
+            ? "available"
+            : "taken"
+          : "checking";
 
   const helperByStatus: Record<
     NicknameStatus,
     { text: string; className: string }
   > = {
     idle: {
-      text: `최대 ${NICKNAME_MAX_LENGTH}자 설정 가능`,
+      text: NICKNAME_GUIDE_TEXT,
       className: "text-neutral-400",
     },
+    invalid: { text: NICKNAME_INVALID_TEXT, className: "text-positive" },
     checking: {
       text: "닉네임 확인 중이에요...",
       className: "text-neutral-400",
@@ -109,7 +120,9 @@ export default function NicknameModal({
 
         <div
           className={`mt-5 flex h-[52px] items-center gap-2 rounded-[12px] border px-4 ${
-            status === "taken" ? "border-positive" : "border-neutral-100"
+            status === "taken" || status === "invalid"
+              ? "border-positive"
+              : "border-neutral-100"
           }`}
         >
           <input

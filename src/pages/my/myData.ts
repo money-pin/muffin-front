@@ -43,6 +43,5 @@ export const MY_RECENT_NEWS: MyRecentNews[] = [
 
 // 닉네임 중복 검사 목데이터 — API 연동 전 임시
 export const TAKEN_NICKNAMES = ["투자 초보", "머핀"];
-export const NICKNAME_MAX_LENGTH = 6;
 
 export const APP_VERSION = "1.0.0";
