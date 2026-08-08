@@ -33,11 +33,11 @@ export default function Toast({
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-6 z-[60] flex justify-center px-5"
+      className="pointer-events-none fixed inset-x-0 bottom-6 z-[60] mx-auto w-full max-w-[var(--max-width-app)] px-5"
       role="status"
       aria-live="polite"
     >
-      <div className="pointer-events-auto flex w-full max-w-[350px] items-center justify-between gap-2 rounded-[12px] bg-neutral-700 px-4 py-3">
+      <div className="pointer-events-auto flex w-full items-center justify-between gap-2 rounded-[12px] bg-neutral-700 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <img
             src={toastCheckIcon}
@@ -46,7 +46,9 @@ export default function Toast({
             className="size-4 shrink-0 object-contain"
             draggable={false}
           />
-          <p className="text-body-16-rg-tighter text-neutral-0 truncate">
+          {/* 피그마 Body/16_rg_tighter_150 기준 line-height 150%.
+              프로젝트 토큰은 160%라 여기서만 1.5로 덮어 높이 48px을 맞춘다. */}
+          <p className="text-body-16-rg-tighter text-neutral-0 truncate leading-[1.5]">
             {message}
           </p>
         </div>
