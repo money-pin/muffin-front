@@ -18,6 +18,7 @@ import {
 } from "@/lib/newsFormat";
 import NewsDetailPageSkeleton from "./components/NewsDetailPageSkeleton";
 import ScrollToTopButton from "./components/ScrollToTopButton";
+import Toast from "./components/Toast";
 import {
   useExplanationCards,
   useNewsDetail,
@@ -26,6 +27,7 @@ import {
   useTerm,
   useToggleScrap,
   useToggleTermSave,
+  useUnsaveTermById,
 } from "./newsQueries";
 
 function splitImpacts(impacts: SectorImpactItem[]) {
@@ -119,6 +121,14 @@ export default function NewsDetailPage() {
   const [selectedTermId, setSelectedTermId] = useState<number | null>(null);
   const isTermSheetOpen = selectedTermId != null;
 
+  // 용어 저장 완료 토스트. undoTermId를 들고 있어 "취소" 시 해당 용어를 해제한다.
+  // id는 연속 저장 시 토스트를 새로 띄우기 위한 키.
+  const [savedToast, setSavedToast] = useState<{
+    id: number;
+    undoTermId: number;
+  } | null>(null);
+  const toastIdRef = useRef(0);
+
   const { data: detail, isLoading, isError } = useNewsDetail(idNum);
   const { data: impactData } = useSectorImpacts(idNum);
   const {
@@ -136,6 +146,7 @@ export default function NewsDetailPage() {
     useToggleScrap(idNum);
   const { mutate: toggleTermSave, isPending: isTermSavePending } =
     useToggleTermSave(selectedTermId ?? -1);
+  const { mutate: undoTermSave } = useUnsaveTermById();
   const { mutate: readNews } = useReadNews(idNum);
 
   useEffect(() => {
@@ -173,8 +184,20 @@ export default function NewsDetailPage() {
   };
 
   const handleTermSaveClick = () => {
-    if (!termData || isTermSavePending) return;
-    toggleTermSave(!termData.isSaved);
+    if (!termData || isTermSavePending || selectedTermId == null) return;
+
+    const nextSaved = !termData.isSaved;
+    // 토스트의 "취소"는 잠시 뒤에 눌릴 수 있고 그 사이 바텀시트가 닫혀
+    // selectedTermId가 바뀔 수 있으므로, 저장 시점의 termId를 캡처해 둔다.
+    const savedTermId = selectedTermId;
+
+    toggleTermSave(nextSaved, {
+      // 저장(false→true)에 성공했을 때만 토스트 노출. 해제는 조용히 처리.
+      onSuccess: () => {
+        if (!nextSaved) return;
+        setSavedToast({ id: ++toastIdRef.current, undoTermId: savedTermId });
+      },
+    });
   };
 
   if (isLoading) {
@@ -381,6 +404,16 @@ export default function NewsDetailPage() {
           </div>
         </div>
       </BottomSheet>
+
+      {savedToast && (
+        <Toast
+          key={savedToast.id}
+          message="용어가 저장되었어요!"
+          actionLabel="취소"
+          onAction={() => undoTermSave(savedToast.undoTermId)}
+          onClose={() => setSavedToast(null)}
+        />
+      )}
     </div>
   );
 }
