@@ -190,7 +190,7 @@ export default function BottomSheet({
   const snapTranslate = !isVisible ? "100%" : `${dragOffset}px`;
 
   return createPortal(
-    <RemoveScroll>
+    <RemoveScroll removeScrollBar={false}>
       <div className="fixed inset-0 z-50 flex items-end justify-center">
         <div
           aria-hidden="true"
