@@ -1,13 +1,21 @@
 import CharacterAvatar from "@/components/common/CharacterAvatar";
+import type { CharacterVariant } from "@/lib/character";
+import pencilIcon from "@/assets/icon-20px/pencil.svg";
 
 interface MyProfileProps {
   nickname: string;
-  characterVariant: "plain" | "sprinkle" | "cream" | "butter";
+  characterVariant: CharacterVariant;
   characterLabel: string;
   onEditNickname: () => void;
 }
 
-// Figma 마이 프로필: 캐릭터 + 캐릭터 태그(하단 겹침) + 닉네임·연필 버튼
+const CHARACTER_TAG_CLASS_MAP: Record<CharacterVariant, string> = {
+  plain: "bg-character-plain-tag-bg text-character-plain-tag-text",
+  butter: "bg-character-butter-tag-bg text-character-butter-tag-text",
+  sprinkle: "bg-character-sprinkle-tag-bg text-character-sprinkle-tag-text",
+  cream: "bg-character-cream-tag-bg text-character-cream-tag-text",
+};
+
 export default function MyProfile({
   nickname,
   characterVariant,
@@ -17,8 +25,10 @@ export default function MyProfile({
   return (
     <section className="flex flex-col items-center">
       <div className="relative">
-        <CharacterAvatar size="large" variant={characterVariant} />
-        <span className="bg-secondary-400 text-caption-12-bd absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-[4px] px-1.5 py-0.5 whitespace-nowrap text-white">
+        <CharacterAvatar size="medium" variant={characterVariant} />
+        <span
+          className={`text-caption-12-md-tighter absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-[4px] px-1.5 py-0.5 whitespace-nowrap ${CHARACTER_TAG_CLASS_MAP[characterVariant]}`}
+        >
           {characterLabel}
         </span>
       </div>
@@ -32,20 +42,13 @@ export default function MyProfile({
         <span className="text-heading-20-bd min-w-0 truncate text-neutral-900">
           {nickname}
         </span>
-        <svg
+        <img
+          src={pencilIcon}
+          alt=""
           aria-hidden="true"
-          className="shrink-0"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--color-neutral-400)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-        </svg>
+          className="size-5 shrink-0"
+          draggable={false}
+        />
       </button>
     </section>
   );

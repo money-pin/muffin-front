@@ -13,15 +13,15 @@ export default function RecentNewsList({
   onNewsClick,
 }: RecentNewsListProps) {
   return (
-    <div className="-mx-5 flex [scrollbar-width:none] gap-3 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
+    <div className="-mx-5 flex [scrollbar-width:none] gap-2 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
       {newsList.map((news) => (
         <button
           key={news.id}
           type="button"
           onClick={() => onNewsClick(news.id)}
-          className="flex w-[130px] shrink-0 flex-col gap-2 text-left"
+          className="flex w-32 shrink-0 flex-col gap-3 text-left"
         >
-          <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px]">
+          <div className="relative size-32 overflow-hidden rounded-[16px]">
             <img
               src={news.image}
               alt=""
@@ -35,7 +35,7 @@ export default function RecentNewsList({
               draggable={false}
             />
           </div>
-          <p className="text-body-14-md line-clamp-2 break-keep text-neutral-900">
+          <p className="text-body-14-md-tighter line-clamp-2 break-keep text-neutral-700">
             {news.title}
           </p>
         </button>

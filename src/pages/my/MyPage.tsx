@@ -7,7 +7,8 @@ import { CHARACTER_LABELS, characterTypeToVariant } from "@/lib/character";
 import { updateNickname, type MyHome, type WeekDay } from "@/lib/mypageApi";
 import { mypageQueryKeys, useMyHomeQuery } from "@/lib/mypageQueries";
 import { getNewsImage } from "@/lib/newsFormat";
-import chevronRightIcon from "@/assets/icon-24px/chevron-right.svg";
+import chevronRightIcon from "@/assets/icon-20px/iconarrow-gray03.svg";
+import settingIcon from "@/assets/icon-24px/setting.svg";
 
 import MyPageSkeleton from "./components/MyPageSkeleton";
 import MyProfile from "./components/MyProfile";
@@ -63,8 +64,8 @@ function MyPage() {
   );
 
   return (
-    <div className="flex min-h-full flex-col">
-      <div className="bg-white pb-6">
+    <div className="flex min-h-[calc(100dvh-80px)] flex-col bg-neutral-50">
+      <div className="bg-white pb-4">
         <header className="flex h-[52px] items-center justify-end px-5">
           <button
             type="button"
@@ -72,20 +73,13 @@ function MyPage() {
             aria-label="설정"
             className="-mr-3 flex size-11 shrink-0 items-center justify-center"
           >
-            <svg
+            <img
+              src={settingIcon}
+              alt=""
               aria-hidden="true"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--color-neutral-900)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-            </svg>
+              className="size-6"
+              draggable={false}
+            />
           </button>
         </header>
 
@@ -96,7 +90,7 @@ function MyPage() {
           onEditNickname={() => setNicknameModalOpen(true)}
         />
 
-        <div className="mt-5 px-5">
+        <div className="mt-4 px-5">
           <StreakWeekCard
             streakDays={streakDays}
             weekChecks={weekChecks}
@@ -105,34 +99,34 @@ function MyPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-9 border-t border-neutral-100 bg-[#f9f9f9] px-5 pt-6 pb-9">
-        <section className="flex flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-8 border-t border-neutral-100 bg-neutral-50 px-5 pt-5 pb-8">
+        <section className="flex flex-col gap-3">
           <SectionHeader title="학습 저장소" />
-          {/* 이 부분만 탭 클릭 시 파라미터(?tab=menu)를 포함해 이동하도록 수정했습니다 */}
+          {/* 탭 클릭 시 파라미터(?tab=menu)를 포함해 이동 */}
           <StorageShortcuts
             onNavigate={(menu) => navigate(`/my/storage?tab=${menu}`)}
           />
         </section>
 
-        <section className="flex flex-col gap-4">
-          <SectionHeader
-            title="최근 읽은 뉴스"
-            right={
-              <button
-                type="button"
-                onClick={() => navigate("/my/storage?tab=read")}
-                aria-label="최근 읽은 뉴스 더보기"
-                className="-mr-3 flex size-11 shrink-0 items-center justify-center"
-              >
-                <img
-                  src={chevronRightIcon}
-                  alt=""
-                  aria-hidden="true"
-                  className="h-6 w-6"
-                />
-              </button>
-            }
-          />
+        <section className="flex flex-col gap-3">
+          <div className="flex h-[26px] items-center justify-between">
+            <h2 className="text-body-16-bd-tighter text-neutral-900">
+              최근 읽은 뉴스
+            </h2>
+            <button
+              type="button"
+              onClick={() => navigate("/my/storage?tab=read")}
+              aria-label="최근 읽은 뉴스 더보기"
+              className="-mr-3 flex size-11 shrink-0 items-center justify-center"
+            >
+              <img
+                src={chevronRightIcon}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+              />
+            </button>
+          </div>
           <RecentNewsList
             newsList={recentNewsList}
             onNewsClick={(newsId) => navigate(`/news/${newsId}`)}

@@ -1,4 +1,5 @@
 import fireIcon from "@/assets/icon-20px/fire.svg";
+import checkIcon from "@/assets/icon-24px/check-2.5.svg";
 
 interface StreakWeekCardProps {
   streakDays: number;
@@ -12,24 +13,6 @@ const WEEK_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 const CELL = 28;
 const GAP = 15;
 
-function CheckMark() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="white"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12.5l4.5 4.5L19 7" />
-    </svg>
-  );
-}
-
 // Figma 마이 스트릭: 배지(위쪽 라운드) + 요일 체크 카드
 // 연속 체크 구간은 이어진 그라데이션 캡슐, 단독 체크는 원형으로 표시
 export default function StreakWeekCard({
@@ -39,7 +22,7 @@ export default function StreakWeekCard({
 }: StreakWeekCardProps) {
   // 연속된 체크/미체크 구간으로 묶기 (캡슐 하나에 그라데이션이 이어지도록)
   const segments: { checked: boolean; start: number; length: number }[] = [];
-  for (let i = 0; i < weekChecks.length; ) {
+  for (let i = 0; i < weekChecks.length;) {
     const checked = weekChecks[i];
     let end = i;
     while (end < weekChecks.length && weekChecks[end] === checked) end += 1;
@@ -50,7 +33,7 @@ export default function StreakWeekCard({
   return (
     <div className="flex w-full flex-col">
       <div className="px-4 leading-none">
-        <span className="inline-flex h-7 items-center gap-1 rounded-t-[8px] bg-secondary-100 px-2">
+        <span className="bg-secondary-100 inline-flex h-7 items-center gap-1 rounded-t-[8px] px-2">
           <img
             src={fireIcon}
             alt=""
@@ -64,12 +47,12 @@ export default function StreakWeekCard({
         </span>
       </div>
 
-      <div className="flex w-full flex-col items-center gap-1 rounded-[16px] bg-white px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
+      <div className="flex w-full flex-col items-center gap-1 rounded-[16px] border border-neutral-100 bg-white px-4 py-4">
         <div className="flex" style={{ gap: GAP }}>
           {WEEK_LABELS.map((label, index) => (
             <span
               key={label}
-              className={`text-center text-caption-12-bd ${
+              className={`text-caption-12-bd text-center ${
                 index === todayIndex ? "text-primary" : "text-neutral-400"
               }`}
               style={{ width: CELL }}
@@ -84,7 +67,7 @@ export default function StreakWeekCard({
             segment.checked ? (
               <div
                 key={segment.start}
-                className="flex items-center rounded-full bg-gradient-to-r from-secondary-400 to-primary"
+                className="from-secondary-400 to-primary flex items-center rounded-full bg-gradient-to-r"
                 style={{
                   height: CELL,
                   width: segment.length * CELL + (segment.length - 1) * GAP,
@@ -97,7 +80,13 @@ export default function StreakWeekCard({
                     className="flex items-center justify-center"
                     style={{ width: CELL }}
                   >
-                    <CheckMark />
+                    <img
+                      src={checkIcon}
+                      alt=""
+                      aria-hidden="true"
+                      className="size-6"
+                      draggable={false}
+                    />
                   </span>
                 ))}
               </div>
