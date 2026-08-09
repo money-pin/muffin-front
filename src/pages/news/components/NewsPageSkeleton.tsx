@@ -1,4 +1,3 @@
-import Carousel from "@/components/common/Carousel";
 import TabBar from "@/components/common/TabBar";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 
@@ -19,18 +18,16 @@ function CarouselCardSkeleton() {
     <div className="bg-neutral-0 flex w-full flex-col gap-3 rounded-[16px] border border-neutral-100 p-5">
       {/* 이미지 310x201, radius sm */}
       <SkeletonBlock className="h-[201px] w-full rounded-[8px]" />
-      {/* 제목 2줄 (310 full + 241) */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-[10px]">
+      {/* 텍스트 영역 310x78 space-between: 제목 프레임(44) + 메타(22) */}
+      <div className="flex h-[78px] flex-col justify-between">
+        {/* 제목 프레임 310x44 space-between: 18(full) + 18(241) */}
+        <div className="flex h-[44px] flex-col justify-between">
           <SkeletonBlock className="h-[18px] w-full rounded-[4px]" />
-          <SkeletonBlock className="h-[18px] w-[75%] rounded-[4px]" />
+          <SkeletonBlock className="h-[18px] w-[241px] max-w-full rounded-[4px]" />
         </div>
-        {/* 메타 줄 310x22 space-between: 뱃지+날짜 / 조회수 */}
+        {/* 메타 줄 310x22 space-between: 뱃지+날짜(102) / 조회수(80) */}
         <div className="flex h-[22px] items-center justify-between">
-          <div className="flex items-center gap-2">
-            <SkeletonBlock className="h-[18px] w-[76px] rounded-[4px]" />
-            <SkeletonBlock className="h-[18px] w-[80px] rounded-[4px]" />
-          </div>
+          <SkeletonBlock className="h-[18px] w-[102px] rounded-[4px]" />
           <SkeletonBlock className="h-[18px] w-[80px] rounded-[4px]" />
         </div>
       </div>
@@ -44,14 +41,14 @@ function NewsCardSkeleton() {
     <div className="bg-neutral-0 flex h-[100px] w-full items-center gap-4 rounded-[12px] border border-neutral-100 px-3">
       {/* 썸네일 74x74, radius 8 */}
       <SkeletonBlock className="size-[74px] flex-shrink-0 rounded-[8px]" />
-      {/* 텍스트 영역 236 Fill x 74, gap 16 안: 제목 2줄(38) + 메타(22) */}
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-4 self-stretch py-[13px]">
-        {/* 제목 2줄 */}
+      {/* 텍스트 영역 236 Fill x 74 space-between: 제목 그룹(38) + 메타(22) */}
+      <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch py-[13px]">
+        {/* 제목 그룹 236x38, gap 8: 16(full) + 16(112) */}
         <div className="flex flex-col gap-2">
           <SkeletonBlock className="h-4 w-full rounded-[4px]" />
-          <SkeletonBlock className="h-4 w-[60%] rounded-[4px]" />
+          <SkeletonBlock className="h-4 w-[112px] max-w-full rounded-[4px]" />
         </div>
-        {/* 메타 줄 236x22 space-between: 뱃지(102)+날짜? / 조회수(80) */}
+        {/* 메타 줄 236x22 space-between: 뱃지+날짜(102) / 조회수(80) */}
         <div className="flex h-[16px] items-center justify-between">
           <SkeletonBlock className="h-4 w-[102px] rounded-[4px]" />
           <SkeletonBlock className="h-4 w-[80px] rounded-[4px]" />
@@ -85,11 +82,13 @@ export default function NewsPageSkeleton() {
             따끈한 금융 소식
           </h2>
         </div>
-        <Carousel>
-          <CarouselCardSkeleton />
-        </Carousel>
-        {/* 캐러셀 인디케이터 (76x8, radius round) */}
-        <div className="flex justify-center">
+        {/* Carousel 자체 인디케이터(활성 도트)를 노출하지 않으려고
+            컴포넌트로 감싸지 않고 바깥 레이아웃(px-5)만 재현한다. */}
+        <div className="flex w-full flex-col items-center gap-3">
+          <div className="w-full px-5">
+            <CarouselCardSkeleton />
+          </div>
+          {/* 캐러셀 인디케이터 (명세: 회색 바 하나 76x8, radius round, #E2E2E2) */}
           <SkeletonBlock className="h-2 w-[76px] rounded-full" />
         </div>
       </section>
