@@ -46,14 +46,6 @@ const errorMessageMap: Record<string, ErrorMessageInfo> = {
     action: "close",
     variant: "error",
   },
-  AUTH_401: {
-    title: "로그인이 필요해요.",
-    description: "인증이 만료되었습니다.\n다시 로그인해주세요.",
-    primaryLabel: "로그인",
-    secondaryLabel: "취소",
-    action: "login",
-    variant: "info",
-  },
   AUTH_401_001: {
     title: "로그인이 필요해요.",
     description: "인증이 만료되었습니다.\n다시 로그인해주세요.",
@@ -134,18 +126,20 @@ const errorMessageMap: Record<string, ErrorMessageInfo> = {
     variant: "error",
   },
   USER_404_001: {
-    title: "사용자 정보를 찾을 수 없어요.",
-    description: "잠시 후 다시 로그인해주세요.",
-    primaryLabel: "확인",
+    title: "다시 로그인해주세요.",
+    description:
+      "사용자 정보를 확인할 수 없습니다.\n다시 로그인한 뒤 이용해주세요.",
+    primaryLabel: "로그인",
     action: "login",
-    variant: "error",
+    variant: "info",
   },
   MYPAGE_404_001: {
-    title: "사용자 정보를 찾을 수 없어요.",
-    description: "잠시 후 다시 로그인해주세요.",
-    primaryLabel: "확인",
+    title: "다시 로그인해주세요.",
+    description:
+      "사용자 정보를 확인할 수 없습니다.\n다시 로그인한 뒤 이용해주세요.",
+    primaryLabel: "로그인",
     action: "login",
-    variant: "error",
+    variant: "info",
   },
   MYPAGE_400_004: {
     title: "요청 정보를 확인해주세요.",
@@ -219,26 +213,12 @@ const errorMessageMap: Record<string, ErrorMessageInfo> = {
     action: "close",
     variant: "error",
   },
-  QUIZ_400_002: {
-    title: "조회 날짜를 확인해주세요.",
-    description: "미래 날짜의 퀴즈는 조회할 수 없습니다.",
-    primaryLabel: "확인",
-    action: "close",
-    variant: "error",
-  },
   QUIZ_400_003: {
     title: "날짜 형식을 확인해주세요.",
-    description: "날짜는 yyyy-MM-dd 형식으로 입력해주세요.",
+    description: "날짜는 yyyy-mm-dd 형식으로 입력해주세요.",
     primaryLabel: "확인",
     action: "close",
     variant: "error",
-  },
-  QUIZ_404_001: {
-    title: "오늘의 퀴즈를 준비 중이에요.",
-    description: "잠시 후 다시 확인해주세요.",
-    primaryLabel: "확인",
-    action: "close",
-    variant: "info",
   },
   QUIZ_404_002: {
     title: "퀴즈를 불러올 수 없어요.",
