@@ -1,5 +1,6 @@
 import { useRecentNewsQuery } from "@/lib/mypageQueries";
 import NewsCard from "@/pages/news/components/NewsCard";
+import StorageEmptyState from "./StorageEmptyState";
 
 function StorageMessage({ children }: { children: string }) {
   return (
@@ -20,7 +21,10 @@ export default function RecentNewsTab() {
       ) : isError ? (
         <StorageMessage>최근 읽은 뉴스를 불러오지 못했어요.</StorageMessage>
       ) : newsList.length === 0 ? (
-        <StorageMessage>최근 읽은 뉴스가 없어요.</StorageMessage>
+        <StorageEmptyState
+          title="아직 읽은 뉴스가 없어요."
+          description="관심 있는 뉴스를 읽어보세요."
+        />
       ) : (
         <section className="flex flex-col gap-3 px-5 pt-3 pb-10">
           {newsList.map((news) => (

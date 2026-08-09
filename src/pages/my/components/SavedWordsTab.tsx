@@ -6,6 +6,7 @@ import SortDropdown from "@/components/common/SortDropdown";
 import type { SavedTermListResult } from "@/lib/mypageApi";
 import { mypageQueryKeys, useSavedTermsQuery } from "@/lib/mypageQueries";
 import { unsaveTerm } from "@/lib/newsApi";
+import StorageEmptyState from "./StorageEmptyState";
 
 type SortValue = "korean" | "recent";
 
@@ -73,7 +74,10 @@ export default function SavedWordsTab() {
       ) : isError ? (
         <StorageMessage>저장한 용어를 불러오지 못했어요.</StorageMessage>
       ) : sortedTerms.length === 0 ? (
-        <StorageMessage>저장한 용어가 없어요.</StorageMessage>
+        <StorageEmptyState
+          title="아직 저장한 용어가 없어요."
+          description="뉴스에서 궁금한 용어를 저장해보세요."
+        />
       ) : (
         <section className="mt-1 flex flex-col gap-3 px-5 pb-10">
           {sortedTerms.map((item) => (

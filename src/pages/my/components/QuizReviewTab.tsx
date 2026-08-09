@@ -3,6 +3,7 @@ import {
   useQuizHistoryQuery,
 } from "@/pages/quiz/api/queries";
 import type { QuizHistoryOption } from "@/pages/quiz/api/types";
+import StorageEmptyState from "./StorageEmptyState";
 
 interface QuizReviewTabProps {
   selectedDate: string | null;
@@ -149,7 +150,12 @@ export default function QuizReviewTab({
 
   const histories = listQuery.data?.histories ?? [];
   if (histories.length === 0) {
-    return <ReviewMessage>아직 복습할 퀴즈 기록이 없어요.</ReviewMessage>;
+    return (
+      <StorageEmptyState
+        title="아직 퀴즈 이력이 없어요."
+        description="퀴즈를 풀고 복습해보세요."
+      />
+    );
   }
 
   return (
