@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import BottomSheet from "@/components/common/BottomSheet";
-import ErrorRetryModal from "@/components/common/ErrorRetryModal";
+import ErrorModal from "@/components/common/ErrorModal";
+import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
+import { useApiErrorModal } from "@/lib/useApiErrorModal";
 
 import {
   useStatsRecentDetailQuery,
@@ -21,6 +23,7 @@ export default function StatsPage() {
   const [isRecentPerformanceOpen, setIsRecentPerformanceOpen] = useState(false);
   const {
     data: statsSummary,
+    error: statsSummaryError,
     isError: isStatsSummaryError,
     isFetching: isStatsSummaryFetching,
     isLoading: isStatsSummaryLoading,
@@ -31,6 +34,20 @@ export default function StatsPage() {
     isError: isRecentPerformanceError,
     isLoading: isRecentPerformanceLoading,
   } = useStatsRecentDetailQuery(isRecentPerformanceOpen);
+  const { error, showError, closeError, handlePrimaryAction } =
+    useApiErrorModal({
+      onRetry: () => {
+        void refetchStatsSummary();
+      },
+    });
+
+  useEffect(() => {
+    if (!isStatsSummaryError) return;
+
+    queueMicrotask(() => {
+      showError(statsSummaryError);
+    });
+  }, [isStatsSummaryError, showError, statsSummaryError]);
 
   if (isStatsSummaryLoading) {
     return <StatsPageSkeleton />;
@@ -40,12 +57,13 @@ export default function StatsPage() {
     return (
       <>
         <main className="min-h-[calc(100dvh-220px)] bg-neutral-50 px-5 pt-6 pb-24" />
-        <ErrorRetryModal
-          isOpen
-          onRetry={() => {
-            void refetchStatsSummary();
-          }}
-          isRetrying={isStatsSummaryFetching}
+        <ErrorModal
+          isOpen={!!error}
+          info={error?.info ?? DEFAULT_ERROR_MESSAGE}
+          onPrimaryAction={handlePrimaryAction}
+          onSecondaryAction={closeError}
+          onClose={closeError}
+          isLoading={isStatsSummaryFetching}
         />
       </>
     );

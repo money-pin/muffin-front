@@ -116,7 +116,7 @@ export async function apiRequest<T>(
       redirectToLogin();
       throw new ApiError(
         "로그인이 만료되었어요. 다시 로그인해주세요.",
-        "AUTH_401",
+        "AUTH_401_001",
       );
     }
   }
