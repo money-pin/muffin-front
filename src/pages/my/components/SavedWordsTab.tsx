@@ -83,10 +83,10 @@ export default function SavedWordsTab() {
           {sortedTerms.map((item) => (
             <div
               key={item.termId}
-              className="flex w-full flex-col gap-[11px] rounded-[16px] border border-neutral-100 bg-white p-4 shadow-sm"
+              className="flex w-full flex-col gap-[11px] rounded-[12px] border border-neutral-100 bg-white p-4"
             >
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-primary min-w-0 flex-1 text-[16px] leading-[160%] font-bold break-keep">
+                <h3 className="text-body-16-bd-tighter text-primary min-w-0 flex-1 break-keep">
                   {item.term}
                 </h3>
                 <button
@@ -103,7 +103,7 @@ export default function SavedWordsTab() {
                 </button>
               </div>
 
-              <p className="text-[16px] leading-[160%] font-normal break-keep text-neutral-900">
+              <p className="text-body-16-rg-tighter break-keep text-neutral-900">
                 {item.content}
               </p>
             </div>
