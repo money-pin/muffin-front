@@ -16,7 +16,9 @@ import SortDropdown, {
 import Badge from "@/components/common/Badge";
 import TabBar from "@/components/common/TabBar";
 import BottomSheet from "@/components/common/BottomSheet";
+import ErrorModal from "@/components/common/ErrorModal";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
+import type { ErrorMessageInfo } from "@/lib/errorMessages";
 
 const SORT_OPTIONS = [
   { value: "investment-asc", label: "투자금 낮은 순" },
@@ -35,6 +37,49 @@ const NEWS_TABS = [
 ] as const;
 
 type NewsTabValue = (typeof NEWS_TABS)[number]["value"];
+
+const ERROR_MODAL_EXAMPLES = {
+  infoOneButton: {
+    title: "안내 모달입니다.",
+    description: "본문영역입니다.",
+    primaryLabel: "확인",
+    action: "close",
+    variant: "info",
+  },
+  infoTwoButton: {
+    title: "안내 모달입니다.",
+    description: "본문영역입니다.",
+    primaryLabel: "버튼2",
+    secondaryLabel: "버튼1",
+    action: "close",
+    variant: "info",
+  },
+  errorOneButton: {
+    title: "에러 모달입니다.",
+    description: "본문영역입니다.",
+    primaryLabel: "확인",
+    action: "close",
+    variant: "error",
+  },
+  errorTwoButton: {
+    title: "에러 모달입니다.",
+    description: "본문영역입니다.",
+    primaryLabel: "버튼2",
+    secondaryLabel: "버튼1",
+    action: "retry",
+    variant: "error",
+  },
+  loading: {
+    title: "에러 모달입니다.",
+    description: "본문영역입니다.",
+    primaryLabel: "다시 시도",
+    secondaryLabel: "취소",
+    action: "retry",
+    variant: "error",
+  },
+} satisfies Record<string, ErrorMessageInfo>;
+
+type ErrorModalExampleKey = keyof typeof ERROR_MODAL_EXAMPLES;
 
 function Section({
   title,
@@ -60,6 +105,8 @@ export default function ShowcasePage() {
   const [sort, setSort] = useState<SortValue>("profit-desc");
   const [newsTab, setNewsTab] = useState<NewsTabValue>("all");
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [errorModalExample, setErrorModalExample] =
+    useState<ErrorModalExampleKey | null>(null);
 
   return (
     <div className="pb-[120px]">
@@ -183,23 +230,56 @@ export default function ShowcasePage() {
         </Button>
       </Section>
 
+      <Section title="ErrorModal">
+        <div className="grid grid-cols-2 gap-2">
+          <Button onClick={() => setErrorModalExample("infoOneButton")}>
+            안내 1버튼
+          </Button>
+          <Button onClick={() => setErrorModalExample("infoTwoButton")}>
+            안내 2버튼
+          </Button>
+          <Button onClick={() => setErrorModalExample("errorOneButton")}>
+            에러 1버튼
+          </Button>
+          <Button onClick={() => setErrorModalExample("errorTwoButton")}>
+            에러 2버튼
+          </Button>
+          <div className="col-span-2">
+            <Button onClick={() => setErrorModalExample("loading")}>
+              로딩 상태
+            </Button>
+          </div>
+        </div>
+      </Section>
+
       <BottomSheet
         isOpen={isBottomSheetOpen}
         onClose={() => setIsBottomSheetOpen(false)}
         ariaLabel="용어 설명"
       >
-        <div className="px-[21px] pb-[60px] pt-4">
+        <div className="px-[21px] pt-4 pb-[60px]">
           <div className="border-b border-neutral-100 py-2">
             <h3 className="text-heading-20-bd text-neutral-1000">
               <span className="text-primary">양적완화</span>란?
             </h3>
           </div>
 
-          <p className="pt-4 text-body-16-rg-tighter text-neutral-900">
+          <p className="text-body-16-rg-tighter pt-4 text-neutral-900">
             중앙은행이 시중에 돈을 더 많이 풀어서 경제를 활성화하는 정책
           </p>
         </div>
       </BottomSheet>
+
+      {errorModalExample && (
+        <ErrorModal
+          isOpen
+          info={ERROR_MODAL_EXAMPLES[errorModalExample]}
+          onPrimaryAction={() => setErrorModalExample(null)}
+          onSecondaryAction={() => setErrorModalExample(null)}
+          onClose={() => setErrorModalExample(null)}
+          isLoading={errorModalExample === "loading"}
+        />
+      )}
 
       <BottomNavigation />
     </div>

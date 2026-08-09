@@ -34,7 +34,7 @@ export default function ErrorModal({
       className="rounded-2xl px-5 pt-6 pb-5"
       contentClassName="flex flex-col items-center gap-6 text-center"
     >
-      <div className="flex flex-col items-center gap-5">
+      <div className="flex w-full flex-col items-center gap-5">
         {shouldShowIcon && (
           <div
             className={`flex size-14 items-center justify-center rounded-full ${iconBgClass}`}
@@ -50,11 +50,11 @@ export default function ErrorModal({
           </div>
         )}
 
-        <div className="flex w-full flex-col items-center gap-2">
+        <div className="flex w-full max-w-[292px] flex-col items-center gap-2">
           <h2 className="text-heading-20-bd leading-[1.5] text-neutral-900">
             {info.title}
           </h2>
-          <p className="text-body-16-md-tighter whitespace-pre-line text-neutral-400">
+          <p className="text-body-16-md-tighter leading-[1.6] whitespace-pre-line text-neutral-400">
             {info.description}
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function ErrorModal({
             type="button"
             onClick={onSecondaryAction ?? onClose}
             disabled={isLoading}
-            className="text-body-16-bd-tighter flex h-[50px] flex-1 items-center justify-center rounded-lg bg-neutral-50 px-5 text-neutral-500 transition-opacity disabled:opacity-60"
+            className="text-body-16-bd-tighter flex h-[50px] flex-1 items-center justify-center rounded-lg bg-neutral-50 px-5 text-neutral-400 transition-opacity disabled:opacity-60"
           >
             {info.secondaryLabel}
           </button>
