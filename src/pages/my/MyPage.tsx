@@ -58,7 +58,7 @@ function MyPage() {
       id: news.newsId,
       title: news.title,
       image: getNewsImage(news.thumbnailUrl, news.categoryName),
-      bookmarked: false,
+      bookmarked: news.isScrapped,
     }),
   );
 

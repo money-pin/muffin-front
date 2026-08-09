@@ -42,6 +42,7 @@ export interface MyHomeRecentNews {
   viewCount: number;
   publishedAt: string;
   viewedAt: string;
+  isScrapped: boolean;
 }
 
 // 마이페이지 홈 (GET /api/mypage/home): 닉네임·캐릭터·스트릭·최근 읽은 뉴스
