@@ -35,6 +35,7 @@ function HomePage() {
 
   const myHomeQuery = useMyHomeQuery();
   const nickname = myHomeQuery.data?.nickname ?? "";
+
   // 캐릭터는 마이페이지와 동일하게 서버값을 사용 (localStorage 불일치 방지)
   const characterVariant = myHomeQuery.data?.character
     ? characterTypeToVariant(myHomeQuery.data.character.characterType)
@@ -43,8 +44,11 @@ function HomePage() {
   const investmentAssetQuery = useInvestmentAssetQuery();
   const statsSummaryQuery = useStatsSummaryQuery();
   const todayNewsQuery = useTodayNews();
+
   // 최근 투자 성과 상세는 시트를 열 때만 조회
   const recentDetailQuery = useStatsRecentDetailQuery(recentPerformanceOpen);
+
+  // 실제 정산 결과 API 호출
   const settlementResultQuery = useSettlementResultQuery();
 
   const todayNewsList = todayNewsQuery.data?.items ?? [];
@@ -54,17 +58,22 @@ function HomePage() {
   const [investResultOpen, setInvestResultOpen] = useState(false);
   const resultShownRef = useRef(false);
 
-  // 정산 결과가 있고, 오전 10시 이후이며, 해당 날짜를 아직 안 봤을 때 1회 자동 노출.
+  // 정산 결과가 있고, 오전 10시 이후이며,
+  // 해당 날짜를 아직 안 봤을 때 1회 자동 노출.
   useEffect(() => {
     if (resultShownRef.current || !settlementResult) return;
 
     const isAfterReveal = new Date().getHours() >= 10;
+
     const alreadySeen =
       localStorage.getItem(INVEST_RESULT_SEEN_KEY) === settlementResult.date;
+
     if (!isAfterReveal || alreadySeen) return;
 
     resultShownRef.current = true;
+
     localStorage.setItem(INVEST_RESULT_SEEN_KEY, settlementResult.date);
+
     // setState-in-effect 룰 회피: 팀 컨벤션대로 queueMicrotask로 감싼다
     queueMicrotask(() => setInvestResultOpen(true));
   }, [settlementResult]);
@@ -174,6 +183,7 @@ function HomePage() {
               }
             />
           </div>
+
           <TopSectorList sectors={topSectors} />
         </section>
       </div>
