@@ -32,9 +32,7 @@ export default function QuizFeedbackSheet({
               cx="10"
               cy="10"
               r="10"
-              fill={
-                isCorrect ? "var(--color-primary)" : "var(--color-positive)"
-              }
+              fill={isCorrect ? "var(--color-green)" : "var(--color-positive)"}
             />
             {isCorrect ? (
               <path
@@ -55,7 +53,7 @@ export default function QuizFeedbackSheet({
           </svg>
         </span>
         <p
-          className={`text-heading-20-bd ${isCorrect ? "text-primary" : "text-positive"}`}
+          className={`text-heading-20-bd ${isCorrect ? "text-green" : "text-positive"}`}
         >
           {isCorrect ? "정답이에요!" : "오답이에요!"}
         </p>

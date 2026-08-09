@@ -64,6 +64,10 @@
   --color-negative-200: #79bcff;
   --color-negative-300: #4da6ff;
 
+  /* 정답/검증 성공 (Figma semantic/green/300). -50은 하이라이트 배경용 라이트 톤 */
+  --color-green: #00a76d;
+  --color-green-50: #e6f7f0;
+
   --color-character-plain-tag-bg: #fff4ea;
   --color-character-plain-tag-text: #f46c0e;
   --color-character-butter-tag-bg: #fff6e8;
