@@ -3,6 +3,8 @@ import { useState } from "react";
 import eyeIcon from "@/assets/icon-24px/eye.svg";
 import eyeOffIcon from "@/assets/icon-24px/eye-off.svg";
 import closeButtonIcon from "@/assets/icon-24px/close-button.svg";
+import messageSuccessIcon from "@/assets/icon-16px/message-success.svg";
+import messageErrorIcon from "@/assets/icon-16px/message-error.svg";
 
 interface TextFieldProps {
   label?: string; // 없으면 라벨 미노출 (예: 온보딩 닉네임)
@@ -43,17 +45,16 @@ export default function TextField({
           <label className="text-body-14-md text-neutral-700">
             {label}
             {required && (
-              <span className="ml-0.5 font-bold text-primary">*</span>
+              <span className="text-primary ml-0.5 font-bold">*</span>
             )}
           </label>
         )}
 
         <div
-          className={`flex h-[50px] items-center gap-2.5 rounded-[8px] border bg-white px-4 transition-all
-          ${
+          className={`flex h-[50px] items-center gap-2.5 rounded-[8px] border bg-white px-4 transition-all ${
             error
               ? "border-positive"
-              : "border-neutral-100 focus-within:border-primary"
+              : "focus-within:border-primary border-neutral-100"
           }`}
         >
           <input
@@ -62,7 +63,7 @@ export default function TextField({
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             maxLength={maxLength}
-            className="flex-1 bg-transparent text-body-14-rg text-neutral-900 outline-none placeholder:text-neutral-400"
+            className="text-body-14-rg flex-1 bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400"
           />
 
           <div className="flex items-center gap-2">
@@ -106,11 +107,29 @@ export default function TextField({
       </div>
 
       {error ? (
-        <p className="px-1 text-caption-12-md text-positive">{error}</p>
+        <p className="text-caption-12-md text-positive flex items-center gap-1 px-1">
+          <img
+            src={messageErrorIcon}
+            alt=""
+            aria-hidden="true"
+            className="size-3.5 shrink-0"
+            draggable={false}
+          />
+          {error}
+        </p>
       ) : success ? (
-        <p className="px-1 text-caption-12-md text-primary">{success}</p>
+        <p className="text-caption-12-md text-green flex items-center gap-1 px-1">
+          <img
+            src={messageSuccessIcon}
+            alt=""
+            aria-hidden="true"
+            className="size-3.5 shrink-0"
+            draggable={false}
+          />
+          {success}
+        </p>
       ) : hint ? (
-        <p className="px-1 text-caption-12-md text-neutral-400">{hint}</p>
+        <p className="text-caption-12-md px-1 text-neutral-400">{hint}</p>
       ) : null}
     </div>
   );

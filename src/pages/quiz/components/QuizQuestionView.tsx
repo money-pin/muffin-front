@@ -15,7 +15,7 @@ interface QuizQuestionViewProps {
 }
 
 // Figma 퀴즈 문제: 스텝 인디케이터 + 질문 + 선택지 + 제출하기
-// 제출 후: 정답은 주황(primary), 내가 고른 오답은 빨강(positive) 하이라이트
+// 제출 후: 정답은 초록(green), 내가 고른 오답은 빨강(positive) 하이라이트
 export default function QuizQuestionView({
   question,
   index,
@@ -32,9 +32,9 @@ export default function QuizQuestionView({
     const isAnswer = optionId === question.answerId;
 
     if (submitted) {
-      // 정답은 주황(primary), 내가 고른 오답은 빨강(positive)
-      if (isAnswer) return "border-primary bg-primary-50 text-primary";
-      if (isSelected) return "border-positive bg-positive-50 text-positive";
+      // 정답=초록(테두리 green300·글자 green400), 내가 고른 오답=빨강(테두리 positive300·글자 positive)
+      if (isAnswer) return "border-green bg-green-100 text-green-400";
+      if (isSelected) return "border-positive-300 bg-positive-50 text-positive";
       return "border-neutral-100 bg-white text-neutral-900";
     }
     if (isSelected) return "border-primary bg-primary-50 text-primary";

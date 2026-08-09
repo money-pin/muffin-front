@@ -10,6 +10,8 @@ import {
 } from "@/lib/nickname";
 import closeIcon from "@/assets/icon-24px/close.svg";
 import closeButtonIcon from "@/assets/icon-24px/close-button.svg";
+import messageSuccessIcon from "@/assets/icon-16px/message-success.svg";
+import messageErrorIcon from "@/assets/icon-16px/message-error.svg";
 
 interface NicknameModalProps {
   isOpen: boolean;
@@ -73,21 +75,30 @@ export default function NicknameModal({
 
   const helperByStatus: Record<
     NicknameStatus,
-    { text: string; className: string }
+    { text: string; className: string; icon?: "success" | "error" }
   > = {
     idle: {
       text: NICKNAME_GUIDE_TEXT,
       className: "text-neutral-400",
     },
-    invalid: { text: NICKNAME_INVALID_TEXT, className: "text-positive" },
+    invalid: {
+      text: NICKNAME_INVALID_TEXT,
+      className: "text-positive",
+      icon: "error",
+    },
     checking: {
       text: "닉네임 확인 중이에요...",
       className: "text-neutral-400",
     },
-    taken: { text: "이미 사용 중인 닉네임이에요!", className: "text-positive" },
+    taken: {
+      text: "이미 사용 중인 닉네임이에요!",
+      className: "text-positive",
+      icon: "error",
+    },
     available: {
       text: "사용 가능한 닉네임이에요.",
-      className: "text-primary",
+      className: "text-green",
+      icon: "success",
     },
   };
   const helper = helperByStatus[status];
@@ -147,7 +158,22 @@ export default function NicknameModal({
             </button>
           )}
         </div>
-        <p className={`text-caption-12-md mt-2 ${helper.className}`}>
+        <p
+          className={`text-caption-12-md mt-2 flex items-center gap-1 ${helper.className}`}
+        >
+          {helper.icon && (
+            <img
+              src={
+                helper.icon === "success"
+                  ? messageSuccessIcon
+                  : messageErrorIcon
+              }
+              alt=""
+              aria-hidden="true"
+              className="size-3.5 shrink-0"
+              draggable={false}
+            />
+          )}
           {helper.text}
         </p>
 
