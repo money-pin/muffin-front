@@ -17,10 +17,18 @@ const EMPTY_TOP_SECTORS: TopSector[] = [
   { rank: 3, name: "---", profitAmount: 0, profitRate: 0 },
 ];
 
+function fillTopSectors(sectors: TopSector[]) {
+  return EMPTY_TOP_SECTORS.map((emptySector) => {
+    return (
+      sectors.find((sector) => sector.rank === emptySector.rank) ?? emptySector
+    );
+  });
+}
+
 export default function TopProfitSectorsCard({
   sectors,
 }: TopProfitSectorsCardProps) {
-  const displaySectors = sectors.length > 0 ? sectors : EMPTY_TOP_SECTORS;
+  const displaySectors = fillTopSectors(sectors);
 
   return (
     <div className="bg-neutral-0 flex w-full flex-col gap-3 rounded-2xl border border-neutral-100 px-5 pt-5 pb-4">
@@ -38,32 +46,38 @@ export default function TopProfitSectorsCard({
       </div>
 
       <div className="flex flex-col">
-        {displaySectors.map((sector, index) => (
-          <div key={sector.rank} className="flex flex-col">
-            <div className="flex w-full items-center justify-between px-1 py-3">
-              <div className="flex items-center gap-3">
-                <RankBadge rank={sector.rank} />
-                <span className="text-body-16-md-tighter leading-[1.6] text-neutral-900">
-                  {sector.name}
-                </span>
-              </div>
+        {displaySectors.map((sector, index) => {
+          const isPlaceholder = sector.name === "---";
 
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-body-16-bd-tighter leading-[1.6] ${getProfitColorClass(
-                    sector.profitAmount,
-                  )}`}
-                >
-                  {formatSignedCurrency(sector.profitAmount)}
-                </span>
-                <ProfitRateBadge rate={sector.profitRate} size="md" />
+          return (
+            <div key={sector.rank} className="flex flex-col">
+              <div className="flex w-full items-center justify-between px-1 py-3">
+                <div className="flex items-center gap-3">
+                  <RankBadge rank={sector.rank} />
+                  <span className="text-body-16-md-tighter leading-[1.6] text-neutral-900">
+                    {sector.name}
+                  </span>
+                </div>
+
+                {!isPlaceholder && (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-body-16-bd-tighter leading-[1.6] ${getProfitColorClass(
+                        sector.profitAmount,
+                      )}`}
+                    >
+                      {formatSignedCurrency(sector.profitAmount)}
+                    </span>
+                    <ProfitRateBadge rate={sector.profitRate} size="md" />
+                  </div>
+                )}
               </div>
+              {index < displaySectors.length - 1 && (
+                <div className="w-full border-t border-neutral-100" />
+              )}
             </div>
-            {index < displaySectors.length - 1 && (
-              <div className="w-full border-t border-neutral-100" />
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

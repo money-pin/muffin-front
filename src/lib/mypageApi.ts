@@ -119,6 +119,7 @@ export interface RecentNewsListItem {
   viewCount: number;
   publishedAt: string;
   viewedAt: string;
+  isScrapped?: boolean;
 }
 
 export interface RecentNewsListResult {

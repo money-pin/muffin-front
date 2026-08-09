@@ -5,6 +5,8 @@ import {
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
+import type { MyHome, RecentNewsListResult } from "@/lib/mypageApi";
+import { mypageQueryKeys } from "@/lib/mypageQueries";
 import {
   getNewsList,
   getTodayNews,
@@ -134,17 +136,25 @@ export function useToggleScrap(newsId: number) {
     onMutate: async (nextScrapped) => {
       const detailKey = newsKeys.detail(newsId);
       const todayKey = newsKeys.today();
+      const mypageHomeKey = mypageQueryKeys.home();
+      const mypageRecentNewsKey = mypageQueryKeys.recentNews();
 
       await Promise.all([
         queryClient.cancelQueries({ queryKey: detailKey }),
         queryClient.cancelQueries({ queryKey: todayKey }),
         queryClient.cancelQueries({ queryKey: NEWS_LIST_QUERY_KEY }),
+        queryClient.cancelQueries({ queryKey: mypageHomeKey }),
+        queryClient.cancelQueries({ queryKey: mypageRecentNewsKey }),
       ]);
 
       const previousDetail =
         queryClient.getQueryData<NewsDetailResponse>(detailKey);
       const previousToday =
         queryClient.getQueryData<TodayNewsResponse>(todayKey);
+      const previousMypageHome =
+        queryClient.getQueryData<MyHome>(mypageHomeKey);
+      const previousMypageRecentNews =
+        queryClient.getQueryData<RecentNewsListResult>(mypageRecentNewsKey);
       const previousLists = queryClient.getQueriesData<
         InfiniteData<NewsListResponse>
       >({
@@ -162,6 +172,28 @@ export function useToggleScrap(newsId: number) {
         queryClient.setQueryData<TodayNewsResponse>(todayKey, {
           ...previousToday,
           items: previousToday.items.map((item) =>
+            item.newsId === newsId
+              ? { ...item, isScrapped: nextScrapped }
+              : item,
+          ),
+        });
+      }
+
+      if (previousMypageHome) {
+        queryClient.setQueryData<MyHome>(mypageHomeKey, {
+          ...previousMypageHome,
+          recentNews: previousMypageHome.recentNews?.map((item) =>
+            item.newsId === newsId
+              ? { ...item, isScrapped: nextScrapped }
+              : item,
+          ),
+        });
+      }
+
+      if (previousMypageRecentNews) {
+        queryClient.setQueryData<RecentNewsListResult>(mypageRecentNewsKey, {
+          ...previousMypageRecentNews,
+          items: previousMypageRecentNews.items.map((item) =>
             item.newsId === newsId
               ? { ...item, isScrapped: nextScrapped }
               : item,
@@ -187,7 +219,13 @@ export function useToggleScrap(newsId: number) {
             : previous,
       );
 
-      return { previousDetail, previousToday, previousLists };
+      return {
+        previousDetail,
+        previousToday,
+        previousMypageHome,
+        previousMypageRecentNews,
+        previousLists,
+      };
     },
     onError: (_err, _next, context) => {
       if (context?.previousDetail) {
@@ -201,6 +239,20 @@ export function useToggleScrap(newsId: number) {
         queryClient.setQueryData(newsKeys.today(), context.previousToday);
       }
 
+      if (context?.previousMypageHome) {
+        queryClient.setQueryData(
+          mypageQueryKeys.home(),
+          context.previousMypageHome,
+        );
+      }
+
+      if (context?.previousMypageRecentNews) {
+        queryClient.setQueryData(
+          mypageQueryKeys.recentNews(),
+          context.previousMypageRecentNews,
+        );
+      }
+
       context?.previousLists.forEach(([queryKey, data]) => {
         queryClient.setQueryData(queryKey, data);
       });
@@ -210,6 +262,10 @@ export function useToggleScrap(newsId: number) {
       queryClient.invalidateQueries({ queryKey: newsKeys.today() });
       queryClient.invalidateQueries({ queryKey: NEWS_LIST_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ["mypage", "scraps"] });
+      queryClient.invalidateQueries({ queryKey: mypageQueryKeys.home() });
+      queryClient.invalidateQueries({
+        queryKey: mypageQueryKeys.recentNews(),
+      });
     },
   });
 }

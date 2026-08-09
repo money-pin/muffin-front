@@ -64,6 +64,15 @@
   --color-negative-200: #79bcff;
   --color-negative-300: #4da6ff;
 
+  --color-character-plain-tag-bg: #fff4ea;
+  --color-character-plain-tag-text: #f46c0e;
+  --color-character-butter-tag-bg: #fff6e8;
+  --color-character-butter-tag-text: #ff9900;
+  --color-character-sprinkle-tag-bg: #fff3f3;
+  --color-character-sprinkle-tag-text: #ff3045;
+  --color-character-cream-tag-bg: #ecf6ff;
+  --color-character-cream-tag-text: #1289ff;
+
   --color-neutral-0: #ffffff;
   --color-neutral-50: #f5f5f5;
   --color-neutral-100: #e2e2e2;

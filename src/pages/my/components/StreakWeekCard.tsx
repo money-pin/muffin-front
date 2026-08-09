@@ -1,4 +1,5 @@
 import fireIcon from "@/assets/icon-20px/fire.svg";
+import checkIcon from "@/assets/icon-24px/check-2.5.svg";
 
 interface StreakWeekCardProps {
   streakDays: number;
@@ -8,27 +9,10 @@ interface StreakWeekCardProps {
 
 const WEEK_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
-// Figma 스펙: 원 28px, 원 사이 간격 15px (고정), 가운데 정렬
-const CELL = 28;
-const GAP = 15;
-
-function CheckMark() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="white"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12.5l4.5 4.5L19 7" />
-    </svg>
-  );
-}
+// 390px 기준 Figma 값은 cell 28px / gap 15px.
+// 더 좁은 화면에서는 카드 내부 폭을 넘지 않도록 살짝 줄인다.
+const CELL_SIZE = "clamp(24px, 7.18vw, 28px)";
+const GAP_SIZE = "clamp(8px, 3.85vw, 15px)";
 
 // Figma 마이 스트릭: 배지(위쪽 라운드) + 요일 체크 카드
 // 연속 체크 구간은 이어진 그라데이션 캡슐, 단독 체크는 원형으로 표시
@@ -39,7 +23,7 @@ export default function StreakWeekCard({
 }: StreakWeekCardProps) {
   // 연속된 체크/미체크 구간으로 묶기 (캡슐 하나에 그라데이션이 이어지도록)
   const segments: { checked: boolean; start: number; length: number }[] = [];
-  for (let i = 0; i < weekChecks.length; ) {
+  for (let i = 0; i < weekChecks.length;) {
     const checked = weekChecks[i];
     let end = i;
     while (end < weekChecks.length && weekChecks[end] === checked) end += 1;
@@ -50,7 +34,7 @@ export default function StreakWeekCard({
   return (
     <div className="flex w-full flex-col">
       <div className="px-4 leading-none">
-        <span className="inline-flex h-7 items-center gap-1 rounded-t-[8px] bg-secondary-100 px-2">
+        <span className="bg-secondary-100 inline-flex h-7 items-center gap-1 rounded-t-[8px] px-2">
           <img
             src={fireIcon}
             alt=""
@@ -64,40 +48,48 @@ export default function StreakWeekCard({
         </span>
       </div>
 
-      <div className="flex w-full flex-col items-center gap-1 rounded-[16px] bg-white px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
-        <div className="flex" style={{ gap: GAP }}>
+      <div className="flex w-full flex-col items-center gap-1 rounded-[16px] border border-neutral-100 bg-white px-4 py-4">
+        <div className="flex" style={{ gap: GAP_SIZE }}>
           {WEEK_LABELS.map((label, index) => (
             <span
               key={label}
-              className={`text-center text-caption-12-bd ${
+              className={`text-caption-12-bd text-center ${
                 index === todayIndex ? "text-primary" : "text-neutral-400"
               }`}
-              style={{ width: CELL }}
+              style={{ width: CELL_SIZE }}
             >
               {label}
             </span>
           ))}
         </div>
 
-        <div className="flex" style={{ gap: GAP }}>
+        <div className="flex" style={{ gap: GAP_SIZE }}>
           {segments.map((segment) =>
             segment.checked ? (
               <div
                 key={segment.start}
-                className="flex items-center rounded-full bg-gradient-to-r from-secondary-400 to-primary"
+                className="from-secondary-400 to-primary flex items-center rounded-full bg-gradient-to-r"
                 style={{
-                  height: CELL,
-                  width: segment.length * CELL + (segment.length - 1) * GAP,
-                  gap: GAP,
+                  height: CELL_SIZE,
+                  width: `calc(${segment.length} * ${CELL_SIZE} + ${
+                    segment.length - 1
+                  } * ${GAP_SIZE})`,
+                  gap: GAP_SIZE,
                 }}
               >
                 {Array.from({ length: segment.length }).map((_, offset) => (
                   <span
                     key={offset}
                     className="flex items-center justify-center"
-                    style={{ width: CELL }}
+                    style={{ width: CELL_SIZE }}
                   >
-                    <CheckMark />
+                    <img
+                      src={checkIcon}
+                      alt=""
+                      aria-hidden="true"
+                      className="size-6"
+                      draggable={false}
+                    />
                   </span>
                 ))}
               </div>
@@ -106,7 +98,7 @@ export default function StreakWeekCard({
                 <div
                   key={segment.start + offset}
                   className="rounded-full bg-neutral-100"
-                  style={{ width: CELL, height: CELL }}
+                  style={{ width: CELL_SIZE, height: CELL_SIZE }}
                 />
               ))
             ),

@@ -3,6 +3,7 @@ import { useState } from "react";
 import SortDropdown from "@/components/common/SortDropdown";
 import { useScrapsQuery } from "@/lib/mypageQueries";
 import NewsCard from "@/pages/news/components/NewsCard";
+import StorageEmptyState from "./StorageEmptyState";
 
 type SortValue = "recent" | "upload" | "views";
 
@@ -54,7 +55,10 @@ export default function ScrappedNewsTab() {
       ) : isError ? (
         <StorageMessage>스크랩한 뉴스를 불러오지 못했어요.</StorageMessage>
       ) : sortedScraps.length === 0 ? (
-        <StorageMessage>스크랩한 뉴스가 없어요.</StorageMessage>
+        <StorageEmptyState
+          title="아직 스크랩한 뉴스가 없어요."
+          description="뉴스를 스크랩해 보세요."
+        />
       ) : (
         <section className="mt-1 flex flex-col gap-3 px-5 pb-10">
           {sortedScraps.map((news) => (

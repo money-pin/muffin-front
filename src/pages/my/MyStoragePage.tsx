@@ -1,56 +1,69 @@
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import TopBar from "../../components/common/TopBar";
-import ScrappedNewsTab from "./components/ScrappedNewsTab";
+import { useEffect, useState } from "react";
+import {
+  useNavigate,
+  useOutletContext,
+  useSearchParams,
+} from "react-router-dom";
+
+import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
+
+import QuizReviewTab from "./components/QuizReviewTab";
 import RecentNewsTab from "./components/RecentNewsTab";
 import SavedWordsTab from "./components/SavedWordsTab";
-import QuizReviewTab from "./components/QuizReviewTab";
+import ScrappedNewsTab from "./components/ScrappedNewsTab";
 
 type TabType = "news" | "read" | "word" | "quiz";
 
+const TAB_TITLE_MAP: Record<TabType, string> = {
+  news: "스크랩한 뉴스",
+  read: "최근 읽은 뉴스",
+  word: "저장한 용어",
+  quiz: "퀴즈 복습",
+};
+
+function parseStorageTab(value: string | null): TabType {
+  if (value === "read" || value === "word" || value === "quiz") {
+    return value;
+  }
+
+  return "news";
+}
+
+function getStorageTitle(tab: TabType, selectedQuizDate: string | null) {
+  if (tab === "quiz" && selectedQuizDate) {
+    return `${selectedQuizDate} 퀴즈 복습`;
+  }
+
+  return TAB_TITLE_MAP[tab];
+}
+
 export default function MyStoragePage() {
   const navigate = useNavigate();
+  const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
   const [searchParams] = useSearchParams();
-  const currentTab = (searchParams.get("tab") || "news") as TabType;
+  const currentTab = parseStorageTab(searchParams.get("tab"));
 
-  // 퀴즈 복습 상세는 날짜(quizDate) 기준으로 선택 (상세는 QuizReviewTab에서 조회)
   const [selectedQuizDate, setSelectedQuizDate] = useState<string | null>(null);
 
-  const tabTitleMap: Record<TabType, string> = {
-    news: "스크랩한 뉴스",
-    read: "최근 읽은 뉴스",
-    word: "저장한 용어",
-    quiz: "퀴즈 복습",
-  };
+  useEffect(() => {
+    setTopBar({
+      title: getStorageTitle(currentTab, selectedQuizDate),
+      showBack: true,
+      onBack: () => {
+        if (currentTab === "quiz" && selectedQuizDate) {
+          setSelectedQuizDate(null);
+          return;
+        }
 
-  const getTitle = () => {
-    if (currentTab === "quiz" && selectedQuizDate) {
-      return `${selectedQuizDate} 퀴즈 복습`;
-    }
-    return tabTitleMap[currentTab] || "학습 저장소";
-  };
+        navigate(-1);
+      },
+    });
 
-  const handleBack = () => {
-    if (currentTab === "quiz" && selectedQuizDate) {
-      setSelectedQuizDate(null);
-      return;
-    }
-    navigate(-1);
-  };
+    return resetTopBar;
+  }, [currentTab, navigate, resetTopBar, selectedQuizDate, setTopBar]);
 
   return (
-    /* 📌 bg-[#F5F5F5] -> bg-white 변경으로 전체 흰색 배경 통일 */
     <div className="relative mx-auto flex min-h-full w-full max-w-[var(--max-width-app)] flex-col bg-white text-black">
-      {/* 고정 TopBar */}
-      <div className="z-50 w-full shrink-0 border-b border-neutral-100 bg-white">
-        <TopBar
-          title={getTitle()}
-          showBack={true}
-          onBack={handleBack}
-          background="white"
-        />
-      </div>
-
       <div className="min-h-0 w-full flex-1 overflow-y-auto">
         {currentTab === "news" && <ScrappedNewsTab />}
         {currentTab === "read" && <RecentNewsTab />}

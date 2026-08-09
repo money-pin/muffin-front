@@ -6,6 +6,7 @@ interface StorageShortcutsProps {
   onNavigate: (menu: "news" | "word" | "quiz") => void;
 }
 
+//TODO : 스크랩 아이콘 사이즈 24px/20px 확인 후 에셋 교체 여부 판단
 const SHORTCUTS = [
   { key: "news", label: "스크랩한 뉴스", icon: bookmarkIcon },
   { key: "word", label: "저장한 용어", icon: wordIcon },
@@ -13,7 +14,9 @@ const SHORTCUTS = [
 ] as const;
 
 // Figma 학습 저장소: 카드 안 3개 진입 버튼, 세로 구분선
-export default function StorageShortcuts({ onNavigate }: StorageShortcutsProps) {
+export default function StorageShortcuts({
+  onNavigate,
+}: StorageShortcutsProps) {
   return (
     <div className="flex w-full rounded-[16px] border border-neutral-100 bg-white py-5">
       {SHORTCUTS.map((shortcut, index) => (
@@ -25,7 +28,7 @@ export default function StorageShortcuts({ onNavigate }: StorageShortcutsProps) 
             index > 0 ? "border-l border-neutral-100" : ""
           }`}
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#f9f9f9]">
+          <span className="flex size-10 items-center justify-center rounded-[10px] bg-neutral-50">
             <img
               src={shortcut.icon}
               alt=""
