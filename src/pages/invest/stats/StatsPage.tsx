@@ -58,7 +58,7 @@ export default function StatsPage() {
       <>
         <main className="min-h-[calc(100dvh-220px)] bg-neutral-50 px-5 pt-6 pb-24" />
         <ErrorModal
-          isOpen
+          isOpen={!!error}
           info={error?.info ?? DEFAULT_ERROR_MESSAGE}
           onPrimaryAction={handlePrimaryAction}
           onSecondaryAction={closeError}

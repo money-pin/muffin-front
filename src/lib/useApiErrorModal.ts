@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ApiError } from "@/lib/api";
@@ -16,6 +16,7 @@ interface UseApiErrorModalOptions {
 interface ApiErrorModalState {
   code?: string;
   info: ErrorMessageInfo;
+  source: unknown;
 }
 
 export function useApiErrorModal({
@@ -24,24 +25,33 @@ export function useApiErrorModal({
 }: UseApiErrorModalOptions = {}) {
   const navigate = useNavigate();
   const [error, setError] = useState<ApiErrorModalState | null>(null);
+  const dismissedErrorRef = useRef<unknown>(null);
 
   const showError = useCallback(
     (err: unknown) => {
+      if (dismissedErrorRef.current === err) return;
+
       if (err instanceof ApiError) {
         setError({
           code: err.code,
           info: getErrorMessage(err.code, overridesByCode?.[err.code]),
+          source: err,
         });
         return;
       }
 
-      setError({ info: DEFAULT_ERROR_MESSAGE });
+      setError({ info: DEFAULT_ERROR_MESSAGE, source: err });
     },
     [overridesByCode],
   );
 
   const closeError = useCallback(() => {
+    dismissedErrorRef.current = error?.source ?? null;
     setError(null);
+  }, [error?.source]);
+
+  const resetDismissedError = useCallback(() => {
+    dismissedErrorRef.current = null;
   }, []);
 
   const handlePrimaryAction = useCallback(() => {
@@ -70,17 +80,19 @@ export function useApiErrorModal({
     }
 
     if (action === "retry") {
+      resetDismissedError();
       onRetry?.();
       return;
     }
 
     closeError();
-  }, [closeError, error?.info.action, navigate, onRetry]);
+  }, [closeError, error?.info.action, navigate, onRetry, resetDismissedError]);
 
   return {
     error,
     showError,
     closeError,
     handlePrimaryAction,
+    resetDismissedError,
   };
 }

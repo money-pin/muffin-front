@@ -65,8 +65,7 @@ export default function ErrorModal({
           <button
             type="button"
             onClick={onSecondaryAction ?? onClose}
-            disabled={isLoading}
-            className="text-body-16-bd-tighter flex h-[50px] flex-1 items-center justify-center rounded-lg bg-neutral-50 px-5 text-neutral-400 transition-opacity disabled:opacity-60"
+            className="text-body-16-bd-tighter flex h-[50px] flex-1 items-center justify-center rounded-lg bg-neutral-50 px-5 text-neutral-400"
           >
             {info.secondaryLabel}
           </button>

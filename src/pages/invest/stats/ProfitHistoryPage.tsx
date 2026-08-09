@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
+import ErrorModal from "@/components/common/ErrorModal";
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
-import ProfitHistoryPeriodTabs from "@/pages/invest/stats/components/ProfitHistoryPeriodTabs";
+import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
+import { useApiErrorModal } from "@/lib/useApiErrorModal";
+import { useStatsHistoryQuery } from "@/pages/invest/stats/api/queries";
 import ProfitHistoryPageSkeleton from "@/pages/invest/stats/components/ProfitHistoryPageSkeleton";
+import ProfitHistoryPeriodTabs from "@/pages/invest/stats/components/ProfitHistoryPeriodTabs";
 import ProfitHistorySectorSection from "@/pages/invest/stats/components/ProfitHistorySectorSection";
 import ProfitHistorySummary from "@/pages/invest/stats/components/ProfitHistorySummary";
-import { useStatsHistoryQuery } from "@/pages/invest/stats/api/queries";
 import type {
   ProfitHistoryApiPeriod,
   ProfitHistoryPeriod,
@@ -36,13 +39,22 @@ export default function ProfitHistoryPage() {
   const apiPeriod = UI_PERIOD_TO_API_PERIOD[period];
   const {
     data: profitHistory,
+    error: profitHistoryError,
     isError,
+    isFetching,
     isLoading,
+    refetch,
   } = useStatsHistoryQuery({
     period: apiPeriod,
     date: selectedDate,
     sort: sortKey,
   });
+  const { error, showError, closeError, handlePrimaryAction } =
+    useApiErrorModal({
+      onRetry: () => {
+        void refetch();
+      },
+    });
 
   const changePeriod = (nextPeriod: ProfitHistoryPeriod) => {
     setPeriod(nextPeriod);
@@ -65,6 +77,14 @@ export default function ProfitHistoryPage() {
     return resetTopBar;
   }, [setTopBar, resetTopBar]);
 
+  useEffect(() => {
+    if (!isError) return;
+
+    queueMicrotask(() => {
+      showError(profitHistoryError);
+    });
+  }, [isError, profitHistoryError, showError]);
+
   return (
     <main className="flex min-h-[calc(100dvh-56px)] flex-col bg-neutral-50">
       <h1 className="sr-only">누적 수익 내역</h1>
@@ -72,12 +92,6 @@ export default function ProfitHistoryPage() {
       <ProfitHistoryPeriodTabs value={period} onChange={changePeriod} />
 
       {isLoading && <ProfitHistoryPageSkeleton sortKey={sortKey} />}
-
-      {isError && !isLoading && (
-        <p className="text-body-14-md px-5 py-10 text-center text-neutral-500">
-          누적 수익 내역을 불러오지 못했습니다.
-        </p>
-      )}
 
       {profitHistory && !isLoading && !isError && (
         <>
@@ -104,6 +118,17 @@ export default function ProfitHistoryPage() {
             <div aria-hidden="true" className="flex-1 bg-neutral-50" />
           )}
         </>
+      )}
+
+      {isError && !isLoading && (
+        <ErrorModal
+          isOpen={!!error}
+          info={error?.info ?? DEFAULT_ERROR_MESSAGE}
+          onPrimaryAction={handlePrimaryAction}
+          onSecondaryAction={closeError}
+          onClose={closeError}
+          isLoading={isFetching}
+        />
       )}
     </main>
   );

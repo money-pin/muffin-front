@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import BottomSheet from "@/components/common/BottomSheet";
+import ErrorModal from "@/components/common/ErrorModal";
+import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
+import { useApiErrorModal } from "@/lib/useApiErrorModal";
 import { useWeeklyRankingQuery } from "@/pages/invest/ranking/api/queries";
 import MyRankingSection from "@/pages/invest/ranking/components/MyRankingSection";
 import RankingUserProfitSheetContent from "@/pages/invest/ranking/components/RankingUserProfitSheetContent";
@@ -14,6 +17,12 @@ function RankingPage() {
   const [isProfitSheetOpen, setIsProfitSheetOpen] = useState(false);
   const sheetHistoryPushedRef = useRef(false);
   const weeklyRankingQuery = useWeeklyRankingQuery();
+  const { error, showError, closeError, handlePrimaryAction } =
+    useApiErrorModal({
+      onRetry: () => {
+        void weeklyRankingQuery.refetch();
+      },
+    });
 
   const rankingData = weeklyRankingQuery.data;
   const isRankingReady = rankingData?.status === "READY";
@@ -54,21 +63,20 @@ function RankingPage() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  useEffect(() => {
+    if (!weeklyRankingQuery.isError) return;
+
+    queueMicrotask(() => {
+      showError(weeklyRankingQuery.error);
+    });
+  }, [showError, weeklyRankingQuery.error, weeklyRankingQuery.isError]);
+
   return (
     <>
       <div className="bg-neutral-0 flex min-h-full w-full flex-col gap-10 pt-6">
         <h1 className="sr-only">모의투자 랭킹</h1>
 
         {weeklyRankingQuery.isLoading && <RankingPageSkeleton />}
-
-        {weeklyRankingQuery.isError && (
-          <RankingStateMessage
-            message="랭킹 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요."
-            onRetry={() => {
-              void weeklyRankingQuery.refetch();
-            }}
-          />
-        )}
 
         {rankingData && !weeklyRankingQuery.isError && (
           <>
@@ -99,6 +107,17 @@ function RankingPage() {
           </>
         )}
       </div>
+
+      {weeklyRankingQuery.isError && !weeklyRankingQuery.isLoading && (
+        <ErrorModal
+          isOpen={!!error}
+          info={error?.info ?? DEFAULT_ERROR_MESSAGE}
+          onPrimaryAction={handlePrimaryAction}
+          onSecondaryAction={closeError}
+          onClose={closeError}
+          isLoading={weeklyRankingQuery.isFetching}
+        />
+      )}
 
       <BottomSheet
         isOpen={isProfitSheetOpen}
@@ -132,25 +151,10 @@ function RankingPageSkeleton() {
   );
 }
 
-function RankingStateMessage({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry?: () => void;
-}) {
+function RankingStateMessage({ message }: { message: string }) {
   return (
     <div className="mx-5 flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-xl bg-neutral-50 px-5 text-center">
       <p className="text-body-14-md text-neutral-600">{message}</p>
-      {onRetry && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="text-body-14-bd text-primary"
-        >
-          다시 시도
-        </button>
-      )}
     </div>
   );
 }
