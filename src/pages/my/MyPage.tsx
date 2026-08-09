@@ -65,7 +65,7 @@ function MyPage() {
 
   return (
     <div className="flex min-h-[calc(100dvh-80px)] flex-col bg-neutral-50">
-      <div className="bg-white pb-4">
+      <div className="bg-white pb-[clamp(12px,4vw,16px)]">
         <header className="flex h-[52px] items-center justify-end px-5">
           <button
             type="button"
@@ -90,7 +90,7 @@ function MyPage() {
           onEditNickname={() => setNicknameModalOpen(true)}
         />
 
-        <div className="mt-4 px-5">
+        <div className="mt-[clamp(12px,4vw,16px)] px-5">
           <StreakWeekCard
             streakDays={streakDays}
             weekChecks={weekChecks}
@@ -99,7 +99,7 @@ function MyPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-8 border-t border-neutral-100 bg-neutral-50 px-5 pt-5 pb-8">
+      <div className="flex flex-1 flex-col gap-[clamp(24px,7vw,32px)] border-t border-neutral-100 bg-neutral-50 px-5 pt-[clamp(16px,5vw,20px)] pb-[clamp(24px,7vw,32px)]">
         <section className="flex flex-col gap-3">
           <SectionHeader title="학습 저장소" />
           {/* 탭 클릭 시 파라미터(?tab=menu)를 포함해 이동 */}

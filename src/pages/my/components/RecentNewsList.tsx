@@ -50,13 +50,13 @@ function RecentNewsCard({
   };
 
   return (
-    <div className="relative w-32 shrink-0">
+    <div className="relative w-[clamp(116px,32.8vw,128px)] shrink-0">
       <button
         type="button"
         onClick={() => onNewsClick(news.id)}
         className="flex w-full flex-col gap-3 text-left"
       >
-        <div className="size-32 overflow-hidden rounded-[16px]">
+        <div className="size-[clamp(116px,32.8vw,128px)] overflow-hidden rounded-[16px]">
           <img
             src={news.image}
             alt=""
