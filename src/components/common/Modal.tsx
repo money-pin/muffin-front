@@ -28,13 +28,8 @@ function Modal({
 
   return createPortal(
     <RemoveScroll>
-      <div className="fixed inset-0 z-50 flex justify-center">
+      <div className="fixed inset-0 z-50 flex justify-center bg-black/50">
         {/* 딤: 프레임 밖(전체화면) — #152 */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[var(--color-neutral-1000)]/50"
-        />
-
         <div className="relative h-full w-full max-w-[var(--max-width-app)]">
           <div
             className={[
@@ -54,7 +49,7 @@ function Modal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="absolute top-5 right-5 flex h-6 w-6 items-center justify-center"
+                  className="absolute top-5 right-5 z-20 flex h-6 w-6 items-center justify-center"
                   aria-label="모달 닫기"
                 >
                   <img src={closeIcon} alt="" className="h-6 w-6" />
