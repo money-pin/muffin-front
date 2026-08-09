@@ -1,32 +1,11 @@
-import { useQueryClient } from "@tanstack/react-query";
-
 import bookmarkFillIcon from "@/assets/icon-24px/bookmark-fill.svg";
 import bookmarkWhiteIcon from "@/assets/icon-24px/bookmark-line-white.svg";
-import type { MyHome } from "@/lib/mypageApi";
-import { mypageQueryKeys } from "@/lib/mypageQueries";
 import { useToggleScrap } from "@/pages/news/newsQueries";
 import type { MyRecentNews } from "@/pages/my/myData";
 
 interface RecentNewsListProps {
   newsList: MyRecentNews[];
   onNewsClick: (newsId: number) => void;
-}
-
-function setHomeScrap(
-  queryClient: ReturnType<typeof useQueryClient>,
-  newsId: number,
-  isScrapped: boolean,
-) {
-  queryClient.setQueryData<MyHome>(mypageQueryKeys.home(), (old) =>
-    old
-      ? {
-          ...old,
-          recentNews: old.recentNews?.map((news) =>
-            news.newsId === newsId ? { ...news, isScrapped } : news,
-          ),
-        }
-      : old,
-  );
 }
 
 function RecentNewsCard({
@@ -36,17 +15,12 @@ function RecentNewsCard({
   news: MyRecentNews;
   onNewsClick: (newsId: number) => void;
 }) {
-  const queryClient = useQueryClient();
   const { mutate: toggleScrap, isPending } = useToggleScrap(news.id);
 
   const handleBookmark = () => {
     if (isPending) return;
 
-    const next = !news.bookmarked;
-    setHomeScrap(queryClient, news.id, next);
-    toggleScrap(next, {
-      onError: () => setHomeScrap(queryClient, news.id, !next),
-    });
+    toggleScrap(!news.bookmarked);
   };
 
   return (
