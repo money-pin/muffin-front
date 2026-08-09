@@ -64,9 +64,11 @@
   --color-negative-200: #79bcff;
   --color-negative-300: #4da6ff;
 
-  /* 정답/검증 성공 (Figma semantic/green). 300=테두리·글자, 100=하이라이트 배경 */
+  /* 정답/검증 성공 (Figma semantic/green). 100=배경, 200=복습 테두리, 300(green)=라이브 테두리·검증, 400=옵션 글자 */
   --color-green: #00a76d;
   --color-green-100: #eefbf9;
+  --color-green-200: #37c795;
+  --color-green-400: #00a068;
 
   --color-character-plain-tag-bg: #fff4ea;
   --color-character-plain-tag-text: #f46c0e;

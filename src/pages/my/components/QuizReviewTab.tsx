@@ -22,21 +22,21 @@ function ReviewMessage({ children }: { children: string }) {
 function getOptionStyle(option: QuizHistoryOption) {
   if (option.isSelected && option.isCorrect) {
     return {
-      className: "bg-green-100 border-green text-green font-bold",
+      className: "bg-green-100 border-green-200 text-green-400 font-bold",
       badgeText: "내 정답",
       badgeClass: "bg-green text-white",
     };
   }
   if (option.isSelected && !option.isCorrect) {
     return {
-      className: "bg-positive-50 border-positive text-positive font-bold",
+      className: "bg-positive-50 border-positive-300 text-positive font-bold",
       badgeText: "내 오답",
       badgeClass: "bg-positive text-white",
     };
   }
   if (!option.isSelected && option.isCorrect) {
     return {
-      className: "bg-green-100 border-green text-green font-bold",
+      className: "bg-green-100 border-green-200 text-green-400 font-bold",
       badgeText: "정답",
       badgeClass: "bg-green text-white",
     };
