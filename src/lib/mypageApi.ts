@@ -164,7 +164,7 @@ export function getSavedTerms(params?: {
   );
 }
 
-// ── 알림 설정 (GET/PATCH /api/mypage/settings/notifications) ──
+// ── 알림 설정 (GET/PUT /api/mypage/settings/notifications) ──
 export interface NotificationSettings {
   newsUpdate: boolean;
   dailyQuiz: boolean;
@@ -190,7 +190,7 @@ export async function updateNotificationSettings(
 ): Promise<NotificationSettings> {
   const result = await apiRequest<MyPageSettings>(
     "/api/mypage/settings/notifications",
-    { method: "PATCH", body, auth: true },
+    { method: "PUT", body, auth: true },
   );
   return result.notifications;
 }
