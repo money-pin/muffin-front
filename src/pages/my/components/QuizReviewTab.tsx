@@ -22,7 +22,7 @@ function ReviewMessage({ children }: { children: string }) {
 function getOptionStyle(option: QuizHistoryOption) {
   if (option.isSelected && option.isCorrect) {
     return {
-      className: "bg-green-50 border-green text-green font-bold",
+      className: "bg-green-100 border-green text-green font-bold",
       badgeText: "내 정답",
       badgeClass: "bg-green text-white",
     };
@@ -36,7 +36,7 @@ function getOptionStyle(option: QuizHistoryOption) {
   }
   if (!option.isSelected && option.isCorrect) {
     return {
-      className: "bg-green-50 border-green text-green font-bold",
+      className: "bg-green-100 border-green text-green font-bold",
       badgeText: "정답",
       badgeClass: "bg-green text-white",
     };

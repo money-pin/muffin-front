@@ -33,7 +33,7 @@ export default function QuizQuestionView({
 
     if (submitted) {
       // 정답은 초록(green), 내가 고른 오답은 빨강(positive)
-      if (isAnswer) return "border-green bg-green-50 text-green";
+      if (isAnswer) return "border-green bg-green-100 text-green";
       if (isSelected) return "border-positive bg-positive-50 text-positive";
       return "border-neutral-100 bg-white text-neutral-900";
     }
