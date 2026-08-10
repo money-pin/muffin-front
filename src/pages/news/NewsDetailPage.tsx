@@ -2,6 +2,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import BottomSheet from "@/components/common/BottomSheet";
 import Badge from "@/components/common/Badge";
+import ErrorModal from "@/components/common/ErrorModal";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
 import bookmarkLineWhite from "@/assets/icon-24px/bookmark-line-white.svg";
 import newsImpactNegativeIcon from "@/assets/icon-16px/news-impact-negative.svg";
@@ -10,6 +11,8 @@ import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import wordSaveActiveIcon from "@/assets/icon-28px/wordsave-active.svg";
 import wordSaveIcon from "@/assets/icon-28px/wordsave.svg";
 import { ApiError } from "@/lib/api";
+import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
+import { useApiErrorModal } from "@/lib/useApiErrorModal";
 import type { SectorImpactItem } from "@/lib/newsApi";
 import {
   formatCategoryName,
@@ -130,7 +133,14 @@ export default function NewsDetailPage() {
   } | null>(null);
   const toastIdRef = useRef(0);
 
-  const { data: detail, isLoading, isError } = useNewsDetail(idNum);
+  const {
+    data: detail,
+    error: detailError,
+    isLoading,
+    isError,
+    isFetching,
+    refetch: refetchDetail,
+  } = useNewsDetail(idNum);
   const { data: impactData } = useSectorImpacts(idNum);
   const {
     data: cardData,
@@ -149,6 +159,26 @@ export default function NewsDetailPage() {
     useToggleTermSave(selectedTermId ?? -1);
   const { mutate: undoTermSave } = useUnsaveTermById();
   const { mutate: readNews } = useReadNews(idNum);
+
+  // 뉴스 상세 전체 로드 실패 시 에러 모달. 코드별 문구/액션은 공용 레이어가
+  // 결정(404·403은 돌아가기/닫기, 그 외는 다시 시도). 다시 시도는 refetch 연결.
+  const {
+    error: detailModalError,
+    showError: showDetailError,
+    closeError: closeDetailError,
+    handlePrimaryAction: handleDetailModalAction,
+  } = useApiErrorModal({
+    onRetry: () => {
+      void refetchDetail();
+    },
+  });
+
+  useEffect(() => {
+    if (!isError) return;
+    queueMicrotask(() => {
+      showDetailError(detailError);
+    });
+  }, [isError, detailError, showDetailError]);
 
   useEffect(() => {
     hasReadRef.current = false;
@@ -207,16 +237,17 @@ export default function NewsDetailPage() {
 
   if (isError || !detail) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 text-neutral-500">
-        <p>뉴스를 불러오지 못했어요.</p>
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="text-primary underline"
-        >
-          뒤로가기
-        </button>
-      </div>
+      <>
+        <div className="min-h-dvh w-full max-w-[var(--max-width-app)] bg-neutral-50" />
+        <ErrorModal
+          isOpen={!!detailModalError}
+          info={detailModalError?.info ?? DEFAULT_ERROR_MESSAGE}
+          onPrimaryAction={handleDetailModalAction}
+          onSecondaryAction={closeDetailError}
+          onClose={closeDetailError}
+          isLoading={isFetching}
+        />
+      </>
     );
   }
 
