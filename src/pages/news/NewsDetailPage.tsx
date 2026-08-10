@@ -288,7 +288,7 @@ export default function NewsDetailPage() {
           </div>
 
           <section className="flex w-full flex-col gap-1 px-5 pt-6 pb-5">
-            <p className="text-body-16-rg-tighter break-keep whitespace-pre-wrap text-neutral-900">
+            <p className="text-body-16-rg-tighter whitespace-pre-wrap text-neutral-900">
               {detail.bodySegments.map((segment, index) =>
                 segment.type === "HIGHLIGHT" && segment.termId != null ? (
                   <button
@@ -345,7 +345,7 @@ export default function NewsDetailPage() {
                     {card.title}
                   </h2>
                 </div>
-                <p className="text-body-16-rg-tighter break-keep whitespace-pre-wrap text-neutral-700">
+                <p className="text-body-16-rg-tighter whitespace-pre-wrap text-neutral-700">
                   {renderMarkdownBold(card.content)}
                 </p>
               </div>
