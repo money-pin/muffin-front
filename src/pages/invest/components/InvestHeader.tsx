@@ -33,11 +33,13 @@ export default function InvestHeader() {
           totalAsset={asset?.totalAsset}
           profitAmount={profitAmount}
           profitRate={profitRate}
-          isLoading={investmentAssetQuery.isLoading || investmentAssetQuery.isError}
+          isLoading={
+            investmentAssetQuery.isLoading || investmentAssetQuery.isError
+          }
         />
       </header>
 
-      <div className="bg-neutral-0 sticky top-0 z-20 w-full shadow-[0_4px_2px_rgba(0,0,0,0.05)]">
+      <div className="bg-neutral-0 sticky -top-px z-20 w-full shadow-[0_4px_2px_rgba(0,0,0,0.05)]">
         <InvestTabBar />
       </div>
     </>

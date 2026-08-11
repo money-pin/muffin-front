@@ -90,11 +90,12 @@ export default function NewsPage() {
         )}
       </section>
 
-      <div className="sticky top-0 z-10 mt-4 w-full border-b border-neutral-100 bg-neutral-50">
+      <div className="sticky -top-px z-10 mt-4 w-full border-b border-neutral-100 bg-neutral-50">
         <TabBar
           tabs={newsTabs}
           currentTab={currentTab}
           onTabChange={(value) => setCurrentTab(value as NewsTabType)}
+          className="bg-neutral-50"
         />
       </div>
 
