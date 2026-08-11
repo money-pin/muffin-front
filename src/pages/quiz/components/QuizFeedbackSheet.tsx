@@ -18,7 +18,11 @@ export default function QuizFeedbackSheet({
   onNext,
 }: QuizFeedbackSheetProps) {
   return (
-    <div className="fixed bottom-0 left-1/2 z-40 w-full max-w-[var(--max-width-app)] -translate-x-1/2 rounded-t-[20px] bg-white px-5 pt-6 pb-[42px] shadow-[0px_0px_8px_rgba(0,0,0,0.2)]">
+    <div
+      className={`fixed bottom-0 left-1/2 z-40 w-full max-w-[var(--max-width-app)] -translate-x-1/2 rounded-t-[20px] px-5 pt-6 pb-[42px] shadow-[0px_0px_8px_rgba(0,0,0,0.2)] ${
+        isCorrect ? "bg-green-100" : "bg-positive-50"
+      }`}
+    >
       <div className="flex items-center gap-1">
         <span className="flex h-6 w-6 items-center justify-center">
           <svg
