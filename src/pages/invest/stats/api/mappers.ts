@@ -36,11 +36,10 @@ export function mapStatsSummaryToStatsSummaryData(
       rate: response.cumulativeProfitRate,
     },
     trend: response.graph.flatMap((point) => {
-      const label = formatGraphDateLabel(point.date);
-      if (!label) return [];
+      if (!parseOptionalInvestmentResultDate(point.date)) return [];
 
       return {
-        label,
+        label: point.date,
         value: point.cumulativeProfitRate,
       };
     }),
@@ -143,13 +142,6 @@ function parseInvestmentResultDate(value: string): InvestmentResultDate {
     month: Number(month),
     day: Number(day),
   };
-}
-
-function formatGraphDateLabel(value: string) {
-  const date = parseOptionalInvestmentResultDate(value);
-  if (!date) return null;
-
-  return `${date.month}/${date.day}`;
 }
 
 function parseOptionalInvestmentResultDate(
