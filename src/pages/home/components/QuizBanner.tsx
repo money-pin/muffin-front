@@ -12,7 +12,7 @@ export default function QuizBanner({ onClick }: QuizBannerProps) {
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between rounded-[12px] border border-neutral-100 bg-white px-4 pb-3 pt-4"
+      className="flex w-full items-center justify-between rounded-[12px] border border-neutral-100 bg-white p-3"
     >
       <span className="flex items-center gap-4">
         <img
@@ -23,7 +23,7 @@ export default function QuizBanner({ onClick }: QuizBannerProps) {
           draggable={false}
         />
         <span className="flex flex-col items-start">
-          <span className="text-body-16-bd-tighter text-neutral-900">
+          <span className="text-body-16-bd-tighter leading-[1.6] text-neutral-900">
             오늘의 한 입 퀴즈
           </span>
           <span className="text-caption-12-md-tighter text-neutral-600">

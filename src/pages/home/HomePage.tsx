@@ -131,7 +131,7 @@ function HomePage() {
         />
       )}
 
-      <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0px_-3px_7px_rgba(0,0,0,0.1)]">
+      <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0_-3px_5px_-3px_rgba(0,0,0,0.08)]">
         <div className="px-5">
           <QuizBanner onClick={() => navigate("/quiz")} />
         </div>
@@ -168,7 +168,7 @@ function HomePage() {
         </section>
 
         <section className="px-5">
-          <TopProfitSectorsCard sectors={topSectors} />
+          <TopProfitSectorsCard sectors={topSectors} variant="section" />
         </section>
       </div>
     </div>

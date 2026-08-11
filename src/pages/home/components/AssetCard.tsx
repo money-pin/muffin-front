@@ -74,7 +74,7 @@ export default function AssetCard({
         </span>
       </div>
 
-      <div className="flex w-full flex-col gap-3 rounded-[16px] bg-white px-4 pt-5 pb-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
+      <div className="flex w-full flex-col gap-3 rounded-[16px] bg-white px-4 pt-5 pb-4 shadow-[0_0_5px_rgba(0,0,0,0.05)]">
         <div className="flex flex-col gap-1 px-1">
           <p className="text-caption-12-md-tighter text-neutral-400">
             {nickname}님의 총 자산
