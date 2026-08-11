@@ -68,9 +68,7 @@ type OptionStyle = {
 };
 
 // 보기 하나의 스타일 결정 (선택 여부 + 정답 여부 기준)
-// 배지는 "내가 고르지 않은 정답 보기"에만 노출. 내가 고른 보기는 색으로만 구분.
 function getOptionStyle(option: QuizHistoryOption): OptionStyle {
-  // 내가 고른 정답
   if (option.isSelected && option.isCorrect) {
     return {
       container: "bg-green-100 border-green-200",
@@ -78,7 +76,6 @@ function getOptionStyle(option: QuizHistoryOption): OptionStyle {
       showCorrectBadge: false,
     };
   }
-  // 내가 고른 오답
   if (option.isSelected && !option.isCorrect) {
     return {
       container: "bg-positive-50 border-positive-300",
@@ -86,7 +83,6 @@ function getOptionStyle(option: QuizHistoryOption): OptionStyle {
       showCorrectBadge: false,
     };
   }
-  // 내가 고르지 않은 정답 → "정답" 배지 노출
   if (!option.isSelected && option.isCorrect) {
     return {
       container: "bg-green-100 border-green-200",
@@ -94,7 +90,6 @@ function getOptionStyle(option: QuizHistoryOption): OptionStyle {
       showCorrectBadge: true,
     };
   }
-  // 기본
   return {
     container: "bg-neutral-50/70 border-transparent",
     text: "text-body-16-md-tighter text-neutral-900",
@@ -120,10 +115,11 @@ export default function QuizReviewTab({
 
     const { summary, questions } = detailQuery.data;
     return (
-      <div className="flex flex-col gap-4 p-5 pb-36">
-        <div className="flex shrink-0 items-center justify-between rounded-xl border border-neutral-100 bg-white p-4">
-          <span className="text-body-14-md text-neutral-600">맞힌 문제 수</span>
-          <div className="text-body-16-bd">
+      <div className="flex min-h-full flex-col gap-4 bg-neutral-50 p-5 pb-36">
+        {/* ScoreContainer: 명세 높이 57px 맞춤 (h-[57px] p-4) */}
+        <div className="flex h-[57px] shrink-0 items-center justify-between rounded-xl border border-neutral-100 bg-white p-4">
+          <span className="text-body-14-rg text-neutral-700">맞힌 문제 수</span>
+          <div className="text-heading-18-md rounded-lg bg-neutral-50 px-2 py-1">
             <span className="text-primary">{summary.correctCount}</span>
             <span className="text-neutral-400">/{summary.totalCount}</span>
           </div>
@@ -137,44 +133,38 @@ export default function QuizReviewTab({
                 question.isCorrect ? "border-neutral-100" : "border-positive"
               }`}
             >
-              {/* Question Body: 헤더 + 보기 */}
-              <div className="flex flex-col gap-4">
-                {/* 헤더: 문제 텍스트 + 정답/오답 상태 아이콘 */}
-                <div className="flex items-start gap-1">
-                  <h3 className="text-body-16-md-tighter flex-1 leading-[1.6] whitespace-pre-line text-neutral-900">
-                    {`Q${index + 1}. ${question.question}`}
-                  </h3>
-                  <span className="mt-0.5">
-                    <QuizStatusIcon isCorrect={question.isCorrect} />
-                  </span>
-                </div>
-
-                {/* 보기 리스트 */}
-                <div className="flex flex-col gap-2">
-                  {question.options.map((option) => {
-                    const style = getOptionStyle(option);
-                    return (
-                      <div
-                        key={option.optionId}
-                        className={`flex items-center justify-between gap-2 rounded-lg border px-4 py-3 transition-colors ${style.container}`}
-                      >
-                        <span
-                          className={`min-w-0 flex-1 break-keep ${style.text}`}
-                        >
-                          {option.content}
-                        </span>
-                        {style.showCorrectBadge && (
-                          <span className="text-body-14-bd bg-green shrink-0 rounded-full px-3 py-1 text-white">
-                            정답
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="flex items-start gap-1">
+                <h3 className="text-body-16-md-tighter flex-1 leading-[1.6] whitespace-pre-line text-neutral-900">
+                  {`Q${index + 1}. ${question.question}`}
+                </h3>
+                <span className="mt-0.5">
+                  <QuizStatusIcon isCorrect={question.isCorrect} />
+                </span>
               </div>
 
-              {/* 해설 */}
+              <div className="flex flex-col gap-2">
+                {question.options.map((option) => {
+                  const style = getOptionStyle(option);
+                  return (
+                    <div
+                      key={option.optionId}
+                      className={`flex items-center justify-between gap-2 rounded-lg border px-4 py-3 transition-colors ${style.container}`}
+                    >
+                      <span
+                        className={`min-w-0 flex-1 break-keep ${style.text}`}
+                      >
+                        {option.content}
+                      </span>
+                      {style.showCorrectBadge && (
+                        <span className="text-body-14-bd bg-green shrink-0 rounded-full px-3 py-1 text-white">
+                          정답
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
               <div className="flex flex-col gap-3">
                 <div className="text-caption-12-md flex items-center gap-1 text-neutral-500">
                   <svg
@@ -230,14 +220,15 @@ export default function QuizReviewTab({
           key={item.quizDate}
           type="button"
           onClick={() => onSelectDate(item.quizDate)}
-          className="transition-active flex h-16 w-full items-center justify-between rounded-xl border border-neutral-100 bg-white px-5 active:bg-neutral-50"
+          /* QuizReviewListCard: 명세 높이 65px, 패딩 16px 맞춤 (h-[65px] p-4) */
+          className="transition-active flex h-[65px] w-full items-center justify-between rounded-xl border border-neutral-100 bg-white p-4 active:bg-neutral-50"
         >
           <span className="text-body-16-bd text-neutral-900">
             {item.quizDate}
           </span>
-          <div className="text-body-16-bd">
+          <div className="text-heading-18-md rounded-lg bg-neutral-50 px-2 py-1">
             <span className="text-primary">{item.correctCount}</span>
-            <span className="text-neutral-300">/{item.totalCount}</span>
+            <span className="text-neutral-400">/{item.totalCount}</span>
           </div>
         </button>
       ))}
