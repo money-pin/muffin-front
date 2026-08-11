@@ -24,7 +24,7 @@ import HomePageSkeleton from "./components/HomePageSkeleton";
 import AssetCard from "./components/AssetCard";
 import QuizBanner from "./components/QuizBanner";
 import InvestResultSheet from "./components/InvestResultSheet";
-import { HOME_USER } from "./homeData";
+import { getHomeGreetingMessage, HOME_GREETING_MESSAGES } from "./homeData";
 
 const INVEST_RESULT_SEEN_KEY = "muffin:investResultSeenDate";
 
@@ -52,7 +52,13 @@ function HomePage() {
 
   const todayNewsList = todayNewsQuery.data?.items ?? [];
   const topSectors = statsSummaryQuery.data?.topSectors ?? [];
-  const settlementResult = settlementResultQuery.data ?? null;
+  const settlementResult = settlementResultQuery.data?.result ?? null;
+  const greetingMessage = getHomeGreetingMessage({
+    hasInvestmentHistory: Boolean(statsSummaryQuery.data?.investDate),
+    cumulativeProfitRate: statsSummaryQuery.data?.cumulativeProfit.rate ?? 0,
+    isSettlementPending:
+      settlementResultQuery.data?.reason === "SETTLEMENT_PENDING",
+  });
 
   const [investResultOpen, setInvestResultOpen] = useState(false);
   const resultShownRef = useRef(false);
@@ -77,7 +83,12 @@ function HomePage() {
     queueMicrotask(() => setInvestResultOpen(true));
   }, [settlementResult]);
 
-  if (investmentAssetQuery.isLoading || myHomeQuery.isLoading) {
+  if (
+    investmentAssetQuery.isLoading ||
+    myHomeQuery.isLoading ||
+    statsSummaryQuery.isLoading ||
+    settlementResultQuery.isLoading
+  ) {
     return <HomePageSkeleton />;
   }
 
@@ -89,7 +100,8 @@ function HomePage() {
 
       <div className="flex flex-col px-5 pt-4">
         <CharacterGreeting
-          message={HOME_USER.message}
+          message={greetingMessage}
+          messageGroups={HOME_GREETING_MESSAGES}
           variant={characterVariant}
         />
       </div>
