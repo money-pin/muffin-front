@@ -5,9 +5,9 @@ import Logo from "@/components/common/Logo";
 import Carousel from "@/components/common/Carousel";
 import SectionHeader from "@/components/common/SectionHeader";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
-import rankingIcon from "@/assets/icon-20px/ranking.svg";
 import BottomSheet from "@/components/common/BottomSheet";
 import RecentPerformanceSheetContent from "@/pages/invest/stats/components/RecentPerformanceSheetContent";
+import TopProfitSectorsCard from "@/pages/invest/stats/components/TopProfitSectorsCard";
 import {
   useStatsRecentDetailQuery,
   useStatsSummaryQuery,
@@ -23,7 +23,6 @@ import CharacterGreeting from "./components/CharacterGreeting";
 import HomePageSkeleton from "./components/HomePageSkeleton";
 import AssetCard from "./components/AssetCard";
 import QuizBanner from "./components/QuizBanner";
-import TopSectorList from "./components/TopSectorList";
 import InvestResultSheet from "./components/InvestResultSheet";
 import { HOME_USER } from "./homeData";
 
@@ -168,23 +167,8 @@ function HomePage() {
           )}
         </section>
 
-        <section className="flex flex-col gap-2 px-5">
-          <div className="px-1">
-            <SectionHeader
-              title="수익 TOP 3 섹터"
-              icon={
-                <img
-                  src={rankingIcon}
-                  alt=""
-                  aria-hidden="true"
-                  className="h-5 w-5"
-                  draggable={false}
-                />
-              }
-            />
-          </div>
-
-          <TopSectorList sectors={topSectors} />
+        <section className="px-5">
+          <TopProfitSectorsCard sectors={topSectors} />
         </section>
       </div>
     </div>
