@@ -18,33 +18,87 @@ function ReviewMessage({ children }: { children: string }) {
   );
 }
 
-// 보기 하나의 스타일/배지 결정 (선택 여부 + 정답 여부 기준)
-function getOptionStyle(option: QuizHistoryOption) {
+// 문제별 정답/오답 상태 아이콘 (원=상태색 currentColor, 마크=neutral-0)
+function QuizStatusIcon({ isCorrect }: { isCorrect: boolean }) {
+  if (isCorrect) {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-label="정답"
+        role="img"
+        className="size-6 shrink-0 text-green-400"
+      >
+        <circle cx="12" cy="12" r="10" fill="currentColor" />
+        <path
+          d="M7.5 12L10.5 15L16.5 9"
+          className="stroke-neutral-0"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-label="오답"
+      role="img"
+      className="text-positive size-6 shrink-0"
+    >
+      <circle cx="12" cy="12" r="10" fill="currentColor" />
+      <path
+        d="M7.75 7.75L16.25 16.25M16.25 7.75L7.75 16.25"
+        className="stroke-neutral-0"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+type OptionStyle = {
+  container: string;
+  text: string;
+  showCorrectBadge: boolean;
+};
+
+// 보기 하나의 스타일 결정 (선택 여부 + 정답 여부 기준)
+// 배지는 "내가 고르지 않은 정답 보기"에만 노출. 내가 고른 보기는 색으로만 구분.
+function getOptionStyle(option: QuizHistoryOption): OptionStyle {
+  // 내가 고른 정답
   if (option.isSelected && option.isCorrect) {
     return {
-      className: "bg-green-100 border-green-200 text-green-400 font-bold",
-      badgeText: "내 정답",
-      badgeClass: "bg-green text-white",
+      container: "bg-green-100 border-green-200",
+      text: "text-body-16-bd-tighter text-green-400",
+      showCorrectBadge: false,
     };
   }
+  // 내가 고른 오답
   if (option.isSelected && !option.isCorrect) {
     return {
-      className: "bg-positive-50 border-positive-300 text-positive font-bold",
-      badgeText: "내 오답",
-      badgeClass: "bg-positive text-white",
+      container: "bg-positive-50 border-positive-300",
+      text: "text-body-16-bd-tighter text-positive",
+      showCorrectBadge: false,
     };
   }
+  // 내가 고르지 않은 정답 → "정답" 배지 노출
   if (!option.isSelected && option.isCorrect) {
     return {
-      className: "bg-green-100 border-green-200 text-green-400 font-bold",
-      badgeText: "정답",
-      badgeClass: "bg-green text-white",
+      container: "bg-green-100 border-green-200",
+      text: "text-body-16-bd-tighter text-green-400",
+      showCorrectBadge: true,
     };
   }
+  // 기본
   return {
-    className: "bg-neutral-50/70 border-transparent text-neutral-900",
-    badgeText: null as string | null,
-    badgeClass: "",
+    container: "bg-neutral-50/70 border-transparent",
+    text: "text-body-16-md-tighter text-neutral-900",
+    showCorrectBadge: false,
   };
 }
 
@@ -75,46 +129,57 @@ export default function QuizReviewTab({
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {questions.map((question, index) => (
             <div
               key={question.quizId}
-              className={`flex flex-col gap-4 rounded-xl border bg-white px-4 py-5 ${
+              className={`flex flex-col gap-6 rounded-xl border bg-white px-4 py-5 ${
                 question.isCorrect ? "border-neutral-100" : "border-positive"
               }`}
             >
-              <h3 className="text-body-16-md-tighter leading-[1.6] whitespace-pre-line text-neutral-900">
-                {`Q${index + 1}. ${question.question}`}
-              </h3>
+              {/* Question Body: 헤더 + 보기 */}
+              <div className="flex flex-col gap-4">
+                {/* 헤더: 문제 텍스트 + 정답/오답 상태 아이콘 */}
+                <div className="flex items-start gap-1">
+                  <h3 className="text-body-16-md-tighter flex-1 leading-[1.6] whitespace-pre-line text-neutral-900">
+                    {`Q${index + 1}. ${question.question}`}
+                  </h3>
+                  <span className="mt-0.5">
+                    <QuizStatusIcon isCorrect={question.isCorrect} />
+                  </span>
+                </div>
 
-              <div className="flex flex-col gap-2.5">
-                {question.options.map((option) => {
-                  const style = getOptionStyle(option);
-                  return (
-                    <div
-                      key={option.optionId}
-                      className={`text-body-14-md flex min-h-[52px] items-center justify-between gap-2 rounded-xl border px-4 transition-colors ${style.className}`}
-                    >
-                      <span className="min-w-0 flex-1 break-keep">
-                        {option.content}
-                      </span>
-                      {style.badgeText && (
+                {/* 보기 리스트 */}
+                <div className="flex flex-col gap-2">
+                  {question.options.map((option) => {
+                    const style = getOptionStyle(option);
+                    return (
+                      <div
+                        key={option.optionId}
+                        className={`flex items-center justify-between gap-2 rounded-lg border px-4 py-3 transition-colors ${style.container}`}
+                      >
                         <span
-                          className={`text-caption-12-bd shrink-0 rounded-full px-2.5 py-1 ${style.badgeClass}`}
+                          className={`min-w-0 flex-1 break-keep ${style.text}`}
                         >
-                          {style.badgeText}
+                          {option.content}
                         </span>
-                      )}
-                    </div>
-                  );
-                })}
+                        {style.showCorrectBadge && (
+                          <span className="text-body-14-bd bg-green shrink-0 rounded-full px-3 py-1 text-white">
+                            정답
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="mt-1 flex flex-col gap-1.5 pt-1">
-                <div className="text-caption-12-md flex items-center gap-1.5 text-neutral-500">
+              {/* 해설 */}
+              <div className="flex flex-col gap-3">
+                <div className="text-caption-12-md flex items-center gap-1 text-neutral-500">
                   <svg
-                    width="16"
-                    height="16"
+                    width="20"
+                    height="20"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
