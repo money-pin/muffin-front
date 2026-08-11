@@ -23,20 +23,33 @@ export interface SettlementResult {
   finalAssets: number;
 }
 
-// 정산 완료(SETTLED)면 결과를, 그 외(reason 존재)엔 null을 반환한다.
-export async function getSettlementResult(): Promise<SettlementResult | null> {
+export interface SettlementResultData {
+  result: SettlementResult | null;
+  reason: SettlementNoResultReason | null;
+}
+
+// 정산 완료(SETTLED)면 결과를 반환하고, 결과가 없으면 서버 사유를 함께 보존한다.
+export async function getSettlementResult(): Promise<SettlementResultData> {
   const response = await apiRequest<SettlementResultApi>(
     "/api/investments/settlement/result",
     { auth: true },
   );
 
-  if (response.reason || !response.investDate) return null;
+  if (response.reason || !response.investDate) {
+    return {
+      result: null,
+      reason: response.reason,
+    };
+  }
 
   return {
-    date: response.investDate.replace(/-/g, "."),
-    profit: response.totalProfitLoss,
-    profitRate: response.totalProfitLossRate,
-    principal: response.totalAmount,
-    finalAssets: response.totalAsset,
+    result: {
+      date: response.investDate.replace(/-/g, "."),
+      profit: response.totalProfitLoss,
+      profitRate: response.totalProfitLossRate,
+      principal: response.totalAmount,
+      finalAssets: response.totalAsset,
+    },
+    reason: null,
   };
 }
