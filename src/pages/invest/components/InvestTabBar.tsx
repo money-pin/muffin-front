@@ -33,6 +33,7 @@ export default function InvestTabBar() {
       tabs={INVEST_TABS}
       currentTab={currentTab}
       onTabChange={(tab) => navigate(TAB_PATH_MAP[tab])}
+      className="bg-neutral-0"
     />
   );
 }

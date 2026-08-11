@@ -21,7 +21,7 @@ export default function ProfitHistoryPeriodTabs({
     <div
       role="tablist"
       aria-label="누적 수익 기간 선택"
-      className="flex items-center gap-1 bg-neutral-0 px-5 py-2 shadow-[0_4px_4px_rgba(0,0,0,0.05)]"
+      className="bg-neutral-0 relative z-10 flex items-center gap-1 px-5 py-2"
     >
       {PERIOD_TABS.map((tab) => {
         const isSelected = tab.value === value;
@@ -43,6 +43,10 @@ export default function ProfitHistoryPeriodTabs({
           </button>
         );
       })}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-full h-2 bg-gradient-to-b from-black/[0.05] via-black/[0.02] to-transparent"
+      />
     </div>
   );
 }

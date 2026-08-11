@@ -3,13 +3,7 @@ import SectionHeader from "@/components/common/SectionHeader";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 import rankingIcon from "@/assets/icon-20px/ranking.svg";
 import calendarIcon from "@/assets/icon-20px/calendar.svg";
-
-// Figma RankBadge: 1위 금색 / 2위 은색 / 3위 동색 (TopSectorList와 동일)
-const RANK_STYLE: Record<1 | 2 | 3, string> = {
-  1: "bg-[#ffd400] text-[#331900]",
-  2: "bg-[#bababa] text-white",
-  3: "bg-[#de7813] text-white",
-};
+import RankBadge from "@/pages/invest/stats/components/RankBadge";
 
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
@@ -44,7 +38,7 @@ export default function HomePageSkeleton() {
           <div className="px-4">
             <SkeletonBlock className="h-7 w-28 rounded-t-[8px]" />
           </div>
-          <div className="flex w-full flex-col gap-3 rounded-[16px] bg-white px-4 pt-5 pb-4 shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
+          <div className="flex w-full flex-col gap-3 rounded-[16px] bg-white px-4 pt-5 pb-4 shadow-[0_0_5px_rgba(0,0,0,0.05)]">
             <div className="flex flex-col gap-1 px-1">
               <SkeletonBlock className="h-4 w-24" />
               <div className="flex w-full items-center justify-between">
@@ -73,9 +67,9 @@ export default function HomePageSkeleton() {
       </div>
 
       {/* 흰색 라운드 시트: 퀴즈 배너 · 금융 소식 · 수익 TOP3 */}
-      <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0px_-3px_7px_rgba(0,0,0,0.1)]">
+      <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0_-3px_5px_-3px_rgba(0,0,0,0.08)]">
         <div className="px-5">
-          <SkeletonBlock className="h-[72px] w-full rounded-[16px]" />
+          <SkeletonBlock className="h-[69px] w-full rounded-[12px]" />
         </div>
 
         <section className="flex flex-col gap-2">
@@ -93,7 +87,7 @@ export default function HomePageSkeleton() {
               }
             />
           </div>
-          <div className="px-6">
+          <div className="px-5">
             <SkeletonBlock className="h-[150px] w-full rounded-[12px]" />
             <div className="mt-3 flex flex-col gap-2">
               <SkeletonBlock className="h-4 w-3/4" />
@@ -117,21 +111,22 @@ export default function HomePageSkeleton() {
               }
             />
           </div>
-          <div className="flex w-full flex-col rounded-[16px] border border-neutral-100 bg-white px-5 py-2">
+          <div className="flex w-full flex-col rounded-[16px] border border-neutral-100 bg-white px-3 py-2">
             {([1, 2, 3] as const).map((rank) => (
               <div
                 key={rank}
-                className="flex w-full items-center justify-between py-3"
+                className={`flex flex-col ${rank < 3 ? "gap-1 pb-1" : ""}`}
               >
-                <div className="flex min-w-0 items-center gap-3">
-                  <span
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] text-[16px] leading-none font-bold ${RANK_STYLE[rank]}`}
-                  >
-                    {rank}
-                  </span>
-                  <SkeletonBlock className="h-5 w-20" />
+                <div className="flex h-14 w-full items-center justify-between px-2 py-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <RankBadge rank={rank} />
+                    <SkeletonBlock className="h-5 w-20" />
+                  </div>
+                  <SkeletonBlock className="h-5 w-24 shrink-0" />
                 </div>
-                <SkeletonBlock className="h-5 w-24 shrink-0" />
+                {rank < 3 && (
+                  <div className="mx-[18px] border-t border-neutral-100" />
+                )}
               </div>
             ))}
           </div>

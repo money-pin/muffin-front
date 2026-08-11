@@ -8,8 +8,8 @@ import type {
 } from "@/pages/invest/stats/types";
 
 const SORT_OPTIONS = [
-  { value: "AMOUNT_DESC", label: "투자금 높은 순" },
-  { value: "AMOUNT_ASC", label: "투자금 낮은 순" },
+  { value: "AMOUNT_DESC", label: "수익금 높은 순" },
+  { value: "AMOUNT_ASC", label: "수익금 낮은 순" },
   { value: "RATE_DESC", label: "수익률 높은 순" },
   { value: "RATE_ASC", label: "수익률 낮은 순" },
 ] as const satisfies readonly SortOption<ProfitHistorySortKey>[];

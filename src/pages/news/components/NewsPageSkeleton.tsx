@@ -95,7 +95,12 @@ export default function NewsPageSkeleton() {
 
       {/* 탭 바 (실제 컴포넌트, 스켈레톤 아님) */}
       <div className="mt-8 w-full">
-        <TabBar tabs={newsTabs} currentTab="all" onTabChange={() => {}} />
+        <TabBar
+          tabs={newsTabs}
+          currentTab="all"
+          onTabChange={() => {}}
+          className="bg-neutral-50"
+        />
       </div>
 
       {/* 뉴스 리스트 (컨테이너 464 높이에 카드 4개, gap 8) */}
