@@ -3,8 +3,8 @@ import polygonIcon from "@/assets/investment/investment-polygon.svg";
 import type { ProfitHistorySortKey } from "@/pages/invest/stats/types";
 
 const SORT_LABELS: Record<ProfitHistorySortKey, string> = {
-  AMOUNT_DESC: "투자금 높은 순",
-  AMOUNT_ASC: "투자금 낮은 순",
+  AMOUNT_DESC: "수익금 높은 순",
+  AMOUNT_ASC: "수익금 낮은 순",
   RATE_DESC: "수익률 높은 순",
   RATE_ASC: "수익률 낮은 순",
 };
