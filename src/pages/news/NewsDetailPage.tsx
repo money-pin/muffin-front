@@ -384,8 +384,9 @@ export default function NewsDetailPage() {
           </section>
         ) : isExplanationPending ? (
           // 해설 카드가 생성되지 않은 뉴스: 재생성되지 않으므로 카드(흰 박스) 없이
-          // 안내 텍스트만 노출한다.
-          <section className="flex w-full flex-1 items-center justify-center bg-neutral-50/80 px-5 py-10">
+          // 안내 텍스트만 노출한다. 직계 부모가 flex 컨테이너가 아니라 flex-1이
+          // 먹지 않으므로 min-height로 회색 영역 높이를 확보한다.
+          <section className="flex min-h-[200px] w-full items-center justify-center bg-neutral-50/80 px-5 py-10">
             <p className="text-body-14-md text-center text-neutral-400">
               해설 카드가 없는 뉴스예요.
             </p>
@@ -399,12 +400,11 @@ export default function NewsDetailPage() {
         ) : null}
       </div>
 
-      {!isExplanationPending && (
-        <ScrollToTopButton
-          onClick={handleScrollToTop}
-          className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-6 z-40"
-        />
-      )}
+      <ScrollToTopButton
+        onClick={handleScrollToTop}
+        scrollTargetRef={containerRef}
+        className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-6 z-40"
+      />
 
       <BottomSheet
         isOpen={isTermSheetOpen}
