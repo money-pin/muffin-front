@@ -6,7 +6,6 @@ interface StorageShortcutsProps {
   onNavigate: (menu: "news" | "word" | "quiz") => void;
 }
 
-//TODO : 스크랩 아이콘 사이즈 24px/20px 확인 후 에셋 교체 여부 판단
 const SHORTCUTS = [
   { key: "news", label: "스크랩한 뉴스", icon: bookmarkIcon },
   { key: "word", label: "저장한 용어", icon: wordIcon },

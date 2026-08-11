@@ -197,7 +197,6 @@ export default function NewsDetailPage() {
       termError instanceof ApiError &&
       termError.code === "CONTENT_404_002"
     ) {
-      console.error(termError);
       queueMicrotask(() => {
         setSelectedTermId(null);
       });
