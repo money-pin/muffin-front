@@ -123,7 +123,7 @@ export default function QuizReviewTab({
       <div className="flex flex-col gap-4 p-5 pb-36">
         <div className="flex shrink-0 items-center justify-between rounded-xl border border-neutral-100 bg-white p-4">
           <span className="text-body-14-md text-neutral-600">맞힌 문제 수</span>
-          <div className="text-body-16-bd">
+          <div className="text-body-16-bd rounded-lg bg-neutral-50/70 px-2 py-1">
             <span className="text-primary">{summary.correctCount}</span>
             <span className="text-neutral-400">/{summary.totalCount}</span>
           </div>
@@ -235,7 +235,7 @@ export default function QuizReviewTab({
           <span className="text-body-16-bd text-neutral-900">
             {item.quizDate}
           </span>
-          <div className="text-body-16-bd">
+          <div className="text-body-16-bd rounded-lg bg-neutral-50/70 px-2 py-1">
             <span className="text-primary">{item.correctCount}</span>
             <span className="text-neutral-300">/{item.totalCount}</span>
           </div>
