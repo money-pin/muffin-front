@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import SectionHeader from "@/components/common/SectionHeader";
+import ErrorModal from "@/components/common/ErrorModal";
+import { ApiError } from "@/lib/api";
 import { CHARACTER_LABELS, characterTypeToVariant } from "@/lib/character";
+import { getErrorMessage, type ErrorMessageInfo } from "@/lib/errorMessages";
 import { updateNickname, type MyHome, type WeekDay } from "@/lib/mypageApi";
 import { mypageQueryKeys, useMyHomeQuery } from "@/lib/mypageQueries";
 import { getNewsImage } from "@/lib/newsFormat";
@@ -26,6 +29,35 @@ function MyPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
+  const [nicknameError, setNicknameError] = useState<ErrorMessageInfo | null>(
+    null,
+  );
+
+  // 닉네임 변경: 홈·마이 공유 캐시를 낙관적으로 갱신하되,
+  // 서버 저장이 실패하면 이전 값으로 롤백하고 사용자에게 알린다.
+  const nicknameMutation = useMutation({
+    mutationFn: (next: string) => updateNickname(next),
+    onMutate: async (next) => {
+      await queryClient.cancelQueries({ queryKey: mypageQueryKeys.home() });
+      const previous = queryClient.getQueryData<MyHome>(mypageQueryKeys.home());
+      queryClient.setQueryData<MyHome>(mypageQueryKeys.home(), (old) =>
+        old ? { ...old, nickname: next } : old,
+      );
+      return { previous };
+    },
+    onError: (error, _next, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(mypageQueryKeys.home(), context.previous);
+      }
+      setNicknameError(
+        getErrorMessage(error instanceof ApiError ? error.code : "", {
+          title: "닉네임 변경에 실패했어요.",
+          description: "잠시 후 다시 시도해주세요.",
+          primaryLabel: "확인",
+        }),
+      );
+    },
+  });
 
   // 닉네임·캐릭터·스트릭·최근뉴스 모두 /api/mypage/home 응답에서 조회 (홈과 캐시 공유).
   // 로딩 동안엔 스켈레톤을 노출해 mock/빈 값 깜빡임을 막는다.
@@ -140,14 +172,17 @@ function MyPage() {
           currentNickname={nickname}
           onClose={() => setNicknameModalOpen(false)}
           onChange={(next) => {
-            // 캐시를 낙관적으로 갱신 (홈·마이 공유 캐시라 양쪽 즉시 반영)
-            queryClient.setQueryData<MyHome>(mypageQueryKeys.home(), (old) =>
-              old ? { ...old, nickname: next } : old,
-            );
             setNicknameModalOpen(false);
-            // 변경한 닉네임을 서버에 저장 (실패해도 화면은 낙관적으로 반영)
-            updateNickname(next).catch(() => {});
+            nicknameMutation.mutate(next);
           }}
+        />
+      )}
+      {nicknameError && (
+        <ErrorModal
+          isOpen
+          info={nicknameError}
+          onPrimaryAction={() => setNicknameError(null)}
+          onClose={() => setNicknameError(null)}
         />
       )}
     </div>

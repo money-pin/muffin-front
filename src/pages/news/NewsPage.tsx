@@ -25,10 +25,31 @@ const TAB_CATEGORY_ID: Record<Exclude<NewsTabType, "all">, number> = {
   world: 3,
 };
 
+// API 실패를 빈 상태("없어요")와 구분해 보여주는 재시도 안내
+function NewsLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-3 text-neutral-400">
+      <p className="text-body-14-md">뉴스를 불러오지 못했어요.</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="text-body-14-md rounded-[8px] border border-neutral-200 px-4 py-2 text-neutral-600"
+      >
+        다시 시도
+      </button>
+    </div>
+  );
+}
+
 export default function NewsPage() {
   const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
 
-  const { data: todayData, isLoading: isTodayNewsLoading } = useTodayNews();
+  const {
+    data: todayData,
+    isLoading: isTodayNewsLoading,
+    isError: isTodayNewsError,
+    refetch: refetchTodayNews,
+  } = useTodayNews();
   const todayNewsList = todayData?.items ?? [];
   const hasTodayNews = todayNewsList.length > 0;
 
@@ -40,6 +61,8 @@ export default function NewsPage() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
+    refetch,
   } = useNewsList(categoryId);
 
   const newsItems = newsData?.pages.flatMap((page) => page.items) ?? [];
@@ -81,11 +104,13 @@ export default function NewsPage() {
               <TodayNewsCarouselCard key={news.newsId} news={news} />
             ))}
           </Carousel>
+        ) : isTodayNewsError ? (
+          <div className="bg-neutral-0 mx-5 flex h-[331px] items-center justify-center rounded-[16px] border border-neutral-100">
+            <NewsLoadError onRetry={() => refetchTodayNews()} />
+          </div>
         ) : (
           <div className="bg-neutral-0 text-body-14-md mx-5 flex h-[331px] items-center justify-center rounded-[16px] border border-neutral-100 text-neutral-400">
-            {isTodayNewsLoading
-              ? "금융 소식을 불러오는 중이에요."
-              : "표시할 금융 소식이 없어요."}
+            표시할 금융 소식이 없어요.
           </div>
         )}
       </section>
@@ -124,7 +149,13 @@ export default function NewsPage() {
           </div>
         )}
 
-        {!isLoading && newsItems.length === 0 && (
+        {!isLoading && isError && (
+          <div className="flex justify-center py-10">
+            <NewsLoadError onRetry={() => refetch()} />
+          </div>
+        )}
+
+        {!isLoading && !isError && newsItems.length === 0 && (
           <p className="py-10 text-center text-neutral-400">
             표시할 뉴스가 없어요.
           </p>

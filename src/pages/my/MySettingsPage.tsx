@@ -3,8 +3,11 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
+import { ApiError } from "@/lib/api";
 import { clearAccessToken } from "@/lib/auth";
 import { logout, withdraw } from "@/lib/authApi";
+import ErrorModal from "@/components/common/ErrorModal";
+import { getErrorMessage, type ErrorMessageInfo } from "@/lib/errorMessages";
 import {
   updateNotificationSettings,
   type NotificationSettings,
@@ -95,6 +98,9 @@ function MySettingsPage() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<ErrorMessageInfo | null>(
+    null,
+  );
 
   // 로그아웃: 백엔드에서 토큰 무효화 후 로컬 토큰 삭제.
   // API가 실패해도 로컬은 비우고 로그인 화면으로 보낸다(세션 종료 보장).
@@ -108,12 +114,21 @@ function MySettingsPage() {
     navigate("/login", { replace: true });
   };
 
-  // 회원 탈퇴: 소프트 딜리트 처리 후 로컬 토큰 삭제
+  // 회원 탈퇴: 서버 소프트 딜리트가 성공했을 때만 로컬 토큰을 지운다.
+  // (로그아웃과 달리 실패 시 계정이 남으므로 성공처럼 처리하면 안 됨)
   const handleWithdraw = async () => {
     try {
       await withdraw();
-    } catch {
-      // 무시 — 로컬 세션은 아래에서 정리
+    } catch (error) {
+      setWithdrawModalOpen(false);
+      setWithdrawError(
+        getErrorMessage(error instanceof ApiError ? error.code : "", {
+          title: "회원 탈퇴에 실패했어요.",
+          description: "잠시 후 다시 시도해주세요.",
+          primaryLabel: "확인",
+        }),
+      );
+      return;
     }
     clearAccessToken();
     navigate("/login", { replace: true });
@@ -203,6 +218,14 @@ function MySettingsPage() {
         isOpen={privacyModalOpen}
         onClose={() => setPrivacyModalOpen(false)}
       />
+      {withdrawError && (
+        <ErrorModal
+          isOpen
+          info={withdrawError}
+          onPrimaryAction={() => setWithdrawError(null)}
+          onClose={() => setWithdrawError(null)}
+        />
+      )}
     </div>
   );
 }
