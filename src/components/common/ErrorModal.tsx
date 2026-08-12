@@ -39,7 +39,6 @@ export default function ErrorModal({
           <div
             className={`flex size-14 items-center justify-center rounded-full ${iconBgClass}`}
           >
-            {/* TODO: info variant 전용 아이콘 에셋 확인 필요 */}
             <img
               src={errorAlertIcon}
               alt=""

@@ -20,12 +20,15 @@ const AXIS_COLOR = "var(--color-neutral-400)";
 const AXIS_FONT_SIZE = 12;
 const GRID_DASH = "4 4";
 const TICK_LENGTH = 6;
-const MIN_AXIS_RANGE = 5;
 const GRID_STEP_COUNT = 4;
 const OVERLAP_THRESHOLD = 0.5;
 const EMPTY_AXIS_RANGE = { minY: 0, maxY: 10 };
 const RECENT_DAY_COUNT = 7;
 const MS_PER_DAY = 86_400_000;
+const AXIS_PADDING_RATIO = 0.15;
+const MIN_AXIS_PADDING = 0.1;
+const SMALL_VALUE_THRESHOLD = 1;
+const SMALL_VALUE_AXIS_RANGE = { minY: -2, maxY: 2 };
 
 function roundDownByStep(value: number, step: number) {
   return Math.floor(value / step) * step;
@@ -33,6 +36,25 @@ function roundDownByStep(value: number, step: number) {
 
 function roundUpByStep(value: number, step: number) {
   return Math.ceil(value / step) * step;
+}
+
+function getNiceStep(value: number) {
+  if (value <= 0) return 1;
+
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const normalized = value / magnitude;
+  const niceNormalized =
+    normalized <= 1
+      ? 1
+      : normalized <= 2
+        ? 2
+        : normalized <= 2.5
+          ? 2.5
+          : normalized <= 5
+            ? 5
+            : 10;
+
+  return niceNormalized * magnitude;
 }
 
 function getAxisRange(data: ProfitTrendPoint[]) {
@@ -48,13 +70,20 @@ function getAxisRange(data: ProfitTrendPoint[]) {
     return EMPTY_AXIS_RANGE;
   }
 
-  const rawRange = Math.max(maxValue - minValue, MIN_AXIS_RANGE);
-  const step = Math.max(1, Math.ceil(rawRange / GRID_STEP_COUNT));
-  const minY = roundDownByStep(minValue, step);
-  const maxY = roundUpByStep(maxValue, step);
+  if (minValue >= -SMALL_VALUE_THRESHOLD && maxValue <= SMALL_VALUE_THRESHOLD) {
+    return SMALL_VALUE_AXIS_RANGE;
+  }
+
+  const rawRange = maxValue - minValue;
+  const padding = Math.max(rawRange * AXIS_PADDING_RATIO, MIN_AXIS_PADDING);
+  const paddedMin = minValue < 0 ? minValue - padding : 0;
+  const paddedMax = maxValue > 0 ? maxValue + padding : 0;
+  const step = getNiceStep((paddedMax - paddedMin) / GRID_STEP_COUNT);
+  const minY = roundDownByStep(paddedMin, step);
+  const maxY = roundUpByStep(paddedMax, step);
 
   if (minY === maxY) {
-    return { minY: minY - MIN_AXIS_RANGE, maxY: maxY + MIN_AXIS_RANGE };
+    return { minY: minY - padding, maxY: maxY + padding };
   }
 
   return { minY, maxY };
@@ -70,7 +99,7 @@ function getGridValues(minY: number, maxY: number) {
 }
 
 function getLabel(value: number) {
-  return `${Number.isInteger(value) ? value : value.toFixed(1)}%`;
+  return `${Number(value.toFixed(2))}%`;
 }
 
 function formatXAxisLabel(value: string) {
@@ -80,7 +109,53 @@ function formatXAxisLabel(value: string) {
   return month && day ? `${Number(month)}/${Number(day)}` : value;
 }
 
-function getRecentDateLabels(now = new Date()) {
+function getDateParts(value: string, now = new Date()) {
+  const [, fullYear, fullMonth, fullDay] =
+    /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/.exec(value) ?? [];
+
+  if (fullYear && fullMonth && fullDay) {
+    return {
+      year: Number(fullYear),
+      month: Number(fullMonth),
+      day: Number(fullDay),
+    };
+  }
+
+  const [, shortMonth, shortDay] = /^(\d{1,2})\/(\d{1,2})$/.exec(value) ?? [];
+  if (!shortMonth || !shortDay) return null;
+
+  const currentYear = Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+    }).format(now),
+  );
+
+  return {
+    year: currentYear,
+    month: Number(shortMonth),
+    day: Number(shortDay),
+  };
+}
+
+function getForwardDateLabels(startDate: string) {
+  const dateParts = getDateParts(startDate);
+  if (!dateParts) return null;
+
+  const startTime = Date.UTC(
+    dateParts.year,
+    dateParts.month - 1,
+    dateParts.day,
+  );
+
+  return Array.from({ length: RECENT_DAY_COUNT }, (_, index) => {
+    const date = new Date(startTime + index * MS_PER_DAY);
+
+    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
+  });
+}
+
+function getForwardDateLabelsFromToday(now = new Date()) {
   const dateParts = new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Seoul",
     year: "numeric",
@@ -93,8 +168,7 @@ function getRecentDateLabels(now = new Date()) {
   const currentDate = Date.UTC(year, month - 1, day);
 
   return Array.from({ length: RECENT_DAY_COUNT }, (_, index) => {
-    const offset = RECENT_DAY_COUNT - 1 - index;
-    const date = new Date(currentDate - offset * MS_PER_DAY);
+    const date = new Date(currentDate + index * MS_PER_DAY);
 
     return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
   });
@@ -104,11 +178,16 @@ export default function ProfitRateGraph({
   data,
   isEmpty = false,
 }: ProfitRateGraphProps) {
-  const labels =
-    data.length > 0
-      ? data.map((point) => formatXAxisLabel(point.label))
-      : getRecentDateLabels();
-  const chartData = isEmpty ? [] : data;
+  const firstNonZeroIndex = data.findIndex((point) => point.value !== 0);
+  const hasProfitData = !isEmpty && firstNonZeroIndex >= 0;
+  const chartData = hasProfitData ? data.slice(firstNonZeroIndex) : [];
+  const forwardLabels =
+    firstNonZeroIndex > 0 && chartData.length > 0
+      ? getForwardDateLabels(chartData[0].label)
+      : null;
+  const labels = !hasProfitData
+    ? getForwardDateLabelsFromToday()
+    : (forwardLabels ?? data.map((point) => formatXAxisLabel(point.label)));
   const { minY, maxY } = getAxisRange(chartData);
   const yGridValues = getGridValues(minY, maxY);
   const canDrawDot = chartData.length >= 1;

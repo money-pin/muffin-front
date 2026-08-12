@@ -490,8 +490,6 @@ function InvestPage() {
       setIsConfirmSheetOpen(false);
       setIsCompleteModalOpen(true);
     } catch (error) {
-      console.error(isEditMode ? "투자 수정 실패:" : "투자 확정 실패:", error);
-
       const message = getErrorMessage(
         error,
         isEditMode
