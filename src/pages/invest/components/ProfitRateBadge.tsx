@@ -2,18 +2,21 @@ import Badge from "@/components/common/Badge";
 
 interface ProfitRateBadgeProps {
   rate: number;
+  profitAmount?: number;
   size?: "sm" | "md";
   className?: string;
 }
 
 export default function ProfitRateBadge({
   rate,
+  profitAmount,
   size = "sm",
   className = "",
 }: ProfitRateBadgeProps) {
   const sizeClass = size === "md" ? "h-6" : "h-[22px]";
+  const directionValue = profitAmount ?? rate;
 
-  if (rate === 0) {
+  if (directionValue === 0) {
     return (
       <Badge variant="gray" size="md" className={`${sizeClass} ${className}`}>
         0.0%
@@ -21,7 +24,7 @@ export default function ProfitRateBadge({
     );
   }
 
-  const isNegative = rate < 0;
+  const isNegative = directionValue < 0;
   const variant = isNegative ? "negative" : "positive";
   const icon = isNegative ? "▼" : "▲";
 

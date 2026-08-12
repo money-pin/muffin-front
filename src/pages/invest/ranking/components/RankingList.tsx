@@ -43,7 +43,11 @@ export default function RankingList({
               <p className={`text-body-14-bd ${profitColorClass}`}>
                 {formatSignedCurrency(item.weeklyProfit)}
               </p>
-              <ProfitRateBadge rate={item.weeklyProfitRate} size="md" />
+              <ProfitRateBadge
+                rate={item.weeklyProfitRate}
+                profitAmount={item.weeklyProfit}
+                size="md"
+              />
             </div>
           </button>
         );

@@ -12,12 +12,15 @@ interface TotalProfitCardProps {
   onClick?: () => void;
 }
 
-export default function TotalProfitCard({ data, onClick }: TotalProfitCardProps) {
+export default function TotalProfitCard({
+  data,
+  onClick,
+}: TotalProfitCardProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-0 p-5 text-left"
+      className="bg-neutral-0 flex w-full items-center justify-between rounded-2xl border border-neutral-100 p-5 text-left"
     >
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1">
@@ -39,7 +42,11 @@ export default function TotalProfitCard({ data, onClick }: TotalProfitCardProps)
           >
             {formatSignedCurrency(data.amount)}
           </span>
-          <ProfitRateBadge rate={data.rate} size="md" />
+          <ProfitRateBadge
+            rate={data.rate}
+            profitAmount={data.amount}
+            size="md"
+          />
         </div>
       </div>
 

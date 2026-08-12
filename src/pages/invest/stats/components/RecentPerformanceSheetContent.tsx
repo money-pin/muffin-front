@@ -76,7 +76,11 @@ export default function RecentPerformanceSheetContent({
                 >
                   {formatSignedCurrency(summary.profitAmount)}
                 </strong>
-                <ProfitRateBadge rate={summary.profitRate} size="md" />
+                <ProfitRateBadge
+                  rate={summary.profitRate}
+                  profitAmount={summary.profitAmount}
+                  size="md"
+                />
               </div>
             </div>
 
@@ -126,7 +130,11 @@ export default function RecentPerformanceSheetContent({
                     >
                       {formatSignedCurrency(sector.profitAmount)}
                     </strong>
-                    <ProfitRateBadge rate={sector.profitRate} size="md" />
+                    <ProfitRateBadge
+                      rate={sector.profitRate}
+                      profitAmount={sector.profitAmount}
+                      size="md"
+                    />
                   </div>
                   <span className="text-body-14-md text-neutral-600">
                     투자금: {formatCurrency(sector.investmentAmount)}

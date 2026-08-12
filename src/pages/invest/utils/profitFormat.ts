@@ -1,5 +1,9 @@
+export function formatNumber(value: number) {
+  return Math.abs(value).toLocaleString("ko-KR");
+}
+
 export function formatCurrency(value: number) {
-  return `${Math.abs(value).toLocaleString("ko-KR")}원`;
+  return `${formatNumber(value)}원`;
 }
 
 export function formatSignedCurrency(value: number) {

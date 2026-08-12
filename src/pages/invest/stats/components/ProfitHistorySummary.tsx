@@ -30,7 +30,7 @@ export default function ProfitHistorySummary({
   const showPeriodControls = period !== "all";
 
   return (
-    <section className="flex flex-col gap-5 bg-neutral-0 px-5 py-6">
+    <section className="bg-neutral-0 flex flex-col gap-5 px-5 py-6">
       <div className="flex items-center gap-2">
         {showPeriodControls && (
           <button
@@ -84,7 +84,11 @@ export default function ProfitHistorySummary({
             >
               {formatSignedCurrency(data.profitAmount)}
             </p>
-            <ProfitRateBadge rate={data.profitRate} size="md" />
+            <ProfitRateBadge
+              rate={data.profitRate}
+              profitAmount={data.profitAmount}
+              size="md"
+            />
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import clockIcon from "@/assets/icon-24px/clock.svg";
 import lockIcon from "@/assets/icon-24px/lock.svg";
 
 import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
+import { formatNumber } from "@/pages/invest/utils/profitFormat";
 
 interface TodayInvestItem {
   assetId: InvestAssetId;
@@ -20,10 +21,6 @@ interface InvestTodayStatusPageProps {
   isClosed: boolean;
   confirmDeadline?: string;
   nextInvestmentAvailableAt?: string;
-}
-
-function formatCurrency(value: number) {
-  return value.toLocaleString("ko-KR");
 }
 
 function getRemainingTimeText(deadline?: string) {
@@ -188,7 +185,7 @@ function InvestTodayStatusPage({
                           </div>
 
                           <strong className="shrink-0 text-right text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
-                            {formatCurrency(item.amount)}원
+                            {formatNumber(item.amount)}원
                           </strong>
                         </div>
 

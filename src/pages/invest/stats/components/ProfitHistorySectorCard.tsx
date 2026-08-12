@@ -14,7 +14,7 @@ export default function ProfitHistorySectorCard({
   sector,
 }: ProfitHistorySectorCardProps) {
   return (
-    <article className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-0 p-4">
+    <article className="bg-neutral-0 flex items-center gap-3 rounded-xl border border-neutral-100 p-4">
       <img
         src={sector.iconSrc}
         alt=""
@@ -24,7 +24,7 @@ export default function ProfitHistorySectorCard({
       />
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-        <h3 className="truncate text-body-16-bd-tighter text-neutral-900">
+        <h3 className="text-body-16-bd-tighter truncate text-neutral-900">
           {sector.name}
         </h3>
 
@@ -37,7 +37,10 @@ export default function ProfitHistorySectorCard({
             >
               {formatSignedCurrency(sector.profitAmount)}
             </p>
-            <ProfitRateBadge rate={sector.profitRate} />
+            <ProfitRateBadge
+              rate={sector.profitRate}
+              profitAmount={sector.profitAmount}
+            />
           </div>
           <p className="text-body-14-md text-neutral-600">
             총 투자금: {formatCurrency(sector.investmentAmount)}

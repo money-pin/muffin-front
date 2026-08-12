@@ -53,7 +53,11 @@ export default function RankingUserProfitSheetContent({
               >
                 {formatSignedCurrency(totalProfitAmount)}
               </strong>
-              <ProfitRateBadge rate={totalProfitRate} size="md" />
+              <ProfitRateBadge
+                rate={totalProfitRate}
+                profitAmount={totalProfitAmount}
+                size="md"
+              />
             </div>
           </div>
 
@@ -101,7 +105,11 @@ export default function RankingUserProfitSheetContent({
                   >
                     {formatSignedCurrency(sector.profitAmount)}
                   </strong>
-                  <ProfitRateBadge rate={sector.profitRate} size="md" />
+                  <ProfitRateBadge
+                    rate={sector.profitRate}
+                    profitAmount={sector.profitAmount}
+                    size="md"
+                  />
                 </div>
                 <span className="text-body-14-md text-neutral-600">
                   투자금: {formatCurrency(sector.investmentAmount)}

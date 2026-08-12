@@ -2,6 +2,7 @@
 import BottomSheet from "@/components/common/BottomSheet";
 
 import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
+import { formatNumber } from "@/pages/invest/utils/profitFormat";
 
 interface InvestConfirmItem {
   assetId: InvestAssetId;
@@ -19,10 +20,6 @@ interface InvestConfirmBottomSheetProps {
   onConfirm: () => void;
 }
 
-function formatCurrency(value: number) {
-  return value.toLocaleString("ko-KR");
-}
-
 function InvestConfirmBottomSheet({
   isOpen,
   items,
@@ -31,11 +28,7 @@ function InvestConfirmBottomSheet({
   onConfirm,
 }: InvestConfirmBottomSheetProps) {
   return (
-    <BottomSheet
-      isOpen={isOpen}
-      onClose={onClose}
-      ariaLabel="오늘의 투자 확정"
-    >
+    <BottomSheet isOpen={isOpen} onClose={onClose} ariaLabel="오늘의 투자 확정">
       <div className="max-h-[calc(100dvh-36px)] overflow-y-auto overscroll-contain px-5 py-8">
         <div className="flex flex-col gap-1">
           <h2 className="text-[length:var(--text-heading-18-bd)] leading-[var(--text-heading-18-bd--line-height)] font-[var(--text-heading-18-bd--font-weight)] tracking-[var(--text-heading-18-bd--letter-spacing)] text-[var(--color-neutral-900)]">
@@ -54,11 +47,7 @@ function InvestConfirmBottomSheet({
             return (
               <div key={item.assetId}>
                 <div className="flex h-10 w-full items-center">
-                  <img
-                    src={item.icon}
-                    alt=""
-                    className="h-10 w-10 shrink-0"
-                  />
+                  <img src={item.icon} alt="" className="h-10 w-10 shrink-0" />
 
                   <div className="ml-4 flex min-w-0 flex-1 items-baseline">
                     <span className="text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
@@ -71,7 +60,7 @@ function InvestConfirmBottomSheet({
                   </div>
 
                   <strong className="shrink-0 text-right text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] tracking-[var(--text-body-16-bd-tighter--letter-spacing)] text-[var(--color-neutral-900)]">
-                    {formatCurrency(item.amount)}원
+                    {formatNumber(item.amount)}원
                   </strong>
                 </div>
 
@@ -89,7 +78,7 @@ function InvestConfirmBottomSheet({
           </span>
 
           <strong className="text-[length:var(--text-heading-20-bd)] leading-[var(--text-heading-20-bd--line-height)] font-[var(--text-heading-20-bd--font-weight)] text-[var(--color-neutral-900)]">
-            {formatCurrency(totalAmount)}원
+            {formatNumber(totalAmount)}원
           </strong>
         </div>
 
