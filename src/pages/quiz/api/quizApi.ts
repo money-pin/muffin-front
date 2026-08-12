@@ -15,7 +15,7 @@ export function getTodayQuiz() {
 
 // 퀴즈 문항 답 제출 → 정답/해설/진행도 반환
 export function submitQuizAttempt(quizId: number, optionId: number) {
-  return apiRequest<QuizAttemptResult>(`/api/quizzes/${quizId}/attempt`, {
+  return apiRequest<QuizAttemptResult>(`/api/quizzes/${quizId}/attempts`, {
     method: "POST",
     body: { optionId },
     auth: true,

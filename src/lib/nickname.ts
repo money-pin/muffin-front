@@ -1,6 +1,6 @@
 // 닉네임 형식 규칙 (온보딩·수정 공용)
 // - 2~6자, 한글/영문/숫자/공백만 허용 (특수문자·이모지 불가)
-// - 중복 검사는 별도(GET /api/mypage/nickname/check)로 처리한다.
+// - 중복 검사는 별도(GET /api/mypage/nicknames/availability)로 처리한다.
 export const NICKNAME_MIN_LENGTH = 2;
 export const NICKNAME_MAX_LENGTH = 6;
 

@@ -134,7 +134,7 @@ export async function getNewsDetail(
 // 뉴스 열람 처리. 상세 조회 성공 후 화면 진입당 1회 호출. 조회수를 1 증가시키고
 // 갱신된 viewCount를 반환한다. 실패해도 사용자에게 노출하지 않는 정책.
 export async function readNews(newsId: number): Promise<{ viewCount: number }> {
-  return apiRequest<{ viewCount: number }>(`/api/news/${newsId}/read`, {
+  return apiRequest<{ viewCount: number }>(`/api/news/${newsId}/views`, {
     method: "POST",
     body: {},
     auth: true,

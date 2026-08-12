@@ -81,8 +81,8 @@ export async function saveOnboardingCharacter(body: {
 
 // 온보딩 완료 (초기 투자금 지급). 멱등 처리
 export async function completeOnboarding(): Promise<{ totalAsset: number }> {
-  return apiRequest<{ totalAsset: number }>("/api/onboarding/complete", {
-    method: "POST",
+  return apiRequest<{ totalAsset: number }>("/api/onboarding/completion", {
+    method: "PUT",
     body: {},
     auth: true,
   });

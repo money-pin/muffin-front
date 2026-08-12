@@ -24,7 +24,7 @@ type NicknameStatus =
   "idle" | "invalid" | "checking" | "taken" | "available" | "error";
 
 // Figma 닉네임 변경 모달: 입력 + 중복/사용 가능 헬퍼 텍스트 + 변경 버튼
-// 중복 검사는 GET /api/mypage/nickname/check (입력 디바운스 후 조회)
+// 중복 검사는 GET /api/mypage/nicknames/availability (입력 디바운스 후 조회)
 export default function NicknameModal({
   isOpen,
   currentNickname,
