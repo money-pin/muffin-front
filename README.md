@@ -8,7 +8,10 @@
 
 사용자는 뉴스를 읽고, 퀴즈를 풀고, 모의투자를 진행하며 경제 개념을 자연스럽게 학습할 수 있습니다.
 
-muffin.ai.kr
+### 🔗 배포 링크
+
+- **서비스**: [https://muffin.ai.kr](https://muffin.ai.kr)
+- **Vercel**: [https://muffin-front.vercel.app](https://muffin-front.vercel.app)
 
 <br />
 
@@ -160,7 +163,21 @@ cd muffin-front
 pnpm install
 ```
 
-### 4. 개발 서버 실행
+### 4. 환경 변수 설정
+
+루트에 `.env` 파일을 만들고 아래 값을 채웁니다. (`.env.example` 참고)
+
+```bash
+# API 서버 base URL (끝 슬래시 없이)
+VITE_API_BASE_URL=https://api.muffin.ai.kr
+
+# Google OAuth Client ID (Google Cloud Console > 사용자 인증 정보)
+VITE_GOOGLE_CLIENT_ID=your-google-client-id
+```
+
+> `.env`는 커밋하지 않습니다(`.gitignore` 처리). 값은 팀에서 공유받아 설정하세요.
+
+### 5. 개발 서버 실행
 
 ```bash
 pnpm dev
