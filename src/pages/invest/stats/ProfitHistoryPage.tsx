@@ -15,7 +15,10 @@ import type {
   ProfitHistoryPeriod,
   ProfitHistorySortKey,
 } from "@/pages/invest/stats/types";
-import { shiftProfitHistoryDate } from "@/pages/invest/stats/utils/profitHistoryDate";
+import {
+  getPreviousKstDate,
+  shiftProfitHistoryDate,
+} from "@/pages/invest/stats/utils/profitHistoryDate";
 
 type DatePeriod = Exclude<ProfitHistoryPeriod, "all">;
 
@@ -33,7 +36,7 @@ function isDatePeriod(period: ProfitHistoryPeriod): period is DatePeriod {
 
 export default function ProfitHistoryPage() {
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
-  const [period, setPeriod] = useState<ProfitHistoryPeriod>("month");
+  const [period, setPeriod] = useState<ProfitHistoryPeriod>("all");
   const [sortKey, setSortKey] = useState<ProfitHistorySortKey>("RATE_DESC");
   const [selectedDate, setSelectedDate] = useState<string>();
   const apiPeriod = UI_PERIOD_TO_API_PERIOD[period];
@@ -58,7 +61,7 @@ export default function ProfitHistoryPage() {
 
   const changePeriod = (nextPeriod: ProfitHistoryPeriod) => {
     setPeriod(nextPeriod);
-    setSelectedDate(undefined);
+    setSelectedDate(nextPeriod === "day" ? getPreviousKstDate() : undefined);
   };
 
   const changeSort = (nextSortKey: ProfitHistorySortKey) => {
