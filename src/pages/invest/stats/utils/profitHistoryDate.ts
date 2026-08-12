@@ -2,6 +2,7 @@ import type { ProfitHistoryPeriod } from "@/pages/invest/stats/types";
 
 type DatePeriod = Exclude<ProfitHistoryPeriod, "all">;
 const MS_PER_DAY = 86_400_000;
+const KST_OFFSET_MS = 9 * 60 * 60 * 1_000;
 
 function assertNever(value: never): never {
   throw new Error(`처리하지 않은 수익 내역 기간입니다: ${String(value)}`);
@@ -19,6 +20,12 @@ function missingDate(period: DatePeriod): never {
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
+}
+
+export function getPreviousKstDate(now = new Date()) {
+  const previousKstDate = new Date(now.getTime() + KST_OFFSET_MS - MS_PER_DAY);
+
+  return previousKstDate.toISOString().slice(0, 10);
 }
 
 function parseIsoWeek(value: string) {
