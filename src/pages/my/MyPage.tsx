@@ -54,6 +54,8 @@ function MyPage() {
           title: "닉네임 변경에 실패했어요.",
           description: "잠시 후 다시 시도해주세요.",
           primaryLabel: "확인",
+          // 탈퇴 실패와 동일하게 단순 안내 정책으로 통일 (확인 단일 버튼)
+          secondaryLabel: undefined,
         }),
       );
     },

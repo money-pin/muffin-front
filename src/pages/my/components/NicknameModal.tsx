@@ -20,7 +20,8 @@ interface NicknameModalProps {
   onChange: (nickname: string) => void;
 }
 
-type NicknameStatus = "idle" | "invalid" | "checking" | "taken" | "available";
+type NicknameStatus =
+  "idle" | "invalid" | "checking" | "taken" | "available" | "error";
 
 // Figma 닉네임 변경 모달: 입력 + 중복/사용 가능 헬퍼 텍스트 + 변경 버튼
 // 중복 검사는 GET /api/mypage/nickname/check (입력 디바운스 후 조회)
@@ -37,6 +38,10 @@ export default function NicknameModal({
     nickname: string;
     available: boolean;
   } | null>(null);
+  // 중복 확인 요청이 실패한 닉네임. 이 값이 현재 입력과 같으면 "확인 실패" 안내를 띄운다.
+  const [checkFailedNickname, setCheckFailedNickname] = useState<string | null>(
+    null,
+  );
   const trimmed = value.trim();
   const formatStatus = getNicknameFormatStatus(value);
   // 형식(최대 6자·특수문자 제외)이 유효하고, 현재 닉네임과 다를 때만 중복 조회한다.
@@ -49,10 +54,14 @@ export default function NicknameModal({
     const timer = window.setTimeout(() => {
       checkNickname(trimmed)
         .then((res) => {
-          if (active)
-            setChecked({ nickname: trimmed, available: res.available });
+          if (!active) return;
+          setChecked({ nickname: trimmed, available: res.available });
+          setCheckFailedNickname((prev) => (prev === trimmed ? null : prev));
         })
-        .catch(() => {});
+        .catch(() => {
+          // 요청 실패는 "확인 중"에 머무르지 않도록 별도 상태로 표시한다.
+          if (active) setCheckFailedNickname(trimmed);
+        });
     }, 400);
     return () => {
       active = false;
@@ -67,11 +76,13 @@ export default function NicknameModal({
       ? "invalid"
       : !isCheckable
         ? "idle"
-        : checked?.nickname === trimmed
-          ? checked.available
-            ? "available"
-            : "taken"
-          : "checking";
+        : checkFailedNickname === trimmed
+          ? "error"
+          : checked?.nickname === trimmed
+            ? checked.available
+              ? "available"
+              : "taken"
+            : "checking";
 
   const helperByStatus: Record<
     NicknameStatus,
@@ -99,6 +110,11 @@ export default function NicknameModal({
       text: "사용 가능한 닉네임이에요.",
       className: "text-green",
       icon: "success",
+    },
+    error: {
+      text: "닉네임 확인에 실패했어요. 다시 입력해주세요.",
+      className: "text-positive",
+      icon: "error",
     },
   };
   const helper = helperByStatus[status];
@@ -131,7 +147,7 @@ export default function NicknameModal({
 
         <div
           className={`mt-5 flex h-[52px] items-center gap-2 rounded-[12px] border px-4 ${
-            status === "taken" || status === "invalid"
+            status === "taken" || status === "invalid" || status === "error"
               ? "border-positive"
               : "border-neutral-100"
           }`}

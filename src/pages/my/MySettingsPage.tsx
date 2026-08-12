@@ -126,6 +126,8 @@ function MySettingsPage() {
           title: "회원 탈퇴에 실패했어요.",
           description: "잠시 후 다시 시도해주세요.",
           primaryLabel: "확인",
+          // 실패 시 즉시 재시도가 아니라 안내만 하고 닫는다(재탈퇴는 사용자가 다시 진행).
+          secondaryLabel: undefined,
         }),
       );
       return;
