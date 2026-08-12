@@ -3,9 +3,8 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
-import { getMyHome } from "@/lib/mypageApi";
 import { characterTypeToVariant, type CharacterVariant } from "@/lib/character";
-import { mypageQueryKeys } from "@/lib/mypageQueries";
+import { mypageQueryKeys, useMyHomeQuery } from "@/lib/mypageQueries";
 import QuizIntro from "@/pages/quiz/components/QuizIntro";
 import QuizQuestionView from "@/pages/quiz/components/QuizQuestionView";
 import QuizFeedbackSheet from "@/pages/quiz/components/QuizFeedbackSheet";
@@ -48,8 +47,6 @@ function QuizPage() {
   const queryClient = useQueryClient();
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
 
-  const [nickname, setNickname] = useState("");
-  const [character, setCharacter] = useState<CharacterVariant>("plain");
   const [phase, setPhase] = useState<QuizPhase>("intro");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -57,6 +54,14 @@ function QuizPage() {
 
   const todayQuizQuery = useTodayQuizQuery();
   const submitAttemptMutation = useSubmitQuizAttemptMutation();
+
+  // 닉네임·캐릭터는 홈·마이와 동일한 공유 캐시(useMyHomeQuery)에서 렌더 중 직접 파생한다.
+  // (기존엔 로컬 state + getMyHome 직접 호출이라 재진입 시 plain/빈값 → 실제값 플래시가 있었음)
+  const myHomeQuery = useMyHomeQuery();
+  const nickname = myHomeQuery.data?.nickname ?? "";
+  const character: CharacterVariant = myHomeQuery.data?.character
+    ? characterTypeToVariant(myHomeQuery.data.character.characterType)
+    : "plain";
 
   const questions = todayQuizQuery.data?.questions ?? [];
   const alreadyFinished = todayQuizQuery.data?.sessionStatus === "FINISHED";
@@ -72,26 +77,6 @@ function QuizPage() {
     });
     return resetTopBar;
   }, [setTopBar, resetTopBar, navigate]);
-
-  // 인트로 문구에 쓸 닉네임 (홈·마이와 동일하게 서버 조회)
-  useEffect(() => {
-    let active = true;
-    getMyHome()
-      .then((home) => {
-        if (!active) return;
-        setNickname(home.nickname);
-        // 캐릭터도 서버값 사용 (홈·마이·퀴즈 일치)
-        setCharacter(
-          home.character
-            ? characterTypeToVariant(home.character.characterType)
-            : "plain",
-        );
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const goHome = () => navigate("/home");
 
@@ -112,7 +97,7 @@ function QuizPage() {
     setPhase("question");
   };
 
-  if (todayQuizQuery.isLoading) {
+  if (todayQuizQuery.isLoading || myHomeQuery.isLoading) {
     return <QuizStateMessage>퀴즈를 불러오는 중입니다.</QuizStateMessage>;
   }
   if (todayQuizQuery.isError) {
