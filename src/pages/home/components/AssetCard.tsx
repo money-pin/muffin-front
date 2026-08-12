@@ -102,7 +102,10 @@ export default function AssetCard({
                 )}`}
               >
                 <span className="text-body-16-bd-tighter">{changeText}</span>
-                <ProfitRateBadge rate={profitRate} />
+                <ProfitRateBadge
+                  rate={profitRate}
+                  profitAmount={profitAmount}
+                />
               </div>
             </div>
           )}

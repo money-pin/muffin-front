@@ -81,7 +81,11 @@ export default function TopProfitSectorsCard({
                   >
                     {formatSignedCurrency(sector.profitAmount)}
                   </span>
-                  <ProfitRateBadge rate={sector.profitRate} size="md" />
+                  <ProfitRateBadge
+                    rate={sector.profitRate}
+                    profitAmount={sector.profitAmount}
+                    size="md"
+                  />
                 </div>
               )}
             </div>

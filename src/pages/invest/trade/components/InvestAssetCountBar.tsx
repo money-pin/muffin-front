@@ -3,6 +3,8 @@ import minusIcon from "@/assets/icon-24px/minus.svg";
 import plusIcon from "@/assets/icon-24px/plus.svg";
 import plusDisabledIcon from "@/assets/icon-24px/plus-disabled.svg";
 
+import { formatNumber } from "@/pages/invest/utils/profitFormat";
+
 interface InvestAssetCountBarProps {
   name: string;
   totalAmount: number;
@@ -11,10 +13,6 @@ interface InvestAssetCountBarProps {
   canIncrease: boolean;
   onDecrease: () => void;
   onIncrease: () => void;
-}
-
-function formatCurrency(value: number) {
-  return value.toLocaleString("ko-KR");
 }
 
 function InvestAssetCountBar({
@@ -34,7 +32,7 @@ function InvestAssetCountBar({
         </strong>
 
         <span className="text-[length:var(--text-body-14-md)] leading-[var(--text-body-14-md--line-height)] font-[var(--text-body-14-md--font-weight)] text-[var(--color-neutral-700)]">
-          ({formatCurrency(totalAmount)}원)
+          ({formatNumber(totalAmount)}원)
         </span>
       </div>
 

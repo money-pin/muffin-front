@@ -55,7 +55,7 @@ export default function InvestAssetSummary({
               {formatSignedCurrency(profitAmount)}
             </p>
 
-            <ProfitRateBadge rate={profitRate} />
+            <ProfitRateBadge rate={profitRate} profitAmount={profitAmount} />
           </div>
         </div>
       )}

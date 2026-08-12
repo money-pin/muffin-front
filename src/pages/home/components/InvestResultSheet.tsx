@@ -77,6 +77,7 @@ export default function InvestResultSheet({
               {/* 배지 색은 수익금 부호 기준(빨강/파랑) */}
               <PercentageBadge
                 rate={Math.abs(result.profitRate) * (up ? 1 : -1)}
+                profitAmount={result.profit}
               />
             </div>
           </div>

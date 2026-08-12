@@ -1,6 +1,8 @@
 //하단 액션 버튼
 import refreshIcon from "@/assets/icon-24px/refresh.svg";
 
+import { formatNumber } from "@/pages/invest/utils/profitFormat";
+
 interface InvestBottomActionProps {
   selectedTotalAmount: number;
   variant?: "purchase" | "editCancel" | "editSubmit";
@@ -9,10 +11,6 @@ interface InvestBottomActionProps {
   onPurchase?: () => void;
   onEditCancel?: () => void;
   onEditSubmit?: () => void;
-}
-
-function formatCurrency(value: number) {
-  return value.toLocaleString("ko-KR");
 }
 
 function InvestBottomAction({
@@ -32,7 +30,7 @@ function InvestBottomAction({
       : variant === "editSubmit"
         ? "수정하기"
         : isActive
-          ? `구매하기 (${formatCurrency(selectedTotalAmount)}원)`
+          ? `구매하기 (${formatNumber(selectedTotalAmount)}원)`
           : "구매하기";
 
   const handleButtonClick = () => {
