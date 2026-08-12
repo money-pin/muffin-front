@@ -11,7 +11,6 @@ import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodaySt
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
 
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
-import { MOCK_INVEST_MARKET_DATA } from "@/pages/invest/trade/mocks/mockInvestMarketData";
 import {
   investmentQueryKeys,
   useConfirmInvestmentMutation,
@@ -262,10 +261,9 @@ function InvestPage() {
 
   const serverTotalBudget =
     typeof responseRemainingAmount === "number" &&
-    typeof responseTotalAmount === "number" &&
-    responseRemainingAmount + responseTotalAmount > 0
+    typeof responseTotalAmount === "number"
       ? responseRemainingAmount + responseTotalAmount
-      : MOCK_INVEST_MARKET_DATA.totalBudget;
+      : 0;
 
   const remainingBudget = Math.max(0, serverTotalBudget - totalInvestAmount);
 
