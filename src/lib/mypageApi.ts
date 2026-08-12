@@ -195,12 +195,12 @@ export async function updateNotificationSettings(
   return result.notifications;
 }
 
-// ── 닉네임 중복 확인 (GET /api/mypage/nickname/check) ──
+// ── 닉네임 사용 가능 여부 확인 (GET /api/mypage/nicknames/availability) ──
 export function checkNickname(
   nickname: string,
 ): Promise<{ available: boolean }> {
   return apiRequest<{ available: boolean }>(
-    `/api/mypage/nickname/check${toQuery({ nickname })}`,
+    `/api/mypage/nicknames/availability${toQuery({ nickname })}`,
     { auth: true },
   );
 }

@@ -49,10 +49,9 @@ export async function getStatsHistory({
 }
 
 export async function getStatsRecentDetail() {
-  const response = await apiRequest<StatsRecentDetailApi>(
-    "/api/stats/recent-detail",
-    { auth: true },
-  );
+  const response = await apiRequest<StatsRecentDetailApi>("/api/stats/recent", {
+    auth: true,
+  });
 
   return mapStatsRecentDetailToRecentPerformanceDetailData(response);
 }

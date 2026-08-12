@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/api";
 // (NO_INVESTMENT: 투자/정산 내역 없음, SETTLEMENT_PENDING: 정산 진행 중)
 export type SettlementNoResultReason = "NO_INVESTMENT" | "SETTLEMENT_PENDING";
 
-// GET /api/investments/settlement/result 원본 응답
+// GET /api/investments/settlements/latest 원본 응답
 export interface SettlementResultApi {
   investDate: string | null;
   totalProfitLoss: number;
@@ -31,7 +31,7 @@ export interface SettlementResultData {
 // 정산 완료(SETTLED)면 결과를 반환하고, 결과가 없으면 서버 사유를 함께 보존한다.
 export async function getSettlementResult(): Promise<SettlementResultData> {
   const response = await apiRequest<SettlementResultApi>(
-    "/api/investments/settlement/result",
+    "/api/investments/settlements/latest",
     { auth: true },
   );
 
