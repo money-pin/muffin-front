@@ -28,7 +28,7 @@ function QuizStateMessage({
 }) {
   return (
     <div className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center gap-4 px-5">
-      <p className="text-body-14-md text-center text-neutral-500">{children}</p>
+      <p className="text-body-14-md text-center text-neutral-400">{children}</p>
       {onRetry && (
         <button
           type="button"
