@@ -1,4 +1,4 @@
-import bookmarkIcon from "@/assets/icon-24px/bookmark-line-gray2.svg";
+import bookmarkIcon from "@/assets/icon-20px/bookmark-line-gray2.svg";
 import wordIcon from "@/assets/icon-20px/word.svg";
 import brainIcon from "@/assets/icon-20px/brain.svg";
 

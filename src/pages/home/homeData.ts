@@ -1,6 +1,6 @@
 interface GetHomeGreetingMessageParams {
   hasInvestmentHistory: boolean;
-  cumulativeProfitRate: number;
+  dailyChangeAmount: number;
   isSettlementPending: boolean;
 }
 
@@ -57,12 +57,12 @@ export const HOME_GREETING_MESSAGES = {
 
 export function getHomeGreetingMessage({
   hasInvestmentHistory,
-  cumulativeProfitRate,
+  dailyChangeAmount,
   isSettlementPending,
 }: GetHomeGreetingMessageParams) {
   if (isSettlementPending) return "다음 투자도 기대해봐요!";
   if (!hasInvestmentHistory) return "오늘의 투자를 시작해볼까요?";
-  if (cumulativeProfitRate > 0) return "투자 성과가 아주 좋아요!";
-  if (cumulativeProfitRate < 0) return "괜찮아요, 다음 기회를 노려봐요..";
+  if (dailyChangeAmount > 0) return "투자 성과가 아주 좋아요!";
+  if (dailyChangeAmount < 0) return "괜찮아요, 다음 기회를 노려봐요..";
   return "꾸준히 잘하고 있어요!";
 }

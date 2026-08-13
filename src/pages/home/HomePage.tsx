@@ -53,11 +53,11 @@ function HomePage() {
   const todayNewsList = todayNewsQuery.data?.items ?? [];
   const topSectors = statsSummaryQuery.data?.topSectors ?? [];
   const settlementResult = settlementResultQuery.data?.result ?? null;
+  const investmentAsset = investmentAssetQuery.data;
   const greetingMessage = getHomeGreetingMessage({
     hasInvestmentHistory: Boolean(statsSummaryQuery.data?.investDate),
-    cumulativeProfitRate: statsSummaryQuery.data?.cumulativeProfit.rate ?? 0,
-    isSettlementPending:
-      settlementResultQuery.data?.reason === "SETTLEMENT_PENDING",
+    dailyChangeAmount: investmentAsset?.dailyChangeAmount ?? 0,
+    isSettlementPending: Boolean(investmentAsset?.settlementPending),
   });
 
   const [investResultOpen, setInvestResultOpen] = useState(false);
