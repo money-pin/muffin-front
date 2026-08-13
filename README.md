@@ -4,7 +4,6 @@
 
 ## 1. 프로젝트 소개
 
-<img width="1310" height="741" alt="머핀" src="https://github.com/user-attachments/assets/915da0c0-1933-4198-b200-80829ac4f080" />
 
 **Muffin**은 경제·금융 뉴스를 쉽고 재미있게 학습할 수 있도록 돕는 모바일 웹앱입니다.
 
