@@ -118,7 +118,7 @@ function QuizPage() {
   if (questions.length === 0 && phase !== "result") {
     return (
       <QuizStateMessage>
-        오늘의 퀴즈가 아직 준비 중이에요. 잠시 후 다시 시도해주세요.
+        오늘의 퀴즈를 준비하고 있어요. 오전 10시부터 풀 수 있어요.
       </QuizStateMessage>
     );
   }
