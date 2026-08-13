@@ -20,12 +20,12 @@
 
 ## 2. 팀원 및 역할
 
-| 이름   | 역할     | 담당 업무                              | GitHub                                   |
-| ------ | -------- | -------------------------------------- | ---------------------------------------- |
-| 황윤재 | Frontend | 홈, 인증, 온보딩, 퀴즈 화면 구현       | [@D5-wq](https://github.com/D5-wq)       |
-| 유아영 | Frontend | 모의투자 화면 및 투자 플로우 구현      | [@ay-yoo](https://github.com/ay-yoo)     |
-| 한서경 | Frontend | 수익 통계, 랭킹 화면 구현              | [@seokyun9](https://github.com/seokyun9) |
-| 정해찬 | Frontend | 뉴스, 뉴스 상세, 학습 저장소 화면 구현 | [@hchnnn](https://github.com/hchnnn)     |
+|                                                        머핀                                                        | 이름   | 역할     | 담당 업무                              | GitHub                                   |
+| :----------------------------------------------------------------------------------------------------------------: | ------ | -------- | -------------------------------------- | ---------------------------------------- |
+|      <img src="src/assets/avatars/muffin-plain.png" width="48" alt="플레인 머핀" />       | 황윤재 | Frontend | 홈, 인증, 온보딩, 퀴즈 화면 구현       | [@D5-wq](https://github.com/D5-wq)       |
+|     <img src="src/assets/avatars/muffin-butter.png" width="48" alt="버터빛 머핀" />       | 유아영 | Frontend | 모의투자 화면 및 투자 플로우 구현      | [@ay-yoo](https://github.com/ay-yoo)     |
+|   <img src="src/assets/avatars/muffin-sprinkle.png" width="48" alt="스프링클 머핀" />     | 한서경 | Frontend | 수익 통계, 랭킹 화면 구현              | [@seokyun9](https://github.com/seokyun9) |
+|      <img src="src/assets/avatars/muffin-cream.png" width="48" alt="생크림 머핀" />       | 정해찬 | Frontend | 뉴스, 뉴스 상세, 학습 저장소 화면 구현 | [@hchnnn](https://github.com/hchnnn)     |
 
 <br />
 
