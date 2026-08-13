@@ -28,7 +28,9 @@ function QuizStateMessage({
 }) {
   return (
     <div className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center gap-4 px-5">
-      <p className="text-body-14-md text-center text-neutral-400">{children}</p>
+      <p className="text-body-14-md text-center whitespace-pre-line text-neutral-400">
+        {children}
+      </p>
       {onRetry && (
         <button
           type="button"
@@ -118,7 +120,7 @@ function QuizPage() {
   if (questions.length === 0 && phase !== "result") {
     return (
       <QuizStateMessage>
-        오늘의 퀴즈가 아직 준비 중이에요. 잠시 후 다시 시도해주세요.
+        {"오늘의 퀴즈를 준비하고 있어요.\n오전 10시부터 풀 수 있어요."}
       </QuizStateMessage>
     );
   }

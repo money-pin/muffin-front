@@ -9,7 +9,10 @@ import InvestCompleteModal from "@/pages/invest/trade/components/InvestCompleteM
 import InvestConfirmBottomSheet from "@/pages/invest/trade/components/InvestConfirmBottomSheet";
 import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodayStatusPage";
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
+import ErrorModal from "@/components/common/ErrorModal";
 
+import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
+import { useApiErrorModal } from "@/lib/useApiErrorModal";
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
 import {
   investmentQueryKeys,
@@ -95,6 +98,36 @@ function InvestPage() {
     todayInvestmentQuery.error,
     "오늘 투자 현황을 불러오지 못했어요.",
   );
+
+  // 오늘 투자 현황·섹터 목록 조회 실패 시 공용 에러 모달(확인/다시 시도)로 안내한다.
+  // (랭킹·통계 화면과 동일한 useApiErrorModal + ErrorModal 패턴)
+  const {
+    error: apiErrorState,
+    showError: showApiError,
+    closeError: closeApiError,
+    handlePrimaryAction: handleApiErrorAction,
+  } = useApiErrorModal({
+    onRetry: () => {
+      void todayInvestmentQuery.refetch();
+      void investmentSectorsQuery.refetch();
+    },
+  });
+
+  useEffect(() => {
+    if (todayInvestmentQuery.isError) {
+      queueMicrotask(() => showApiError(todayInvestmentQuery.error));
+      return;
+    }
+    if (investmentSectorsQuery.isError) {
+      queueMicrotask(() => showApiError(investmentSectorsQuery.error));
+    }
+  }, [
+    todayInvestmentQuery.isError,
+    todayInvestmentQuery.error,
+    investmentSectorsQuery.isError,
+    investmentSectorsQuery.error,
+    showApiError,
+  ]);
 
   const [now, setNow] = useState(() => new Date());
   const [isEditMode, setIsEditMode] = useState(false);
@@ -557,11 +590,17 @@ function InvestPage() {
 
   if (todayInvestmentQuery.isError && !todayInvestmentData) {
     return (
-      <div className="-mb-[80px] flex flex-1 items-center justify-center bg-[var(--color-neutral-50)] px-5 text-center">
-        <p className="text-[length:var(--text-body-14-md-tighter)] text-[var(--color-primary)]">
-          {todayInvestmentErrorMessage}
-        </p>
-      </div>
+      <>
+        <div className="-mb-[80px] flex flex-1 bg-[var(--color-neutral-50)] px-5" />
+        <ErrorModal
+          isOpen={!!apiErrorState}
+          info={apiErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
+          onPrimaryAction={handleApiErrorAction}
+          onSecondaryAction={closeApiError}
+          onClose={closeApiError}
+          isLoading={todayInvestmentQuery.isFetching}
+        />
+      </>
     );
   }
 
@@ -576,6 +615,22 @@ function InvestPage() {
           투자 항목을 불러오는 중이에요.
         </p>
       </div>
+    );
+  }
+
+  if (screenMode === "trade" && investmentSectorsQuery.isError && !sectorData) {
+    return (
+      <>
+        <div className="-mb-[80px] flex flex-1 bg-[var(--color-neutral-50)] px-5" />
+        <ErrorModal
+          isOpen={!!apiErrorState}
+          info={apiErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
+          onPrimaryAction={handleApiErrorAction}
+          onSecondaryAction={closeApiError}
+          onClose={closeApiError}
+          isLoading={investmentSectorsQuery.isFetching}
+        />
+      </>
     );
   }
 
