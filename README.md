@@ -128,10 +128,10 @@ docs: README 작성
 PR 제목 예시:
 
 ```txt
-[feat] 로그인 페이지 구현
-[fix] 하단 탭 아이콘 오류 수정
-[chore] 개발 환경 세팅
-[docs] README 작성
+feat: 로그인 페이지 구현
+fix: 하단 탭 아이콘 오류 수정
+chore: 모바일 레이아웃 및 라우팅 구조 세팅
+docs: README 작성
 ```
 
 관련 이슈 작성 예시:
