@@ -548,7 +548,7 @@ function InvestPage() {
   if (todayInvestmentQuery.isPending && !todayInvestmentData) {
     return (
       <div className="-mb-[80px] flex flex-1 items-center justify-center bg-[var(--color-neutral-50)] px-5">
-        <p className="text-[length:var(--text-body-14-md-tighter)] text-[var(--color-neutral-600)]">
+        <p className="text-body-14-md text-neutral-400">
           오늘 투자 현황을 불러오는 중이에요.
         </p>
       </div>
@@ -572,7 +572,7 @@ function InvestPage() {
   ) {
     return (
       <div className="-mb-[80px] flex flex-1 items-center justify-center bg-[var(--color-neutral-50)] px-5">
-        <p className="text-[length:var(--text-body-14-md-tighter)] text-[var(--color-neutral-600)]">
+        <p className="text-body-14-md text-neutral-400">
           투자 항목을 불러오는 중이에요.
         </p>
       </div>
