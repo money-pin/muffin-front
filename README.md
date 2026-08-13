@@ -4,6 +4,7 @@
 
 ## 1. 프로젝트 소개
 
+<img width="1280" height="800" alt="55_머핀_서비스 미리보기 이미지" src="https://github.com/user-attachments/assets/e5800e76-9cc8-4e23-9f98-eef9bca33c6f" />
 
 **Muffin**은 경제·금융 뉴스를 쉽고 재미있게 학습할 수 있도록 돕는 모바일 웹앱입니다.
 
@@ -12,7 +13,6 @@
 ### 🔗 배포 링크
 
 - **서비스**: [https://muffin.ai.kr](https://muffin.ai.kr)
-- **Vercel**: [https://muffin-front.vercel.app](https://muffin-front.vercel.app)
 
 <br />
 
