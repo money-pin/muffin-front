@@ -11,8 +11,7 @@ export interface PrivacySection {
 export const PRIVACY_POLICY_LEAD =
   '머핀(이하 "서비스")은 이용자의 개인정보를 중요하게 생각하며, 「개인정보 보호법」 등 관련 법령을 준수하여 개인정보를 안전하게 처리합니다.';
 
-// 시행일자는 디자인상 미정(placeholder)
-export const PRIVACY_POLICY_EFFECTIVE_DATE = "시행일자: 2026년 O월 O일";
+export const PRIVACY_POLICY_EFFECTIVE_DATE = "시행일자: 2026년 8월 21일";
 
 export const PRIVACY_POLICY_SECTIONS: PrivacySection[] = [
   {
