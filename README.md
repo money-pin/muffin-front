@@ -1,5 +1,13 @@
 # 🧁 Muffin Front
 
+<p align="center">
+  <img src="https://img.shields.io/badge/UMC%2010기%20데모데이-🏆%20대상-FFD700?style=for-the-badge&labelColor=6C4A2E" alt="UMC 10기 데모데이 대상" />
+</p>
+
+> 🏆 **UMC 10기 데모데이 대상 수상**  ·  BEXCO, 2026
+
+<img width="5712" height="4284" alt="머핀대상 축하해요" src="https://github.com/user-attachments/assets/0394c5d9-3a6d-4d3e-bdf7-3a12ef681659" />
+
 ---
 
 ## 1. 프로젝트 소개
