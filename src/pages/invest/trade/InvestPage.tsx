@@ -421,21 +421,37 @@ function InvestPage() {
     if (!sector) return;
 
     setConfirmInvestmentErrorMessage("");
+
+    const currentQuantity = assetQuantities[assetId] ?? 0;
+
+    // 이미 선택된(포커스된) 항목을 다시 누르면 선택 해제 (토글 off)
+    if (selectedAssetId === assetId) {
+      setSelectedAssetId(null);
+      setAssetQuantities((prev) => {
+        const next = { ...prev };
+        delete next[assetId];
+
+        return next;
+      });
+      return;
+    }
+
+    // 수량이 있는 다른 항목을 누르면 포커스만 이동 (수량은 +/- 버튼으로만 조절)
+    if (currentQuantity > 0) {
+      setSelectedAssetId(assetId);
+      return;
+    }
+
+    // 새 항목 선택 (토글 on): 예산 내에서만 수량 1로 설정
+    if (totalInvestAmount + unitAmount > serverTotalBudget) {
+      return;
+    }
+
     setSelectedAssetId(assetId);
-
-    setAssetQuantities((prev) => {
-      const currentQuantity = prev[assetId] ?? 0;
-      const currentTotalAmount = getTotalInvestAmount(prev, unitAmount);
-
-      if (currentTotalAmount + unitAmount > serverTotalBudget) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        [assetId]: currentQuantity + 1,
-      };
-    });
+    setAssetQuantities((prev) => ({
+      ...prev,
+      [assetId]: 1,
+    }));
   };
 
   const handleDecrease = () => {
