@@ -9,6 +9,8 @@ import RedirectIfAuth from "@/routes/RedirectIfAuth";
 import SplashPage from "@/pages/auth/SplashPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
+import FindAccountPage from "@/pages/auth/FindAccountPage";
+import FindPasswordPage from "@/pages/auth/FindPasswordPage";
 import OnboardingPage from "@/pages/onboarding/OnboardingPage";
 import HomePage from "@/pages/home/HomePage";
 import NewsPage from "@/pages/news/NewsPage";
@@ -45,6 +47,14 @@ export const router = createBrowserRouter([
           {
             path: "signup",
             element: <SignupPage />,
+          },
+          {
+            path: "find-account",
+            element: <FindAccountPage />,
+          },
+          {
+            path: "find-password",
+            element: <FindPasswordPage />,
           },
         ],
       },

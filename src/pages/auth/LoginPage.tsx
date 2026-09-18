@@ -111,11 +111,19 @@ function LoginPage() {
               </div>
 
               <div className="text-body-14-md-tighter flex items-center justify-center gap-4 px-5 text-neutral-700">
-                <button type="button" className="flex-1 text-right">
+                <button
+                  type="button"
+                  onClick={() => navigate("/find-account")}
+                  className="flex-1 text-right"
+                >
                   계정 찾기
                 </button>
                 <span className="h-3 w-px shrink-0 bg-neutral-100" />
-                <button type="button" className="flex-1 text-left">
+                <button
+                  type="button"
+                  onClick={() => navigate("/find-password")}
+                  className="flex-1 text-left"
+                >
                   비밀번호 찾기
                 </button>
               </div>
