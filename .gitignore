@@ -32,3 +32,11 @@ node_modules
 
 # Claude Code local settings (if used)
 .claude/
+
+# Capacitor (iOS) — 네이티브 프로젝트(ios/)는 커밋하되 빌드 산출물/의존물은 제외
+/ios/App/App/public
+/ios/App/Pods
+/ios/App/output
+/ios/App/build
+/ios/DerivedData
+/ios/capacitor-cordova-ios-plugins
