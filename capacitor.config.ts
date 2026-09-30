@@ -10,8 +10,10 @@ const config: CapacitorConfig = {
   // Vite 빌드 결과물. `pnpm build` 후 `npx cap sync`로 네이티브에 복사된다.
   webDir: "dist",
   ios: {
-    // 상태바/노치 영역은 앱 CSS(Safe Area)에서 직접 처리하므로 기본 inset 사용
-    contentInset: "always",
+    // WebView가 상태바·홈 인디케이터 영역까지 화면 전체를 쓰고, Safe Area는
+    // 네이티브 inset이 아닌 CSS(viewport-fit=cover + env(safe-area-inset-*))로 처리한다.
+    // TODO(#271): Safe Area CSS 적용 전까지는 네이티브 실행 시 상단이 상태바에 겹칠 수 있음
+    contentInset: "never",
   },
 };
 
