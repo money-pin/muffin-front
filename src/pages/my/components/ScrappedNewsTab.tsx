@@ -69,7 +69,6 @@ export default function ScrappedNewsTab() {
               categoryName={news.categoryName}
               publishedAt={news.publishedAt}
               viewCount={news.viewCount}
-              thumbnailUrl={news.thumbnailUrl}
               initialScrapped={true}
             />
           ))}

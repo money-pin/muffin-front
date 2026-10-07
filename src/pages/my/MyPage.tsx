@@ -9,7 +9,7 @@ import { CHARACTER_LABELS, characterTypeToVariant } from "@/lib/character";
 import { getErrorMessage, type ErrorMessageInfo } from "@/lib/errorMessages";
 import { updateNickname, type MyHome, type WeekDay } from "@/lib/mypageApi";
 import { mypageQueryKeys, useMyHomeQuery } from "@/lib/mypageQueries";
-import { getNewsImage } from "@/lib/newsFormat";
+import { getNewsCategoryImage } from "@/lib/newsFormat";
 import chevronRightIcon from "@/assets/icon-20px/iconarrow-gray03.svg";
 import settingIcon from "@/assets/icon-24px/setting.svg";
 
@@ -92,7 +92,7 @@ function MyPage() {
     (news) => ({
       id: news.newsId,
       title: news.title,
-      image: getNewsImage(news.thumbnailUrl, news.categoryName),
+      image: getNewsCategoryImage(news.categoryName),
       bookmarked: news.isScrapped,
     }),
   );
