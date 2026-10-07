@@ -153,9 +153,11 @@ function InvestPage() {
     const refreshTimeAndStatus = () => {
       setNow(new Date());
 
-      void queryClient.invalidateQueries({
-        queryKey: investmentQueryKeys.today(),
-      });
+      // 포커스·탭 복귀·주기 갱신이 겹쳐도 진행 중인 조회를 재시작하지 않는다.
+      void queryClient.invalidateQueries(
+        { queryKey: investmentQueryKeys.today() },
+        { cancelRefetch: false },
+      );
     };
 
     const timer = window.setInterval(refreshTimeAndStatus, 30_000);

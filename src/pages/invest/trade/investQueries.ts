@@ -26,6 +26,8 @@ export function useTodayInvestmentQuery() {
     queryKey: investmentQueryKeys.today(),
     queryFn: getTodayInvestment,
     retry: false,
+    // InvestPage에서 포커스·탭 복귀 갱신을 처리한다.
+    refetchOnWindowFocus: false,
   });
 }
 
