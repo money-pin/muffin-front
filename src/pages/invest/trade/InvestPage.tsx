@@ -265,7 +265,7 @@ function InvestPage() {
     isWithinBudget,
     canDecrease,
     canIncrease,
-    incrementAsset,
+    toggleAssetSelection,
     incrementSelectedAsset,
     decrementSelectedAsset,
     replaceQuantities,
@@ -349,7 +349,7 @@ function InvestPage() {
     if (!sector || !isInvestmentAvailable || isSubmittingInvestment) return;
 
     setConfirmInvestmentErrorMessage("");
-    incrementAsset(assetId);
+    toggleAssetSelection(assetId);
   };
 
   const handleDecrease = () => {

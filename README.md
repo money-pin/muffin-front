@@ -1,8 +1,18 @@
 # 🧁 Muffin Front
 
+<p align="center">
+  <img src="https://img.shields.io/badge/UMC%2010기%20데모데이-🏆%20대상-FFD700?style=for-the-badge&labelColor=6C4A2E" alt="UMC 10기 데모데이 대상" />
+</p>
+
+> 🏆 **UMC 10기 데모데이 대상 수상**  ·  BEXCO, 2026
+
+<img width="5712" height="4284" alt="머핀대상 축하해요" src="https://github.com/user-attachments/assets/0394c5d9-3a6d-4d3e-bdf7-3a12ef681659" />
+
 ---
 
 ## 1. 프로젝트 소개
+
+<img width="1280" height="800" alt="55_머핀_서비스 미리보기 이미지" src="https://github.com/user-attachments/assets/e5800e76-9cc8-4e23-9f98-eef9bca33c6f" />
 
 **Muffin**은 경제·금융 뉴스를 쉽고 재미있게 학습할 수 있도록 돕는 모바일 웹앱입니다.
 
@@ -11,7 +21,6 @@
 ### 🔗 배포 링크
 
 - **서비스**: [https://muffin.ai.kr](https://muffin.ai.kr)
-- **Vercel**: [https://muffin-front.vercel.app](https://muffin-front.vercel.app)
 
 <br />
 
@@ -19,12 +28,12 @@
 
 ## 2. 팀원 및 역할
 
-| 이름   | 역할     | 담당 업무                              | GitHub                                   |
-| ------ | -------- | -------------------------------------- | ---------------------------------------- |
-| 황윤재 | Frontend | 홈, 인증, 온보딩, 퀴즈 화면 구현       | [@D5-wq](https://github.com/D5-wq)       |
-| 유아영 | Frontend | 모의투자 화면 및 투자 플로우 구현      | [@ay-yoo](https://github.com/ay-yoo)     |
-| 한서경 | Frontend | 수익 통계, 랭킹 화면 구현              | [@seokyun9](https://github.com/seokyun9) |
-| 정해찬 | Frontend | 뉴스, 뉴스 상세, 학습 저장소 화면 구현 | [@hchnnn](https://github.com/hchnnn)     |
+|                                                        머핀                                                        | 이름   | 역할     | 담당 업무                              | GitHub                                   |
+| :----------------------------------------------------------------------------------------------------------------: | ------ | -------- | -------------------------------------- | ---------------------------------------- |
+|      <img src="src/assets/avatars/muffin-plain.png" width="48" alt="플레인 머핀" />       | 황윤재 | Frontend | 홈, 인증, 온보딩, 퀴즈 화면 구현       | [@D5-wq](https://github.com/D5-wq)       |
+|     <img src="src/assets/avatars/muffin-butter.png" width="48" alt="버터빛 머핀" />       | 유아영 | Frontend | 모의투자 화면 및 투자 플로우 구현      | [@ay-yoo](https://github.com/ay-yoo)     |
+|   <img src="src/assets/avatars/muffin-sprinkle.png" width="48" alt="스프링클 머핀" />     | 한서경 | Frontend | 수익 통계, 랭킹 화면 구현              | [@seokyun9](https://github.com/seokyun9) |
+|      <img src="src/assets/avatars/muffin-cream.png" width="48" alt="생크림 머핀" />       | 정해찬 | Frontend | 뉴스, 뉴스 상세, 학습 저장소 화면 구현 | [@hchnnn](https://github.com/hchnnn)     |
 
 <br />
 
@@ -127,10 +136,10 @@ docs: README 작성
 PR 제목 예시:
 
 ```txt
-[feat] 로그인 페이지 구현
-[fix] 하단 탭 아이콘 오류 수정
-[chore] 개발 환경 세팅
-[docs] README 작성
+feat: 로그인 페이지 구현
+fix: 하단 탭 아이콘 오류 수정
+chore: 모바일 레이아웃 및 라우팅 구조 세팅
+docs: README 작성
 ```
 
 관련 이슈 작성 예시:
