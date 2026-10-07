@@ -91,6 +91,18 @@ function InvestPage() {
     },
   });
 
+  // 제출 실패 재시도는 조회 재시도와 구분해 동일한 투자 요청을 다시 보낸다.
+  const {
+    error: investmentErrorState,
+    showError: showInvestmentError,
+    closeError: closeInvestmentError,
+    handlePrimaryAction: handleInvestmentErrorAction,
+  } = useApiErrorModal({
+    onRetry: () => {
+      void handleSubmitInvestment();
+    },
+  });
+
   useEffect(() => {
     if (todayInvestmentQuery.isError) {
       queueMicrotask(() => showApiError(todayInvestmentQuery.error));
@@ -264,8 +276,9 @@ function InvestPage() {
     queueMicrotask(() => {
       setIsEditMode(false);
       setIsConfirmSheetOpen(false);
+      closeInvestmentError();
     });
-  }, [isInvestmentAvailable, isWeekend]);
+  }, [isInvestmentAvailable, isWeekend, closeInvestmentError]);
 
   const selectedAsset = useMemo(() => {
     return selectedAssetId ? assetById.get(selectedAssetId) : undefined;
@@ -414,20 +427,14 @@ function InvestPage() {
       replaceQuantities(assetQuantities);
       setIsEditMode(false);
       setIsConfirmSheetOpen(false);
+      closeInvestmentError();
       setIsCompleteModalOpen(true);
       void queryClient.invalidateQueries({
         queryKey: investmentQueryKeys.today(),
       });
     } catch (error) {
-      const message = getErrorMessage(
-        error,
-        isEditMode
-          ? "투자 수정에 실패했어요. 잠시 후 다시 시도해주세요."
-          : "투자 확정에 실패했어요. 잠시 후 다시 시도해주세요.",
-      );
-
-      setConfirmInvestmentErrorMessage(message);
       setIsConfirmSheetOpen(false);
+      showInvestmentError(error);
     } finally {
       submissionLock.current = false;
     }
@@ -475,7 +482,7 @@ function InvestPage() {
   // 완료 안내와 겹치지 않도록 완료 모달을 닫은 뒤 오류를 표시한다.
   const apiErrorModal = (
     <ErrorModal
-      isOpen={!!apiErrorState && !isCompleteModalOpen}
+      isOpen={!!apiErrorState && !isCompleteModalOpen && !investmentErrorState}
       info={apiErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
       onPrimaryAction={handleApiErrorAction}
       onSecondaryAction={closeApiError}
@@ -675,6 +682,14 @@ function InvestPage() {
         onConfirm={handleCompleteModalConfirm}
       />
       {apiErrorModal}
+      <ErrorModal
+        isOpen={!!investmentErrorState}
+        info={investmentErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
+        onPrimaryAction={handleInvestmentErrorAction}
+        onSecondaryAction={closeInvestmentError}
+        onClose={closeInvestmentError}
+        isLoading={isSubmittingInvestment}
+      />
     </>
   );
 }
