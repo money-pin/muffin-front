@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
@@ -14,6 +14,7 @@ import ErrorModal from "@/components/common/ErrorModal";
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
 import { useApiErrorModal } from "@/lib/useApiErrorModal";
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
+import { useInvestmentSelection } from "@/pages/invest/trade/hooks/useInvestmentSelection";
 import {
   investmentQueryKeys,
   useConfirmInvestmentMutation,
@@ -21,16 +22,18 @@ import {
   useTodayInvestmentQuery,
   useUpdateInvestmentMutation,
 } from "@/pages/invest/trade/investQueries";
+import {
+  createInvestmentRequest,
+  createInvestmentSummaryItems,
+} from "@/pages/invest/trade/utils/investmentSelection";
 
 import type {
-  ConfirmInvestmentRequest,
   InvestAssetId,
+  InvestmentQuantityMap,
+  TodayInvestmentResult,
 } from "@/pages/invest/trade/types/invest";
 
-type AssetQuantityMap = Partial<Record<InvestAssetId, number>>;
 type InvestScreenMode = "weekend" | "trade" | "status";
-
-const FORCE_TRADE_VIEW_FOR_DEV = false;
 
 const INVESTMENT_AVAILABLE_STATUSES = new Set([
   "AVAILABLE",
@@ -45,31 +48,6 @@ function getIsKstWeekend(date: Date) {
   }).format(date);
 
   return weekday === "Sat" || weekday === "Sun";
-}
-
-function getTotalInvestAmount(
-  assetQuantities: AssetQuantityMap,
-  unitAmount: number,
-) {
-  return Object.values(assetQuantities).reduce((sum, quantity) => {
-    return sum + unitAmount * (quantity ?? 0);
-  }, 0);
-}
-
-function isSameQuantityMap(
-  current: AssetQuantityMap,
-  confirmed: AssetQuantityMap,
-) {
-  const assetIds = new Set([
-    ...Object.keys(current),
-    ...Object.keys(confirmed),
-  ]);
-
-  return Array.from(assetIds).every((assetId) => {
-    const typedAssetId = assetId as InvestAssetId;
-
-    return (current[typedAssetId] ?? 0) === (confirmed[typedAssetId] ?? 0);
-  });
 }
 
 function getErrorMessage(error: unknown, fallbackMessage: string) {
@@ -113,6 +91,18 @@ function InvestPage() {
     },
   });
 
+  // 제출 실패 재시도는 조회 재시도와 구분해 동일한 투자 요청을 다시 보낸다.
+  const {
+    error: investmentErrorState,
+    showError: showInvestmentError,
+    closeError: closeInvestmentError,
+    handlePrimaryAction: handleInvestmentErrorAction,
+  } = useApiErrorModal({
+    onRetry: () => {
+      void handleSubmitInvestment();
+    },
+  });
+
   useEffect(() => {
     if (todayInvestmentQuery.isError) {
       queueMicrotask(() => showApiError(todayInvestmentQuery.error));
@@ -129,27 +119,45 @@ function InvestPage() {
     showApiError,
   ]);
 
+  useEffect(() => {
+    if (
+      apiErrorState &&
+      todayInvestmentQuery.isSuccess &&
+      investmentSectorsQuery.isSuccess
+    ) {
+      queueMicrotask(closeApiError);
+    }
+  }, [
+    apiErrorState,
+    todayInvestmentQuery.isSuccess,
+    investmentSectorsQuery.isSuccess,
+    closeApiError,
+  ]);
+
   const [now, setNow] = useState(() => new Date());
   const [isEditMode, setIsEditMode] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-  const [selectedAssetId, setSelectedAssetId] = useState<InvestAssetId | null>(
-    null,
-  );
-  const [assetQuantities, setAssetQuantities] = useState<AssetQuantityMap>({});
-  const [confirmedQuantities, setConfirmedQuantities] =
-    useState<AssetQuantityMap>({});
+  // 제출 성공 직후 재조회가 끝나기 전까지 표시할 내역. 이후에는 서버 응답을 사용한다.
+  const [submittedInvestment, setSubmittedInvestment] = useState<{
+    source: TodayInvestmentResult | null;
+    quantities: InvestmentQuantityMap;
+  } | null>(null);
   const [isConfirmSheetOpen, setIsConfirmSheetOpen] = useState(false);
   const [confirmInvestmentErrorMessage, setConfirmInvestmentErrorMessage] =
     useState("");
-  const [isSubmittingInvestment, setIsSubmittingInvestment] = useState(false);
+  const submissionLock = useRef(false);
+  const isSubmittingInvestment =
+    confirmInvestmentMutation.isPending || updateInvestmentMutation.isPending;
 
   useEffect(() => {
     const refreshTimeAndStatus = () => {
       setNow(new Date());
 
-      void queryClient.invalidateQueries({
-        queryKey: investmentQueryKeys.today(),
-      });
+      // 포커스·탭 복귀·주기 갱신이 겹쳐도 진행 중인 조회를 재시작하지 않는다.
+      void queryClient.invalidateQueries(
+        { queryKey: investmentQueryKeys.today() },
+        { cancelRefetch: false },
+      );
     };
 
     const timer = window.setInterval(refreshTimeAndStatus, 30_000);
@@ -175,6 +183,11 @@ function InvestPage() {
   const allAssets = useMemo(() => {
     return INVEST_ASSET_SECTIONS.flatMap((section) => section.items);
   }, []);
+
+  const assetById = useMemo(
+    () => new Map(allAssets.map((asset) => [asset.id, asset])),
+    [allAssets],
+  );
 
   const assetBySectorCode = useMemo(() => {
     return new Map(allAssets.map((asset) => [asset.sectorCode, asset]));
@@ -208,59 +221,56 @@ function InvestPage() {
 
   const isInvestmentAvailable = INVESTMENT_AVAILABLE_STATUSES.has(todayStatus);
 
-  const hasLocalConfirmedInvestment =
-    isInvestmentAvailable &&
-    Object.values(confirmedQuantities).some((quantity) => (quantity ?? 0) > 0);
-
+  const serverQuantities = useMemo(
+    () =>
+      todayInvestmentSectors.reduce<InvestmentQuantityMap>(
+        (quantities, item) => {
+          const asset = assetBySectorCode.get(item.sectorCode);
+          if (asset && item.quantity > 0) quantities[asset.id] = item.quantity;
+          return quantities;
+        },
+        {},
+      ),
+    [assetBySectorCode, todayInvestmentSectors],
+  );
+  const pendingConfirmedQuantities =
+    isInvestmentAvailable && submittedInvestment?.source === todayInvestmentData
+      ? submittedInvestment.quantities
+      : null;
+  const confirmedQuantities = pendingConfirmedQuantities ?? serverQuantities;
   const hasConfirmedInvestment =
-    hasServerInvestment || hasLocalConfirmedInvestment;
-
+    hasServerInvestment || Object.keys(confirmedQuantities).length > 0;
   const canEditTodayInvestment =
     hasConfirmedInvestment && isInvestmentAvailable;
-  useEffect(() => {
-    if (!todayInvestmentData || isEditMode) return;
 
-    const hasInvestmentResponse =
-      Array.isArray(todayInvestmentData.sectors) ||
-      Array.isArray(todayInvestmentData.previousInvestment?.sectors);
+  const responseRemainingAmount = todayInvestmentData?.remainingAmount;
+  const responseTotalAmount =
+    todayInvestmentData?.totalAmount ??
+    todayInvestmentData?.previousInvestment?.totalAmount;
+  const serverTotalBudget =
+    typeof responseRemainingAmount === "number" &&
+    typeof responseTotalAmount === "number"
+      ? responseRemainingAmount + responseTotalAmount
+      : 0;
 
-    if (!hasInvestmentResponse) return;
-
-    const nextConfirmedQuantities = todayInvestmentSectors.reduce(
-      (acc, item) => {
-        const asset = assetBySectorCode.get(item.sectorCode);
-
-        if (!asset || item.quantity <= 0) return acc;
-
-        return {
-          ...acc,
-          [asset.id]: item.quantity,
-        };
-      },
-      {} as AssetQuantityMap,
-    );
-
-    const hasInvestment = Object.keys(nextConfirmedQuantities).length > 0;
-
-    queueMicrotask(() => {
-      if (hasInvestment) {
-        setConfirmedQuantities(nextConfirmedQuantities);
-        setAssetQuantities(nextConfirmedQuantities);
-        setSelectedAssetId(null);
-        return;
-      }
-
-      if (todayStatus === "AVAILABLE") {
-        setConfirmedQuantities({});
-      }
-    });
-  }, [
-    assetBySectorCode,
-    isEditMode,
-    todayInvestmentData,
-    todayInvestmentSectors,
-    todayStatus,
-  ]);
+  const {
+    quantities: assetQuantities,
+    selectedAssetId,
+    selectedQuantity,
+    selectedTotalAmount: selectedAssetTotalAmount,
+    totalAmount: totalInvestAmount,
+    remainingBudget,
+    hasInvestment: hasAnyInvestment,
+    isChanged,
+    isWithinBudget,
+    canDecrease,
+    canIncrease,
+    toggleAssetSelection,
+    incrementSelectedAsset,
+    decrementSelectedAsset,
+    replaceQuantities,
+    resetSelection,
+  } = useInvestmentSelection({ unitAmount, totalBudget: serverTotalBudget });
 
   useEffect(() => {
     if (!isWeekend && isInvestmentAvailable) return;
@@ -268,57 +278,19 @@ function InvestPage() {
     queueMicrotask(() => {
       setIsEditMode(false);
       setIsConfirmSheetOpen(false);
+      closeInvestmentError();
     });
-  }, [isInvestmentAvailable, isWeekend]);
+  }, [isInvestmentAvailable, isWeekend, closeInvestmentError]);
 
   const selectedAsset = useMemo(() => {
-    return allAssets.find((asset) => asset.id === selectedAssetId);
-  }, [allAssets, selectedAssetId]);
+    return selectedAssetId ? assetById.get(selectedAssetId) : undefined;
+  }, [assetById, selectedAssetId]);
 
-  const selectedQuantity = selectedAssetId
-    ? (assetQuantities[selectedAssetId] ?? 0)
-    : 0;
-
-  const selectedAssetPrice = selectedAssetId ? unitAmount : 0;
-  const selectedAssetTotalAmount = selectedAssetPrice * selectedQuantity;
-  const totalInvestAmount = getTotalInvestAmount(assetQuantities, unitAmount);
-  const confirmedTotalInvestAmount = getTotalInvestAmount(
-    confirmedQuantities,
+  const confirmItems = createInvestmentSummaryItems(
+    assetQuantities,
+    assetById,
     unitAmount,
   );
-
-  const responseRemainingAmount = todayInvestmentData?.remainingAmount;
-  const responseTotalAmount =
-    todayInvestmentData?.totalAmount ??
-    todayInvestmentData?.previousInvestment?.totalAmount;
-
-  const serverTotalBudget =
-    typeof responseRemainingAmount === "number" &&
-    typeof responseTotalAmount === "number"
-      ? responseRemainingAmount + responseTotalAmount
-      : 0;
-
-  const remainingBudget = Math.max(0, serverTotalBudget - totalInvestAmount);
-
-  const confirmItems = Object.entries(assetQuantities)
-    .filter(([, quantity]) => (quantity ?? 0) > 0)
-    .map(([assetId, quantity]) => {
-      const typedAssetId = assetId as InvestAssetId;
-      const asset = allAssets.find((item) => item.id === typedAssetId);
-      const amount = unitAmount * (quantity ?? 0);
-      const percentage =
-        totalInvestAmount > 0
-          ? Math.round((amount / totalInvestAmount) * 100)
-          : 0;
-
-      return {
-        assetId: typedAssetId,
-        name: asset?.name ?? "",
-        icon: asset?.activeIcon ?? "",
-        amount,
-        percentage,
-      };
-    });
 
   const serverTodayStatusItems = todayInvestmentSectors.flatMap((item) => {
     const asset = assetBySectorCode.get(item.sectorCode);
@@ -334,36 +306,15 @@ function InvestPage() {
     };
   });
 
-  const localTodayStatusItems = Object.entries(confirmedQuantities)
-    .filter(([, quantity]) => (quantity ?? 0) > 0)
-    .map(([assetId, quantity]) => {
-      const typedAssetId = assetId as InvestAssetId;
-      const asset = allAssets.find((item) => item.id === typedAssetId);
-      const amount = unitAmount * (quantity ?? 0);
-      const percentage =
-        confirmedTotalInvestAmount > 0
-          ? Math.round((amount / confirmedTotalInvestAmount) * 100)
-          : 0;
-
-      return {
-        assetId: typedAssetId,
-        name: asset?.name ?? "",
-        icon: asset?.activeIcon ?? "",
-        amount,
-        percentage,
-      };
-    });
-
-  const todayStatusItems =
-    serverTodayStatusItems.length > 0
-      ? serverTodayStatusItems
-      : isInvestmentAvailable
-        ? localTodayStatusItems
-        : [];
+  const todayStatusItems = pendingConfirmedQuantities
+    ? createInvestmentSummaryItems(
+        pendingConfirmedQuantities,
+        assetById,
+        unitAmount,
+      )
+    : serverTodayStatusItems;
 
   const screenMode: InvestScreenMode = (() => {
-    if (FORCE_TRADE_VIEW_FOR_DEV) return "trade";
-
     // 주말
     if (isWeekend) return "weekend";
 
@@ -379,31 +330,8 @@ function InvestPage() {
     return "status";
   })();
 
-  const buildInvestmentBody = (): ConfirmInvestmentRequest => {
-    const sectors = Object.entries(assetQuantities)
-      .filter(([, quantity]) => (quantity ?? 0) > 0)
-      .flatMap(([assetId, quantity]) => {
-        const typedAssetId = assetId as InvestAssetId;
-        const asset = allAssets.find((item) => item.id === typedAssetId);
-
-        if (!asset) return [];
-
-        return {
-          sectorCode: asset.sectorCode,
-          quantity: quantity ?? 0,
-        };
-      });
-
-    return { sectors };
-  };
-
-  const canDecrease = selectedQuantity > 0;
-  const canIncrease =
-    selectedAssetPrice > 0 && remainingBudget >= selectedAssetPrice;
-  const hasAnyInvestment = totalInvestAmount > 0;
   const hasAssetCountBar = Boolean(selectedAsset && selectedQuantity > 0);
-  const isEditChanged =
-    isEditMode && !isSameQuantityMap(assetQuantities, confirmedQuantities);
+  const isEditChanged = isEditMode && isChanged;
 
   const bottomActionVariant =
     isEditMode && isEditChanged
@@ -415,102 +343,54 @@ function InvestPage() {
   const tradePageBottomPadding = hasAssetCountBar ? "pb-[240px]" : "pb-[176px]";
 
   const handleAssetClick = (assetId: InvestAssetId) => {
-    const asset = allAssets.find((item) => item.id === assetId);
+    const asset = assetById.get(assetId);
     const sector = asset ? sectorByCode.get(asset.sectorCode) : undefined;
 
-    if (!sector) return;
+    if (!sector || !isInvestmentAvailable || isSubmittingInvestment) return;
 
     setConfirmInvestmentErrorMessage("");
-
-    const currentQuantity = assetQuantities[assetId] ?? 0;
-
-    // 이미 선택된(포커스된) 항목을 다시 누르면 선택 해제 (토글 off)
-    if (selectedAssetId === assetId) {
-      setSelectedAssetId(null);
-      setAssetQuantities((prev) => {
-        const next = { ...prev };
-        delete next[assetId];
-
-        return next;
-      });
-      return;
-    }
-
-    // 수량이 있는 다른 항목을 누르면 포커스만 이동 (수량은 +/- 버튼으로만 조절)
-    if (currentQuantity > 0) {
-      setSelectedAssetId(assetId);
-      return;
-    }
-
-    // 새 항목 선택 (토글 on): 예산 내에서만 수량 1로 설정
-    if (totalInvestAmount + unitAmount > serverTotalBudget) {
-      return;
-    }
-
-    setSelectedAssetId(assetId);
-    setAssetQuantities((prev) => ({
-      ...prev,
-      [assetId]: 1,
-    }));
+    toggleAssetSelection(assetId);
   };
 
   const handleDecrease = () => {
-    if (!selectedAssetId) return;
+    if (!isInvestmentAvailable || isSubmittingInvestment) return;
 
     setConfirmInvestmentErrorMessage("");
 
-    setAssetQuantities((prev) => {
-      const currentQuantity = prev[selectedAssetId] ?? 0;
-      const nextQuantity = Math.max(0, currentQuantity - 1);
-
-      if (nextQuantity === 0) {
-        const next = { ...prev };
-        delete next[selectedAssetId];
-
-        setSelectedAssetId(null);
-
-        return next;
-      }
-
-      return {
-        ...prev,
-        [selectedAssetId]: nextQuantity,
-      };
-    });
+    decrementSelectedAsset();
   };
 
   const handleIncrease = () => {
-    if (!selectedAssetId || !canIncrease) return;
+    if (!isInvestmentAvailable || isSubmittingInvestment) return;
 
     setConfirmInvestmentErrorMessage("");
 
-    setAssetQuantities((prev) => {
-      const currentQuantity = prev[selectedAssetId] ?? 0;
-
-      return {
-        ...prev,
-        [selectedAssetId]: currentQuantity + 1,
-      };
-    });
+    incrementSelectedAsset();
   };
 
   const handleReset = () => {
-    setSelectedAssetId(null);
-    setAssetQuantities({});
+    if (isSubmittingInvestment) return;
+    resetSelection();
     setConfirmInvestmentErrorMessage("");
   };
 
   const handlePurchase = () => {
-    if (!hasAnyInvestment || !isInvestmentAvailable) return;
+    if (
+      !hasAnyInvestment ||
+      !isWithinBudget ||
+      !isInvestmentAvailable ||
+      isSubmittingInvestment
+    )
+      return;
 
     setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
   };
 
   const handleSubmitInvestment = async () => {
-    if (isSubmittingInvestment || !isInvestmentAvailable) return;
+    if (submissionLock.current || !isInvestmentAvailable || isWeekend) return;
 
-    const requestBody = buildInvestmentBody();
+    const requestBody = createInvestmentRequest(assetQuantities, assetById);
 
     if (requestBody.sectors.length === 0) {
       setConfirmInvestmentErrorMessage("하나 이상의 섹터를 선택해주세요.");
@@ -518,8 +398,16 @@ function InvestPage() {
       return;
     }
 
+    if (!isWithinBudget) {
+      setConfirmInvestmentErrorMessage(
+        "투자 가능 금액을 확인하고 수량을 조정해주세요.",
+      );
+      setIsConfirmSheetOpen(false);
+      return;
+    }
+
     try {
-      setIsSubmittingInvestment(true);
+      submissionLock.current = true;
       setConfirmInvestmentErrorMessage("");
 
       if (isEditMode) {
@@ -527,33 +415,35 @@ function InvestPage() {
       } else {
         await confirmInvestmentMutation.mutateAsync(requestBody);
       }
+      // 진행 중이던 이전 조회가 성공한 수정 내역을 덮지 않도록 취소한 뒤 재조회한다.
+      await queryClient.cancelQueries({
+        queryKey: investmentQueryKeys.today(),
+      });
+      setSubmittedInvestment({
+        source:
+          queryClient.getQueryData<TodayInvestmentResult>(
+            investmentQueryKeys.today(),
+          ) ?? null,
+        quantities: { ...assetQuantities },
+      });
+      replaceQuantities(assetQuantities);
+      setIsEditMode(false);
+      setIsConfirmSheetOpen(false);
+      closeInvestmentError();
+      setIsCompleteModalOpen(true);
       void queryClient.invalidateQueries({
         queryKey: investmentQueryKeys.today(),
       });
-
-      setConfirmedQuantities({ ...assetQuantities });
-      setSelectedAssetId(null);
-      setIsEditMode(false);
-      setIsConfirmSheetOpen(false);
-      setIsCompleteModalOpen(true);
     } catch (error) {
-      const message = getErrorMessage(
-        error,
-        isEditMode
-          ? "투자 수정에 실패했어요. 잠시 후 다시 시도해주세요."
-          : "투자 확정에 실패했어요. 잠시 후 다시 시도해주세요.",
-      );
-
-      setConfirmInvestmentErrorMessage(message);
       setIsConfirmSheetOpen(false);
+      showInvestmentError(error);
     } finally {
-      setIsSubmittingInvestment(false);
+      submissionLock.current = false;
     }
   };
 
   const handleCompleteModalConfirm = () => {
     setIsCompleteModalOpen(false);
-    setSelectedAssetId(null);
   };
 
   const handleStartEdit = () => {
@@ -563,27 +453,47 @@ function InvestPage() {
       allAssets.find((asset) => (confirmedQuantities[asset.id] ?? 0) > 0)?.id ??
       null;
 
-    setAssetQuantities(confirmedQuantities);
-    setSelectedAssetId(firstConfirmedAssetId);
+    replaceQuantities(confirmedQuantities, firstConfirmedAssetId);
     setConfirmInvestmentErrorMessage("");
     setIsEditMode(true);
   };
 
   const handleEditCancel = () => {
-    setAssetQuantities(confirmedQuantities);
-    setSelectedAssetId(null);
+    if (isSubmittingInvestment) return;
+    replaceQuantities(confirmedQuantities);
     setConfirmInvestmentErrorMessage("");
     setIsEditMode(false);
   };
 
   const handleEditSubmit = () => {
-    if (!hasAnyInvestment || !isEditChanged || !canEditTodayInvestment) {
+    if (
+      !hasAnyInvestment ||
+      !isWithinBudget ||
+      !isEditChanged ||
+      !canEditTodayInvestment ||
+      isSubmittingInvestment
+    ) {
       return;
     }
 
     setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
   };
+
+  // 캐시된 내역을 유지한 재조회 실패도 동일한 모달로 안내한다.
+  // 완료 안내와 겹치지 않도록 완료 모달을 닫은 뒤 오류를 표시한다.
+  const apiErrorModal = (
+    <ErrorModal
+      isOpen={!!apiErrorState && !isCompleteModalOpen && !investmentErrorState}
+      info={apiErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
+      onPrimaryAction={handleApiErrorAction}
+      onSecondaryAction={closeApiError}
+      onClose={closeApiError}
+      isLoading={
+        todayInvestmentQuery.isFetching || investmentSectorsQuery.isFetching
+      }
+    />
+  );
 
   if (screenMode === "weekend") {
     return (
@@ -608,14 +518,7 @@ function InvestPage() {
     return (
       <>
         <div className="-mb-[80px] flex flex-1 bg-[var(--color-neutral-50)] px-5" />
-        <ErrorModal
-          isOpen={!!apiErrorState}
-          info={apiErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
-          onPrimaryAction={handleApiErrorAction}
-          onSecondaryAction={closeApiError}
-          onClose={closeApiError}
-          isLoading={todayInvestmentQuery.isFetching}
-        />
+        {apiErrorModal}
       </>
     );
   }
@@ -638,14 +541,7 @@ function InvestPage() {
     return (
       <>
         <div className="-mb-[80px] flex flex-1 bg-[var(--color-neutral-50)] px-5" />
-        <ErrorModal
-          isOpen={!!apiErrorState}
-          info={apiErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
-          onPrimaryAction={handleApiErrorAction}
-          onSecondaryAction={closeApiError}
-          onClose={closeApiError}
-          isLoading={investmentSectorsQuery.isFetching}
-        />
+        {apiErrorModal}
       </>
     );
   }
@@ -751,20 +647,34 @@ function InvestPage() {
           <InvestBottomAction
             selectedTotalAmount={totalInvestAmount}
             variant={bottomActionVariant}
+            disabled={
+              isSubmittingInvestment ||
+              !isInvestmentAvailable ||
+              (bottomActionVariant !== "editCancel" &&
+                (!hasAnyInvestment || !isWithinBudget))
+            }
+            resetDisabled={isSubmittingInvestment}
             showTopShadow={!hasAssetCountBar}
             onReset={handleReset}
-            onPurchase={handlePurchase}
-            onEditCancel={handleEditCancel}
-            onEditSubmit={handleEditSubmit}
+            onAction={
+              bottomActionVariant === "editCancel"
+                ? handleEditCancel
+                : bottomActionVariant === "editSubmit"
+                  ? handleEditSubmit
+                  : handlePurchase
+            }
           />
         </div>
       )}
 
       <InvestConfirmBottomSheet
         isOpen={isConfirmSheetOpen}
+        isSubmitting={isSubmittingInvestment}
         items={confirmItems}
         totalAmount={totalInvestAmount}
-        onClose={() => setIsConfirmSheetOpen(false)}
+        onClose={() => {
+          if (!submissionLock.current) setIsConfirmSheetOpen(false);
+        }}
         onConfirm={handleSubmitInvestment}
       />
 
@@ -772,6 +682,15 @@ function InvestPage() {
         isOpen={isCompleteModalOpen}
         onClose={() => setIsCompleteModalOpen(false)}
         onConfirm={handleCompleteModalConfirm}
+      />
+      {apiErrorModal}
+      <ErrorModal
+        isOpen={!!investmentErrorState}
+        info={investmentErrorState?.info ?? DEFAULT_ERROR_MESSAGE}
+        onPrimaryAction={handleInvestmentErrorAction}
+        onSecondaryAction={closeInvestmentError}
+        onClose={closeInvestmentError}
+        isLoading={isSubmittingInvestment}
       />
     </>
   );

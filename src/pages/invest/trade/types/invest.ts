@@ -14,6 +14,8 @@ export type InvestAssetId =
 
 export type InvestAssetCardStatus = "default" | "selected" | "purchased";
 
+export type InvestmentQuantityMap = Partial<Record<InvestAssetId, number>>;
+
 export type InvestSectorCode =
   | "DEPOSIT"
   | "GOLD"
@@ -40,6 +42,14 @@ export interface InvestAssetSection {
   id: string;
   title: string;
   items: InvestAssetMeta[];
+}
+
+export interface InvestmentSummaryItem {
+  assetId: InvestAssetId;
+  name: string;
+  icon: string;
+  amount: number;
+  percentage: number;
 }
 
 export interface InvestmentSector {

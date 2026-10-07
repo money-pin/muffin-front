@@ -4,19 +4,11 @@ import { useEffect, useState } from "react";
 import clockIcon from "@/assets/icon-24px/clock.svg";
 import lockIcon from "@/assets/icon-24px/lock.svg";
 
-import type { InvestAssetId } from "@/pages/invest/trade/types/invest";
+import type { InvestmentSummaryItem } from "@/pages/invest/trade/types/invest";
 import { formatNumber } from "@/pages/invest/utils/profitFormat";
 
-interface TodayInvestItem {
-  assetId: InvestAssetId;
-  name: string;
-  icon: string;
-  amount: number;
-  percentage: number;
-}
-
 interface InvestTodayStatusPageProps {
-  items: TodayInvestItem[];
+  items: InvestmentSummaryItem[];
   onEdit: () => void;
   isClosed: boolean;
   confirmDeadline?: string;
