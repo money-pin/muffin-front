@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* 스포카 한 산스 Neo: CDN 대신 앱에 포함해 제공 (네트워크·오프라인과 무관하게 동일 글꼴, SIL OFL 1.1 — assets/fonts 라이선스 참고) */
 @font-face {
   font-family: "Spoqa Han Sans Neo";
   font-style: normal;
@@ -7,7 +8,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Regular"),
-    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo/SpoqaHanSansNeo-Regular.woff2")
+    url("./assets/fonts/SpoqaHanSansNeo-Regular.woff2")
       format("woff2");
 }
 
@@ -18,7 +19,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Medium"),
-    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo/SpoqaHanSansNeo-Medium.woff2")
+    url("./assets/fonts/SpoqaHanSansNeo-Medium.woff2")
       format("woff2");
 }
 
@@ -29,7 +30,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Bold"),
-    url("https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo/SpoqaHanSansNeo-Bold.woff2")
+    url("./assets/fonts/SpoqaHanSansNeo-Bold.woff2")
       format("woff2");
 }
 
