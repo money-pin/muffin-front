@@ -159,13 +159,10 @@ export default function NewsDetailPageSkeleton() {
               </div>
             </div>
 
-            {/* 원문 뉴스 보기 (실제 텍스트 노출, h-45 우측 정렬) */}
-            <div className="text-body-16-md-tighter ml-auto flex h-[45px] items-center gap-2 pr-4 text-neutral-400">
-              <span aria-hidden="true" className="text-[20px] leading-none">
-                ↗
-              </span>
-              원문 뉴스 보기
-            </div>
+            {/* AI 안내 문구 (실제 텍스트 노출) */}
+            <p className="text-caption-12-md-tighter pt-3 pb-2 text-neutral-400">
+              AI가 요약·작성한 콘텐츠에요
+            </p>
 
             {/* 긍정/부정 반응 카드 (세로 2개, 데이터 유무 모르니 항상 노출) */}
             <div className="flex flex-col gap-2 pt-1">

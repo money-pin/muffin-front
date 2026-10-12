@@ -150,7 +150,6 @@ export default function NewsPage() {
               categoryName={news.categoryName}
               publishedAt={news.publishedAt}
               viewCount={news.viewCount}
-              thumbnailUrl={news.thumbnailUrl}
               initialScrapped={news.isScrapped}
             />
           ))}

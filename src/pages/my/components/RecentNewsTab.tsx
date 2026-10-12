@@ -35,7 +35,6 @@ export default function RecentNewsTab() {
               categoryName={news.categoryName}
               publishedAt={news.publishedAt}
               viewCount={news.viewCount}
-              thumbnailUrl={news.thumbnailUrl}
               initialScrapped={news.isScrapped ?? false}
             />
           ))}

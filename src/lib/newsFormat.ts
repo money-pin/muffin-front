@@ -13,7 +13,8 @@ const CATEGORY_FALLBACK_IMAGE: Record<string, string> = {
 const DEFAULT_FALLBACK_IMAGE = newscardEconomy;
 const DEFAULT_CATEGORY_NAME = "경제";
 
-export function getCategoryFallbackImage(
+// 언론사 기사 사진은 쓰지 않고 카테고리 이미지를 대표 이미지로 쓴다 (#276)
+export function getNewsCategoryImage(
   categoryName: string | null | undefined,
 ): string {
   return categoryName
@@ -25,15 +26,6 @@ export function formatCategoryName(
   categoryName: string | null | undefined,
 ): string {
   return categoryName ?? DEFAULT_CATEGORY_NAME;
-}
-
-export function getNewsImage(
-  thumbnailUrl: string | null | undefined,
-  categoryName: string | null | undefined,
-): string {
-  return thumbnailUrl && thumbnailUrl.length > 0
-    ? thumbnailUrl
-    : getCategoryFallbackImage(categoryName);
 }
 
 export function formatViewCount(count: number): string {

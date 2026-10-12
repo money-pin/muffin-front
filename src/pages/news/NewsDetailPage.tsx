@@ -17,7 +17,7 @@ import type { SectorImpactItem } from "@/lib/newsApi";
 import {
   formatCategoryName,
   formatRelativeDate,
-  getNewsImage,
+  getNewsCategoryImage,
 } from "@/lib/newsFormat";
 import NewsDetailPageSkeleton from "./components/NewsDetailPageSkeleton";
 import ScrollToTopButton from "./components/ScrollToTopButton";
@@ -265,7 +265,7 @@ export default function NewsDetailPage() {
         <article className="bg-neutral-0 flex w-full flex-col">
           <div className="relative h-[225px] w-full shrink-0 overflow-hidden bg-neutral-900">
             <img
-              src={getNewsImage(detail.thumbnailUrl, detail.categoryName)}
+              src={getNewsCategoryImage(detail.categoryName)}
               alt=""
               aria-hidden="true"
               className="h-full w-full object-cover opacity-55"
@@ -335,17 +335,9 @@ export default function NewsDetailPage() {
               )}
             </p>
 
-            <a
-              href={detail.originalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-body-16-md-tighter ml-auto flex h-[45px] items-center gap-2 rounded-[8px] pr-4 text-neutral-400"
-            >
-              <span aria-hidden="true" className="text-[20px] leading-none">
-                ↗
-              </span>
-              원문 뉴스 보기
-            </a>
+            <p className="text-caption-12-md-tighter pt-3 pb-2 text-neutral-400">
+              AI가 요약·작성한 콘텐츠에요
+            </p>
 
             {(positive.length > 0 || negative.length > 0) && (
               <div className="flex flex-col gap-2 pt-1">
@@ -355,6 +347,10 @@ export default function NewsDetailPage() {
                 {negative.length > 0 && (
                   <ImpactCard type="negative" sectors={negative} />
                 )}
+                <p className="text-caption-12-md-tighter text-neutral-400">
+                  AI가 뉴스를 바탕으로 분석한 결과라 실제 투자 판단과 다를 수
+                  있어요
+                </p>
               </div>
             )}
           </section>

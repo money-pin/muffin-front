@@ -8,8 +8,7 @@ import {
   formatCategoryName,
   formatRelativeDate,
   formatViewCount,
-  getCategoryFallbackImage,
-  getNewsImage,
+  getNewsCategoryImage,
 } from "@/lib/newsFormat";
 import { useToggleScrap } from "../newsQueries";
 
@@ -23,9 +22,6 @@ export default function TodayNewsCarouselCard({
   const navigate = useNavigate();
   const [optimisticScrapped, setOptimisticScrapped] = useState<boolean | null>(
     null,
-  );
-  const [imgSrc, setImgSrc] = useState(() =>
-    getNewsImage(news.thumbnailUrl, news.categoryName),
   );
   const { mutate: toggleScrap, isPending: isScrapPending } = useToggleScrap(
     news.newsId,
@@ -52,12 +48,11 @@ export default function TodayNewsCarouselCard({
     >
       <div className="relative h-[201px] w-full overflow-hidden rounded-[8px] bg-neutral-700">
         <img
-          src={imgSrc}
+          src={getNewsCategoryImage(news.categoryName)}
           alt=""
           aria-hidden="true"
           className="size-full object-cover"
           draggable={false}
-          onError={() => setImgSrc(getCategoryFallbackImage(news.categoryName))}
         />
         <button
           type="button"

@@ -7,8 +7,7 @@ import {
   formatCategoryName,
   formatRelativeDate,
   formatViewCount,
-  getCategoryFallbackImage,
-  getNewsImage,
+  getNewsCategoryImage,
 } from "@/lib/newsFormat";
 import { useToggleScrap } from "../newsQueries";
 
@@ -18,7 +17,6 @@ export interface NewsCardProps {
   categoryName: string | null;
   publishedAt: string;
   viewCount: number;
-  thumbnailUrl?: string | null;
   initialScrapped?: boolean;
 }
 
@@ -28,15 +26,11 @@ export default function NewsCard({
   categoryName,
   publishedAt,
   viewCount,
-  thumbnailUrl,
   initialScrapped = false,
 }: NewsCardProps) {
   const navigate = useNavigate();
   const [optimisticScrapped, setOptimisticScrapped] = useState<boolean | null>(
     null,
-  );
-  const [imgSrc, setImgSrc] = useState(() =>
-    getNewsImage(thumbnailUrl, categoryName),
   );
   const { mutate: toggleScrap, isPending: isScrapPending } =
     useToggleScrap(newsId);
@@ -63,12 +57,11 @@ export default function NewsCard({
     >
       <div className="size-[74px] flex-shrink-0 overflow-hidden rounded-[8px]">
         <img
-          src={imgSrc}
+          src={getNewsCategoryImage(categoryName)}
           alt=""
           aria-hidden="true"
           className="size-full object-cover"
           draggable={false}
-          onError={() => setImgSrc(getCategoryFallbackImage(categoryName))}
         />
       </div>
 
