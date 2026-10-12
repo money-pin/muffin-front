@@ -153,7 +153,9 @@ export default function ShowcasePage() {
       </Section>
 
       <Section title="SocialLoginButton">
-        <SocialLoginButton />
+        <SocialLoginButton provider="kakao" label="Kakao로 계속하기" />
+        <SocialLoginButton provider="apple" label="Apple로 계속하기" />
+        <SocialLoginButton provider="google" label="Google로 계속하기" />
       </Section>
 
       <Section title="OnboardingButton (선택 토글)">

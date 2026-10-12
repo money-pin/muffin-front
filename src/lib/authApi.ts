@@ -1,41 +1,4 @@
 import { apiRequest } from "./api";
-import { saveAccessToken } from "./auth";
-
-interface AccessTokenResult {
-  accessToken: string;
-}
-
-// 회원가입 1단계: 계정 생성 (accessToken 발급 + refreshToken 쿠키), 토큰 저장
-export async function signup(params: {
-  name: string;
-  email: string;
-  password: string;
-  termsAgreed: boolean;
-}) {
-  const { accessToken } = await apiRequest<AccessTokenResult>("/auth/signup", {
-    method: "POST",
-    body: params,
-  });
-  saveAccessToken(accessToken);
-}
-
-// 회원가입 2단계: 이메일 인증번호 발송 (계정 토큰 필요). 만료(초)를 반환
-export async function sendEmailVerification(): Promise<number> {
-  const { expiresIn } = await apiRequest<{ expiresIn: number }>(
-    "/api/auth/email/verification",
-    { method: "POST", body: {}, auth: true },
-  );
-  return expiresIn;
-}
-
-// 회원가입 3단계: 인증번호 확인
-export async function confirmEmailVerification(code: string) {
-  return apiRequest<void>("/api/auth/email/verification/confirm", {
-    method: "POST",
-    body: { code },
-    auth: true,
-  });
-}
 
 // 로그아웃 (accessToken blacklist + refreshToken 쿠키 만료)
 export async function logout() {

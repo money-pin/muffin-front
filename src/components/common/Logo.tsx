@@ -2,14 +2,15 @@ import logo from "@/assets/logo.svg";
 
 interface LogoProps {
   tagline?: boolean;
-  size?: "lg" | "sm" | "xs";
+  size?: "lg" | "md" | "sm" | "xs";
   className?: string;
 }
 
-// Figma: 스플래시 로고 188×66(lg) / 로그인 로고 135×47(sm) / 홈 상단 80×28(xs), 주황 워드마크 + 태그라인
+// Figma: 스플래시 로고 188×66(lg) / 시작 화면 150×52(md) / 로그인 로고 135×47(sm) / 홈 상단 80×28(xs), 주황 워드마크 + 태그라인
 const TAGLINE = "매일 가볍게 즐기는 금융 핀셋 가이드";
 const SIZE_CLASS = {
   lg: "h-[66px] w-[188px]",
+  md: "h-[52px] w-[150px]",
   sm: "h-[47px] w-[135px]",
   xs: "h-[28px] w-[80px]",
 } as const;
