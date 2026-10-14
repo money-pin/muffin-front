@@ -4,6 +4,7 @@ import SocialLoginButton from "./SocialLoginButton";
 import { loadGoogleIdentity } from "@/lib/google";
 
 interface GoogleLoginButtonProps {
+  label: string;
   onCredential: (idToken: string) => void;
   onError?: (message: string) => void;
 }
@@ -11,6 +12,7 @@ interface GoogleLoginButtonProps {
 // Figma 디자인(SocialLoginButton)을 유지하기 위해, 구글이 렌더한 실제 버튼을
 // 투명하게 겹쳐 클릭을 위임한다. (One Tap prompt()는 표시가 보장되지 않음)
 export default function GoogleLoginButton({
+  label,
   onCredential,
   onError,
 }: GoogleLoginButtonProps) {
@@ -65,11 +67,12 @@ export default function GoogleLoginButton({
 
   return (
     <div className="relative">
-      <SocialLoginButton />
+      <SocialLoginButton provider="google" label={label} />
+      {/* 구글 버튼(높이 40px)을 48px 버튼 세로 중앙에 겹쳐 클릭 영역을 맞춘다 */}
       <div
         ref={overlayRef}
         aria-hidden="true"
-        className={`absolute inset-0 overflow-hidden opacity-0 ${
+        className={`absolute inset-0 flex items-center overflow-hidden opacity-0 ${
           isReady ? "" : "pointer-events-none"
         }`}
       />
