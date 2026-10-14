@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
@@ -12,34 +12,27 @@ import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeeke
 import ErrorModal from "@/components/common/ErrorModal";
 
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
-import { useApiErrorModal } from "@/lib/useApiErrorModal";
+import { useInvestmentSubmission } from "@/pages/invest/trade/hooks/useInvestmentSubmission";
+import { useInvestmentQueryError } from "@/pages/invest/trade/hooks/useInvestmentQueryError";
+import { INVESTMENT_AVAILABLE_STATUSES } from "@/pages/invest/trade/constants/investmentStatus";
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
 import { useInvestmentSelection } from "@/pages/invest/trade/hooks/useInvestmentSelection";
 import {
   investmentQueryKeys,
-  useConfirmInvestmentMutation,
   useInvestmentSectorsQuery,
   useTodayInvestmentQuery,
-  useUpdateInvestmentMutation,
 } from "@/pages/invest/trade/investQueries";
 import {
-  createInvestmentRequest,
   createInvestmentSummaryItems,
+  getInvestmentBudget,
 } from "@/pages/invest/trade/utils/investmentSelection";
 
 import type {
   InvestAssetId,
   InvestmentQuantityMap,
-  TodayInvestmentResult,
 } from "@/pages/invest/trade/types/invest";
 
 type InvestScreenMode = "weekend" | "trade" | "status";
-
-const INVESTMENT_AVAILABLE_STATUSES = new Set([
-  "AVAILABLE",
-  "CONFIRMED",
-  "CONFIRMED_EDITABLE",
-]);
 
 function getIsKstWeekend(date: Date) {
   const weekday = new Intl.DateTimeFormat("en-US", {
@@ -50,104 +43,17 @@ function getIsKstWeekend(date: Date) {
   return weekday === "Sat" || weekday === "Sun";
 }
 
-function getErrorMessage(error: unknown, fallbackMessage: string) {
-  if (!error) return "";
-
-  return error instanceof Error ? error.message : fallbackMessage;
-}
-
 function InvestPage() {
   const queryClient = useQueryClient();
 
   const investmentSectorsQuery = useInvestmentSectorsQuery();
   const todayInvestmentQuery = useTodayInvestmentQuery();
-  const confirmInvestmentMutation = useConfirmInvestmentMutation();
-  const updateInvestmentMutation = useUpdateInvestmentMutation();
 
   const sectorData = investmentSectorsQuery.data ?? null;
   const todayInvestmentData = todayInvestmentQuery.data ?? null;
 
-  const sectorErrorMessage = getErrorMessage(
-    investmentSectorsQuery.error,
-    "투자 섹터 정보를 불러오지 못했어요.",
-  );
-
-  const todayInvestmentErrorMessage = getErrorMessage(
-    todayInvestmentQuery.error,
-    "오늘 투자 현황을 불러오지 못했어요.",
-  );
-
-  // 오늘 투자 현황·섹터 목록 조회 실패 시 공용 에러 모달(확인/다시 시도)로 안내한다.
-  // (랭킹·통계 화면과 동일한 useApiErrorModal + ErrorModal 패턴)
-  const {
-    error: apiErrorState,
-    showError: showApiError,
-    closeError: closeApiError,
-    handlePrimaryAction: handleApiErrorAction,
-  } = useApiErrorModal({
-    onRetry: () => {
-      void todayInvestmentQuery.refetch();
-      void investmentSectorsQuery.refetch();
-    },
-  });
-
-  // 제출 실패 재시도는 조회 재시도와 구분해 동일한 투자 요청을 다시 보낸다.
-  const {
-    error: investmentErrorState,
-    showError: showInvestmentError,
-    closeError: closeInvestmentError,
-    handlePrimaryAction: handleInvestmentErrorAction,
-  } = useApiErrorModal({
-    onRetry: () => {
-      void handleSubmitInvestment();
-    },
-  });
-
-  useEffect(() => {
-    if (todayInvestmentQuery.isError) {
-      queueMicrotask(() => showApiError(todayInvestmentQuery.error));
-      return;
-    }
-    if (investmentSectorsQuery.isError) {
-      queueMicrotask(() => showApiError(investmentSectorsQuery.error));
-    }
-  }, [
-    todayInvestmentQuery.isError,
-    todayInvestmentQuery.error,
-    investmentSectorsQuery.isError,
-    investmentSectorsQuery.error,
-    showApiError,
-  ]);
-
-  useEffect(() => {
-    if (
-      apiErrorState &&
-      todayInvestmentQuery.isSuccess &&
-      investmentSectorsQuery.isSuccess
-    ) {
-      queueMicrotask(closeApiError);
-    }
-  }, [
-    apiErrorState,
-    todayInvestmentQuery.isSuccess,
-    investmentSectorsQuery.isSuccess,
-    closeApiError,
-  ]);
-
   const [now, setNow] = useState(() => new Date());
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-  // 제출 성공 직후 재조회가 끝나기 전까지 표시할 내역. 이후에는 서버 응답을 사용한다.
-  const [submittedInvestment, setSubmittedInvestment] = useState<{
-    source: TodayInvestmentResult | null;
-    quantities: InvestmentQuantityMap;
-  } | null>(null);
-  const [isConfirmSheetOpen, setIsConfirmSheetOpen] = useState(false);
-  const [confirmInvestmentErrorMessage, setConfirmInvestmentErrorMessage] =
-    useState("");
-  const submissionLock = useRef(false);
-  const isSubmittingInvestment =
-    confirmInvestmentMutation.isPending || updateInvestmentMutation.isPending;
 
   useEffect(() => {
     const refreshTimeAndStatus = () => {
@@ -233,25 +139,7 @@ function InvestPage() {
       ),
     [assetBySectorCode, todayInvestmentSectors],
   );
-  const pendingConfirmedQuantities =
-    isInvestmentAvailable && submittedInvestment?.source === todayInvestmentData
-      ? submittedInvestment.quantities
-      : null;
-  const confirmedQuantities = pendingConfirmedQuantities ?? serverQuantities;
-  const hasConfirmedInvestment =
-    hasServerInvestment || Object.keys(confirmedQuantities).length > 0;
-  const canEditTodayInvestment =
-    hasConfirmedInvestment && isInvestmentAvailable;
-
-  const responseRemainingAmount = todayInvestmentData?.remainingAmount;
-  const responseTotalAmount =
-    todayInvestmentData?.totalAmount ??
-    todayInvestmentData?.previousInvestment?.totalAmount;
-  const serverTotalBudget =
-    typeof responseRemainingAmount === "number" &&
-    typeof responseTotalAmount === "number"
-      ? responseRemainingAmount + responseTotalAmount
-      : 0;
+  const serverTotalBudget = getInvestmentBudget(todayInvestmentData) ?? 0;
 
   const {
     quantities: assetQuantities,
@@ -272,6 +160,40 @@ function InvestPage() {
     resetSelection,
   } = useInvestmentSelection({ unitAmount, totalBudget: serverTotalBudget });
 
+  const {
+    isSubmittingInvestment,
+    isConfirmSheetOpen,
+    setIsConfirmSheetOpen,
+    isCompleteModalOpen,
+    setIsCompleteModalOpen,
+    confirmInvestmentErrorMessage,
+    setConfirmInvestmentErrorMessage,
+    pendingConfirmedQuantities,
+    investmentErrorState,
+    closeInvestmentError,
+    handleInvestmentErrorAction,
+    handleSubmitInvestment,
+    closeConfirmation,
+  } = useInvestmentSubmission({
+    assetQuantities,
+    assetById,
+    unitAmount,
+    isEditMode,
+    isInvestmentAvailable,
+    isWeekend,
+    isWithinBudget,
+    onConfirmed: (quantities) => {
+      replaceQuantities(quantities);
+      setIsEditMode(false);
+    },
+  });
+
+  const confirmedQuantities = pendingConfirmedQuantities ?? serverQuantities;
+  const hasConfirmedInvestment =
+    hasServerInvestment || Object.keys(confirmedQuantities).length > 0;
+  const canEditTodayInvestment =
+    hasConfirmedInvestment && isInvestmentAvailable;
+
   useEffect(() => {
     if (!isWeekend && isInvestmentAvailable) return;
 
@@ -280,7 +202,12 @@ function InvestPage() {
       setIsConfirmSheetOpen(false);
       closeInvestmentError();
     });
-  }, [isInvestmentAvailable, isWeekend, closeInvestmentError]);
+  }, [
+    isInvestmentAvailable,
+    isWeekend,
+    closeInvestmentError,
+    setIsConfirmSheetOpen,
+  ]);
 
   const selectedAsset = useMemo(() => {
     return selectedAssetId ? assetById.get(selectedAssetId) : undefined;
@@ -329,6 +256,20 @@ function InvestPage() {
 
     return "status";
   })();
+
+  const needsSectorData = screenMode === "trade";
+  const {
+    apiErrorState,
+    closeApiError,
+    handleApiErrorAction,
+    isRetryingQuery,
+    relevantQueryFailed,
+    retryQueries,
+  } = useInvestmentQueryError({
+    todayInvestmentQuery,
+    investmentSectorsQuery,
+    needsSectorData,
+  });
 
   const hasAssetCountBar = Boolean(selectedAsset && selectedQuantity > 0);
   const isEditChanged = isEditMode && isChanged;
@@ -387,61 +328,6 @@ function InvestPage() {
     setIsConfirmSheetOpen(true);
   };
 
-  const handleSubmitInvestment = async () => {
-    if (submissionLock.current || !isInvestmentAvailable || isWeekend) return;
-
-    const requestBody = createInvestmentRequest(assetQuantities, assetById);
-
-    if (requestBody.sectors.length === 0) {
-      setConfirmInvestmentErrorMessage("하나 이상의 섹터를 선택해주세요.");
-      setIsConfirmSheetOpen(false);
-      return;
-    }
-
-    if (!isWithinBudget) {
-      setConfirmInvestmentErrorMessage(
-        "투자 가능 금액을 확인하고 수량을 조정해주세요.",
-      );
-      setIsConfirmSheetOpen(false);
-      return;
-    }
-
-    try {
-      submissionLock.current = true;
-      setConfirmInvestmentErrorMessage("");
-
-      if (isEditMode) {
-        await updateInvestmentMutation.mutateAsync(requestBody);
-      } else {
-        await confirmInvestmentMutation.mutateAsync(requestBody);
-      }
-      // 진행 중이던 이전 조회가 성공한 수정 내역을 덮지 않도록 취소한 뒤 재조회한다.
-      await queryClient.cancelQueries({
-        queryKey: investmentQueryKeys.today(),
-      });
-      setSubmittedInvestment({
-        source:
-          queryClient.getQueryData<TodayInvestmentResult>(
-            investmentQueryKeys.today(),
-          ) ?? null,
-        quantities: { ...assetQuantities },
-      });
-      replaceQuantities(assetQuantities);
-      setIsEditMode(false);
-      setIsConfirmSheetOpen(false);
-      closeInvestmentError();
-      setIsCompleteModalOpen(true);
-      void queryClient.invalidateQueries({
-        queryKey: investmentQueryKeys.today(),
-      });
-    } catch (error) {
-      setIsConfirmSheetOpen(false);
-      showInvestmentError(error);
-    } finally {
-      submissionLock.current = false;
-    }
-  };
-
   const handleCompleteModalConfirm = () => {
     setIsCompleteModalOpen(false);
   };
@@ -489,11 +375,31 @@ function InvestPage() {
       onPrimaryAction={handleApiErrorAction}
       onSecondaryAction={closeApiError}
       onClose={closeApiError}
-      isLoading={
-        todayInvestmentQuery.isFetching || investmentSectorsQuery.isFetching
-      }
+      isLoading={isRetryingQuery}
     />
   );
+
+  const queryFailureNotice =
+    relevantQueryFailed && todayInvestmentData ? (
+      <div
+        role="status"
+        className="bg-neutral-0 flex flex-wrap items-center justify-between gap-2 rounded-xl p-4"
+      >
+        <p className="text-body-14-md text-neutral-600">
+          최신 투자 정보를 불러오지 못했어요.
+        </p>
+        <button
+          type="button"
+          disabled={isRetryingQuery}
+          onClick={() => {
+            void retryQueries();
+          }}
+          className="text-body-14-bd text-primary min-h-11 disabled:opacity-40"
+        >
+          {isRetryingQuery ? "다시 조회 중..." : "다시 시도"}
+        </button>
+      </div>
+    ) : null;
 
   if (screenMode === "weekend") {
     return (
@@ -549,7 +455,13 @@ function InvestPage() {
   return (
     <>
       {screenMode === "status" ? (
-        <div className="-mb-[80px] flex flex-1 flex-col">
+        <div
+          aria-busy={todayInvestmentQuery.isFetching}
+          className="-mb-[80px] flex flex-1 flex-col"
+        >
+          {queryFailureNotice && (
+            <div className="bg-neutral-50 px-5 pt-5">{queryFailureNotice}</div>
+          )}
           <InvestTodayStatusPage
             items={todayStatusItems}
             onEdit={handleStartEdit}
@@ -562,6 +474,7 @@ function InvestPage() {
         </div>
       ) : (
         <div
+          aria-busy={todayInvestmentQuery.isFetching}
           className={[
             "-mb-[80px] flex flex-1 flex-col gap-5 bg-[var(--color-neutral-50)] px-5 pt-5",
             tradePageBottomPadding,
@@ -572,17 +485,7 @@ function InvestPage() {
             remainingBudget={remainingBudget}
           />
 
-          {sectorErrorMessage && (
-            <p className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-primary)]">
-              {sectorErrorMessage}
-            </p>
-          )}
-
-          {todayInvestmentErrorMessage && (
-            <p className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-primary)]">
-              {todayInvestmentErrorMessage}
-            </p>
-          )}
+          {queryFailureNotice}
 
           {confirmInvestmentErrorMessage && (
             <p className="text-[length:var(--text-caption-12-md)] leading-[var(--text-caption-12-md--line-height)] font-[var(--text-caption-12-md--font-weight)] text-[var(--color-primary)]">
@@ -672,10 +575,10 @@ function InvestPage() {
         isSubmitting={isSubmittingInvestment}
         items={confirmItems}
         totalAmount={totalInvestAmount}
-        onClose={() => {
-          if (!submissionLock.current) setIsConfirmSheetOpen(false);
+        onClose={closeConfirmation}
+        onConfirm={() => {
+          void handleSubmitInvestment();
         }}
-        onConfirm={handleSubmitInvestment}
       />
 
       <InvestCompleteModal

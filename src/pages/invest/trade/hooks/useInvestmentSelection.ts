@@ -103,7 +103,7 @@ export function useInvestmentSelection({
     [totalBudget, unitAmount],
   );
 
-  // 카드 신규 선택과 +/- 모두 최신 수량을 기준으로 같은 예산 제한을 적용한다.
+  // 증가는 예산으로 제한하고, 감소는 기존 수량에서 한 개씩 적용한다.
   const changeQuantity = useCallback(
     (delta: number) => {
       setSelection((current) => {

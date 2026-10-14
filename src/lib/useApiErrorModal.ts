@@ -11,6 +11,7 @@ import {
 interface UseApiErrorModalOptions {
   overridesByCode?: Record<string, Partial<ErrorMessageInfo>>;
   onRetry?: () => void;
+  useServerMessageForUnknownClientErrors?: boolean;
 }
 
 interface ApiErrorModalState {
@@ -22,6 +23,7 @@ interface ApiErrorModalState {
 export function useApiErrorModal({
   overridesByCode,
   onRetry,
+  useServerMessageForUnknownClientErrors = false,
 }: UseApiErrorModalOptions = {}) {
   const navigate = useNavigate();
   const [error, setError] = useState<ApiErrorModalState | null>(null);
@@ -34,7 +36,19 @@ export function useApiErrorModal({
       if (err instanceof ApiError) {
         setError({
           code: err.code,
-          info: getErrorMessage(err.code, overridesByCode?.[err.code]),
+          info: getErrorMessage(
+            err.code,
+            overridesByCode?.[err.code],
+            useServerMessageForUnknownClientErrors &&
+              /(^4\d\d$|_4\d\d_)/.test(err.code)
+              ? {
+                  description: err.message,
+                  primaryLabel: "확인",
+                  secondaryLabel: undefined,
+                  action: "close",
+                }
+              : undefined,
+          ),
           source: err,
         });
         return;
@@ -42,7 +56,7 @@ export function useApiErrorModal({
 
       setError({ info: DEFAULT_ERROR_MESSAGE, source: err });
     },
-    [overridesByCode],
+    [overridesByCode, useServerMessageForUnknownClientErrors],
   );
 
   const closeError = useCallback(() => {
