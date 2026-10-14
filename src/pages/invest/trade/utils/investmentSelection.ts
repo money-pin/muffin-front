@@ -4,12 +4,30 @@ import type {
   InvestAssetMeta,
   InvestmentQuantityMap,
   InvestmentSummaryItem,
+  TodayInvestmentResult,
 } from "@/pages/invest/trade/types/invest";
 
 function normalizeQuantity(quantity: number | undefined) {
   if (!Number.isFinite(quantity)) return 0;
 
   return Math.max(0, Math.floor(quantity ?? 0));
+}
+
+// 예산 누락은 0원과 구분한다. 알 수 없는 예산으로 재시도하지 않는다.
+export function getInvestmentBudget(data: TodayInvestmentResult | null) {
+  const remaining = data?.remainingAmount;
+  const invested = data?.totalAmount ?? data?.previousInvestment?.totalAmount;
+  if (
+    typeof remaining !== "number" ||
+    typeof invested !== "number" ||
+    !Number.isFinite(remaining) ||
+    !Number.isFinite(invested) ||
+    remaining < 0 ||
+    invested < 0
+  )
+    return null;
+  const total = remaining + invested;
+  return Number.isFinite(total) ? total : null;
 }
 
 export function getTotalInvestAmount(
@@ -70,11 +88,13 @@ export function updateInvestmentQuantity(
     unitAmount,
     totalBudget,
   );
-  const nextQuantity = Math.min(
-    normalizeQuantity(requestedQuantity),
-    maxQuantity,
-  );
   const currentQuantity = normalizeQuantity(quantities[assetId]);
+  const requested = normalizeQuantity(requestedQuantity);
+  // 예산이 줄어든 경우에도 감소는 요청한 만큼만 적용한다.
+  const nextQuantity =
+    requested <= currentQuantity
+      ? requested
+      : Math.max(currentQuantity, Math.min(requested, maxQuantity));
 
   if (nextQuantity === currentQuantity) return quantities;
 
@@ -126,6 +146,24 @@ export function createInvestmentRequest(
   });
 
   return { sectors };
+}
+
+// 서버 배열 순서와 무관하게 오늘의 확정 수량이 실패한 요청과 같은지 확인한다.
+export function isSameInvestmentRequest(
+  request: ConfirmInvestmentRequest,
+  sectors: readonly { sectorCode: string; quantity: number }[],
+) {
+  const actual = sectors.filter((item) => item.quantity > 0);
+  return (
+    actual.length === request.sectors.length &&
+    request.sectors.every((expected) =>
+      actual.some(
+        (item) =>
+          item.sectorCode === expected.sectorCode &&
+          item.quantity === expected.quantity,
+      ),
+    )
+  );
 }
 
 export function createInvestmentSummaryItems(

@@ -51,7 +51,7 @@ function InvestBottomAction({
         type="button"
         onClick={onReset}
         disabled={resetDisabled}
-        className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[12px] border-[0.7px] border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)]"
+        className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[12px] border-[0.7px] border-[var(--color-neutral-100)] bg-[var(--color-neutral-0)] disabled:opacity-40"
         aria-label="선택 초기화"
       >
         <img src={refreshIcon} alt="" className="h-6 w-6" />

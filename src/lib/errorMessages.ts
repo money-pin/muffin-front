@@ -268,9 +268,10 @@ const errorMessageMap: Record<string, ErrorMessageInfo> = {
 export function getErrorMessage(
   code: string,
   overrides?: Partial<ErrorMessageInfo>,
+  fallback?: Partial<ErrorMessageInfo>,
 ): ErrorMessageInfo {
   return {
-    ...(errorMessageMap[code] ?? DEFAULT_ERROR_MESSAGE),
+    ...(errorMessageMap[code] ?? { ...DEFAULT_ERROR_MESSAGE, ...fallback }),
     ...overrides,
   };
 }
