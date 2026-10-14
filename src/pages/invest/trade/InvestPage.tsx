@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
@@ -11,40 +11,28 @@ import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodaySt
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
 import ErrorModal from "@/components/common/ErrorModal";
 
-import { ApiError } from "@/lib/api";
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
-import { useApiErrorModal } from "@/lib/useApiErrorModal";
+import { useInvestmentSubmission } from "@/pages/invest/trade/hooks/useInvestmentSubmission";
+import { useInvestmentQueryError } from "@/pages/invest/trade/hooks/useInvestmentQueryError";
+import { INVESTMENT_AVAILABLE_STATUSES } from "@/pages/invest/trade/constants/investmentStatus";
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
-import { getTodayInvestment } from "@/pages/invest/trade/apis/investmentApi";
 import { useInvestmentSelection } from "@/pages/invest/trade/hooks/useInvestmentSelection";
 import {
   investmentQueryKeys,
-  useConfirmInvestmentMutation,
   useInvestmentSectorsQuery,
   useTodayInvestmentQuery,
-  useUpdateInvestmentMutation,
 } from "@/pages/invest/trade/investQueries";
 import {
-  createInvestmentRequest,
   createInvestmentSummaryItems,
   getInvestmentBudget,
-  getTotalInvestAmount,
-  isSameInvestmentRequest,
 } from "@/pages/invest/trade/utils/investmentSelection";
 
 import type {
   InvestAssetId,
   InvestmentQuantityMap,
-  ConfirmInvestmentRequest,
 } from "@/pages/invest/trade/types/invest";
 
 type InvestScreenMode = "weekend" | "trade" | "status";
-
-const INVESTMENT_AVAILABLE_STATUSES = new Set([
-  "AVAILABLE",
-  "CONFIRMED",
-  "CONFIRMED_EDITABLE",
-]);
 
 function getIsKstWeekend(date: Date) {
   const weekday = new Intl.DateTimeFormat("en-US", {
@@ -55,72 +43,17 @@ function getIsKstWeekend(date: Date) {
   return weekday === "Sat" || weekday === "Sun";
 }
 
-function getKstDateKey(date: Date) {
-  return new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Seoul" }).format(
-    date,
-  );
-}
-
 function InvestPage() {
   const queryClient = useQueryClient();
 
   const investmentSectorsQuery = useInvestmentSectorsQuery();
   const todayInvestmentQuery = useTodayInvestmentQuery();
-  const confirmInvestmentMutation = useConfirmInvestmentMutation();
-  const updateInvestmentMutation = useUpdateInvestmentMutation();
 
   const sectorData = investmentSectorsQuery.data ?? null;
   const todayInvestmentData = todayInvestmentQuery.data ?? null;
 
-  const [isRetryingQuery, setIsRetryingQuery] = useState(false);
-  const queryRetryLock = useRef(false);
-  const notifiedErrors = useRef({ today: false, sectors: false });
-  const failedSubmission = useRef<{
-    body: ConfirmInvestmentRequest;
-    quantities: InvestmentQuantityMap;
-    isEdit: boolean;
-    dateKey: string;
-  } | null>(null);
-
-  // 동일 조회의 연속 실패는 한 번만 모달로 알리고 인라인 재시도를 유지한다.
-  // (랭킹·통계 화면과 동일한 useApiErrorModal + ErrorModal 패턴)
-  const {
-    error: apiErrorState,
-    showError: showApiError,
-    closeError: closeApiError,
-    handlePrimaryAction: handleApiErrorAction,
-  } = useApiErrorModal({
-    onRetry: () => {
-      void retryQueries();
-    },
-  });
-
-  // 응답 유실 가능성이 있는 제출은 서버 반영 여부부터 확인한다.
-  const {
-    error: investmentErrorState,
-    showError: showInvestmentError,
-    closeError: closeInvestmentError,
-    handlePrimaryAction: handleInvestmentErrorAction,
-  } = useApiErrorModal({
-    useServerMessageForUnknownClientErrors: true,
-    onRetry: () => {
-      void handleSubmitInvestment(true);
-    },
-  });
-
   const [now, setNow] = useState(() => new Date());
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-  // 제출 성공 직후 재조회가 끝나기 전까지 표시할 내역. 이후에는 서버 응답을 사용한다.
-  const [submittedInvestment, setSubmittedInvestment] = useState<{
-    sourceUpdateCount: number;
-    quantities: InvestmentQuantityMap;
-  } | null>(null);
-  const [isConfirmSheetOpen, setIsConfirmSheetOpen] = useState(false);
-  const [confirmInvestmentErrorMessage, setConfirmInvestmentErrorMessage] =
-    useState("");
-  const submissionLock = useRef(false);
-  const [isSubmittingInvestment, setIsSubmittingInvestment] = useState(false);
 
   useEffect(() => {
     const refreshTimeAndStatus = () => {
@@ -206,19 +139,6 @@ function InvestPage() {
       ),
     [assetBySectorCode, todayInvestmentSectors],
   );
-  const pendingConfirmedQuantities =
-    isInvestmentAvailable &&
-    submittedInvestment !== null &&
-    submittedInvestment.sourceUpdateCount ===
-      queryClient.getQueryState(investmentQueryKeys.today())?.dataUpdateCount
-      ? submittedInvestment.quantities
-      : null;
-  const confirmedQuantities = pendingConfirmedQuantities ?? serverQuantities;
-  const hasConfirmedInvestment =
-    hasServerInvestment || Object.keys(confirmedQuantities).length > 0;
-  const canEditTodayInvestment =
-    hasConfirmedInvestment && isInvestmentAvailable;
-
   const serverTotalBudget = getInvestmentBudget(todayInvestmentData) ?? 0;
 
   const {
@@ -240,6 +160,40 @@ function InvestPage() {
     resetSelection,
   } = useInvestmentSelection({ unitAmount, totalBudget: serverTotalBudget });
 
+  const {
+    isSubmittingInvestment,
+    isConfirmSheetOpen,
+    setIsConfirmSheetOpen,
+    isCompleteModalOpen,
+    setIsCompleteModalOpen,
+    confirmInvestmentErrorMessage,
+    setConfirmInvestmentErrorMessage,
+    pendingConfirmedQuantities,
+    investmentErrorState,
+    closeInvestmentError,
+    handleInvestmentErrorAction,
+    handleSubmitInvestment,
+    closeConfirmation,
+  } = useInvestmentSubmission({
+    assetQuantities,
+    assetById,
+    unitAmount,
+    isEditMode,
+    isInvestmentAvailable,
+    isWeekend,
+    isWithinBudget,
+    onConfirmed: (quantities) => {
+      replaceQuantities(quantities);
+      setIsEditMode(false);
+    },
+  });
+
+  const confirmedQuantities = pendingConfirmedQuantities ?? serverQuantities;
+  const hasConfirmedInvestment =
+    hasServerInvestment || Object.keys(confirmedQuantities).length > 0;
+  const canEditTodayInvestment =
+    hasConfirmedInvestment && isInvestmentAvailable;
+
   useEffect(() => {
     if (!isWeekend && isInvestmentAvailable) return;
 
@@ -248,7 +202,12 @@ function InvestPage() {
       setIsConfirmSheetOpen(false);
       closeInvestmentError();
     });
-  }, [isInvestmentAvailable, isWeekend, closeInvestmentError]);
+  }, [
+    isInvestmentAvailable,
+    isWeekend,
+    closeInvestmentError,
+    setIsConfirmSheetOpen,
+  ]);
 
   const selectedAsset = useMemo(() => {
     return selectedAssetId ? assetById.get(selectedAssetId) : undefined;
@@ -299,58 +258,18 @@ function InvestPage() {
   })();
 
   const needsSectorData = screenMode === "trade";
-  const relevantQueryFailed =
-    todayInvestmentQuery.isError ||
-    (needsSectorData && investmentSectorsQuery.isError);
-
-  async function retryQueries() {
-    if (queryRetryLock.current) return;
-    queryRetryLock.current = true;
-    setIsRetryingQuery(true);
-    notifiedErrors.current = { today: false, sectors: false };
-    try {
-      await Promise.all([
-        todayInvestmentQuery.refetch({ cancelRefetch: false }),
-        ...(needsSectorData
-          ? [investmentSectorsQuery.refetch({ cancelRefetch: false })]
-          : []),
-      ]);
-    } finally {
-      queryRetryLock.current = false;
-      setIsRetryingQuery(false);
-    }
-  }
-
-  useEffect(() => {
-    if (todayInvestmentQuery.isSuccess) notifiedErrors.current.today = false;
-    if (investmentSectorsQuery.isSuccess)
-      notifiedErrors.current.sectors = false;
-    if (todayInvestmentQuery.isError && !notifiedErrors.current.today) {
-      notifiedErrors.current.today = true;
-      queueMicrotask(() => showApiError(todayInvestmentQuery.error));
-    } else if (
-      needsSectorData &&
-      investmentSectorsQuery.isError &&
-      !notifiedErrors.current.sectors
-    ) {
-      notifiedErrors.current.sectors = true;
-      queueMicrotask(() => showApiError(investmentSectorsQuery.error));
-    }
-  }, [
-    todayInvestmentQuery.isSuccess,
-    todayInvestmentQuery.isError,
-    todayInvestmentQuery.error,
-    investmentSectorsQuery.isSuccess,
-    investmentSectorsQuery.isError,
-    investmentSectorsQuery.error,
+  const {
+    apiErrorState,
+    closeApiError,
+    handleApiErrorAction,
+    isRetryingQuery,
+    relevantQueryFailed,
+    retryQueries,
+  } = useInvestmentQueryError({
+    todayInvestmentQuery,
+    investmentSectorsQuery,
     needsSectorData,
-    showApiError,
-  ]);
-
-  useEffect(() => {
-    if (apiErrorState && !relevantQueryFailed && !isRetryingQuery)
-      queueMicrotask(closeApiError);
-  }, [apiErrorState, relevantQueryFailed, isRetryingQuery, closeApiError]);
+  });
 
   const hasAssetCountBar = Boolean(selectedAsset && selectedQuantity > 0);
   const isEditChanged = isEditMode && isChanged;
@@ -407,138 +326,6 @@ function InvestPage() {
 
     setConfirmInvestmentErrorMessage("");
     setIsConfirmSheetOpen(true);
-  };
-
-  const handleSubmitInvestment = async (retry = false) => {
-    if (submissionLock.current || !isInvestmentAvailable || isWeekend) return;
-
-    const pending = failedSubmission.current;
-    const quantities = retry && pending ? pending.quantities : assetQuantities;
-    const requestBody =
-      retry && pending
-        ? pending.body
-        : createInvestmentRequest(quantities, assetById);
-    const isEdit = retry && pending ? pending.isEdit : isEditMode;
-
-    if (requestBody.sectors.length === 0) {
-      setConfirmInvestmentErrorMessage("하나 이상의 섹터를 선택해주세요.");
-      setIsConfirmSheetOpen(false);
-      return;
-    }
-
-    if (!pending && !isWithinBudget) {
-      setConfirmInvestmentErrorMessage(
-        "투자 가능 금액을 확인하고 수량을 조정해주세요.",
-      );
-      setIsConfirmSheetOpen(false);
-      return;
-    }
-
-    try {
-      submissionLock.current = true;
-      setIsSubmittingInvestment(true);
-      setConfirmInvestmentErrorMessage("");
-
-      if (pending) {
-        if (pending.dateKey !== getKstDateKey(new Date())) {
-          failedSubmission.current = null;
-          throw new ApiError(
-            "투자 날짜가 바뀌었어요. 오늘 내역을 다시 확인해주세요.",
-            "INVESTMENT_400_001",
-          );
-        }
-        // 실패한 제출 전에 시작된 GET을 재사용하면 오래된 내역으로 재전송할 수 있다.
-        await queryClient.cancelQueries({
-          queryKey: investmentQueryKeys.today(),
-        });
-        // 제출 재시도는 오프라인에서도 대기열에 남기지 않고 즉시 실패 처리한다.
-        const checked = await queryClient.fetchQuery({
-          queryKey: investmentQueryKeys.today(),
-          queryFn: getTodayInvestment,
-          staleTime: 0,
-          retry: false,
-          networkMode: "always",
-        });
-        // 이전 날짜의 previousInvestment는 오늘 요청의 성공 증거로 쓰지 않는다.
-        const alreadySaved = isSameInvestmentRequest(
-          requestBody,
-          checked.sectors ?? [],
-        );
-        if (alreadySaved) {
-          // 현재 확정하려는 수량과 일치할 때만 완료로 처리한다.
-          failedSubmission.current = null;
-          replaceQuantities(quantities);
-          setIsEditMode(false);
-          setIsConfirmSheetOpen(false);
-          closeInvestmentError();
-          setIsCompleteModalOpen(true);
-          return;
-        }
-        if (!INVESTMENT_AVAILABLE_STATUSES.has(checked.status)) {
-          failedSubmission.current = null;
-          throw new ApiError(
-            "현재는 투자할 수 없는 시간이에요.",
-            "INVESTMENT_400_001",
-          );
-        }
-        if (
-          !isEdit &&
-          (checked.status !== "AVAILABLE" ||
-            (checked.sectors ?? []).some((item) => item.quantity > 0))
-        ) {
-          failedSubmission.current = null;
-          throw new ApiError(
-            "이미 확정된 투자 내역을 확인해주세요.",
-            "INVESTMENT_409_001",
-          );
-        }
-        const budget = getInvestmentBudget(checked);
-        if (budget === null)
-          throw new Error("투자 가능 금액을 확인하지 못했어요.");
-        if (getTotalInvestAmount(quantities, unitAmount) > budget) {
-          throw new ApiError(
-            "투자 가능 금액을 확인해주세요.",
-            "INVESTMENT_400_003",
-          );
-        }
-      }
-      failedSubmission.current = {
-        body: requestBody,
-        quantities: { ...quantities },
-        isEdit,
-        dateKey: getKstDateKey(new Date()),
-      };
-      if (isEdit) {
-        await updateInvestmentMutation.mutateAsync(requestBody);
-      } else {
-        await confirmInvestmentMutation.mutateAsync(requestBody);
-      }
-      failedSubmission.current = null;
-      // 진행 중인 이전 조회를 취소한 뒤, 다음 조회 성공까지 확정 수량을 유지한다.
-      await queryClient.cancelQueries({
-        queryKey: investmentQueryKeys.today(),
-      });
-      setSubmittedInvestment({
-        sourceUpdateCount:
-          queryClient.getQueryState(investmentQueryKeys.today())
-            ?.dataUpdateCount ?? 0,
-        quantities: { ...quantities },
-      });
-      replaceQuantities(quantities);
-      setIsEditMode(false);
-      setIsConfirmSheetOpen(false);
-      closeInvestmentError();
-      setIsCompleteModalOpen(true);
-      void queryClient.invalidateQueries({
-        queryKey: investmentQueryKeys.today(),
-      });
-    } catch (error) {
-      setIsConfirmSheetOpen(false);
-      showInvestmentError(error);
-    } finally {
-      submissionLock.current = false;
-      setIsSubmittingInvestment(false);
-    }
   };
 
   const handleCompleteModalConfirm = () => {
@@ -788,9 +575,7 @@ function InvestPage() {
         isSubmitting={isSubmittingInvestment}
         items={confirmItems}
         totalAmount={totalInvestAmount}
-        onClose={() => {
-          if (!submissionLock.current) setIsConfirmSheetOpen(false);
-        }}
+        onClose={closeConfirmation}
         onConfirm={() => {
           void handleSubmitInvestment();
         }}

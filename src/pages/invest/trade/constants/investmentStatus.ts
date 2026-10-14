@@ -1,0 +1,5 @@
+export const INVESTMENT_AVAILABLE_STATUSES = new Set([
+  "AVAILABLE",
+  "CONFIRMED",
+  "CONFIRMED_EDITABLE",
+]);
