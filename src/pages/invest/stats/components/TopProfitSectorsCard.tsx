@@ -43,7 +43,7 @@ export default function TopProfitSectorsCard({
         draggable={false}
       />
       <h2 className="text-body-16-bd-tighter leading-[1.6] text-neutral-900">
-        수익 TOP 3 섹터
+        매매수익률 TOP3 섹터
       </h2>
     </div>
   );

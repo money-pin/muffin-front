@@ -68,7 +68,7 @@ export default function StatsPageSkeleton() {
               draggable={false}
             />
             <h2 className="text-body-16-bd-tighter truncate text-neutral-900">
-              총 누적 수익
+              누적 투자 수익률
             </h2>
           </div>
           <SkeletonBlock className="h-6 w-full max-w-[215px]" />
@@ -111,7 +111,7 @@ export default function StatsPageSkeleton() {
             draggable={false}
           />
           <h2 className="text-body-16-bd-tighter text-neutral-900">
-            수익 TOP 3 섹터
+            매매수익률 TOP3 섹터
           </h2>
         </div>
         <div className="flex flex-col gap-1">

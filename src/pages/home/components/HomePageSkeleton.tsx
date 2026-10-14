@@ -66,7 +66,7 @@ export default function HomePageSkeleton() {
         </div>
       </div>
 
-      {/* 흰색 라운드 시트: 퀴즈 배너 · 금융 소식 · 수익 TOP3 */}
+      {/* 흰색 라운드 시트: 퀴즈 배너 · 금융 소식 · 매매수익률 TOP3 */}
       <div className="mt-7 flex flex-1 flex-col gap-9 rounded-t-[24px] bg-white pt-6 pb-9 shadow-[0_-3px_5px_-3px_rgba(0,0,0,0.08)]">
         <div className="px-5">
           <SkeletonBlock className="h-[69px] w-full rounded-[12px]" />
@@ -99,7 +99,7 @@ export default function HomePageSkeleton() {
         <section className="flex flex-col gap-2 px-5">
           <div className="px-1">
             <SectionHeader
-              title="수익 TOP 3 섹터"
+              title="매매수익률 TOP3 섹터"
               icon={
                 <img
                   src={rankingIcon}

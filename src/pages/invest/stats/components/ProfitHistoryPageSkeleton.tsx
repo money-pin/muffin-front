@@ -41,7 +41,7 @@ export default function ProfitHistoryPageSkeleton({
   return (
     <div
       aria-busy="true"
-      aria-label="누적 수익 내역을 불러오는 중"
+      aria-label="기간 매매수익률을 불러오는 중"
       className="flex flex-1 flex-col"
     >
       <section className="bg-neutral-0 flex flex-col gap-5 px-5 py-6">

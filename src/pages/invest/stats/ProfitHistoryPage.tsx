@@ -76,7 +76,7 @@ export default function ProfitHistoryPage() {
   };
 
   useEffect(() => {
-    setTopBar({ title: "누적 수익 내역", showBack: true });
+    setTopBar({ title: "기간 매매수익률", showBack: true });
     return resetTopBar;
   }, [setTopBar, resetTopBar]);
 
@@ -90,7 +90,7 @@ export default function ProfitHistoryPage() {
 
   return (
     <main className="flex min-h-[calc(100dvh-56px)] flex-col bg-neutral-50">
-      <h1 className="sr-only">누적 수익 내역</h1>
+      <h1 className="sr-only">기간 매매수익률</h1>
 
       <ProfitHistoryPeriodTabs value={period} onChange={changePeriod} />
 

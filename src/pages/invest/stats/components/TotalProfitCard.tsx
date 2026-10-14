@@ -32,7 +32,7 @@ export default function TotalProfitCard({
             draggable={false}
           />
           <h2 className="text-body-16-bd-tighter leading-[1.6] text-neutral-900">
-            총 누적 수익
+            누적 투자 수익률
           </h2>
         </div>
 
