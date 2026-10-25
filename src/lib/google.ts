@@ -44,8 +44,13 @@ export function loadGoogleIdentity(): Promise<GoogleIdentity> {
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      if (window.google) resolve(window.google);
-      else reject(new Error("구글 로그인 초기화에 실패했어요."));
+      if (window.google) {
+        resolve(window.google);
+        return;
+      }
+      // 다시 시도할 수 있도록 실패한 로드는 캐시하지 않는다
+      loadPromise = null;
+      reject(new Error("구글 로그인 초기화에 실패했어요."));
     };
     script.onerror = () => {
       loadPromise = null;
