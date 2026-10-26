@@ -25,28 +25,31 @@ function InvestAssetCard({
   return (
     <button
       type="button"
+      aria-pressed={isSelected}
       onClick={onClick}
       className={[
-        "relative flex h-[98px] w-full max-w-[88px] min-w-0 flex-col items-center justify-center gap-1 justify-self-center rounded-[12px] border-2 bg-[var(--color-neutral-0)]",
+        "bg-neutral-0 relative flex h-[98px] w-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl border-2 transition-colors duration-300 ease-[ease-out] motion-reduce:transition-none",
         isSelected
           ? "border-[var(--color-primary)]"
           : "border-[var(--color-neutral-0)]",
       ].join(" ")}
     >
       {showBadge && (
-        <span className="text-body-14-bd absolute top-[6px] right-[6px] flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary)] text-center leading-none text-[var(--color-neutral-0)]">
+        <span className="text-body-14-bd bg-primary text-neutral-0 absolute top-[6px] right-[6px] flex size-6 shrink-0 items-center justify-center rounded-full text-center leading-none">
           {quantity}
         </span>
       )}
 
-      <img src={isActive ? activeIcon : icon} alt="" className="h-12 w-12" />
+      <img
+        src={isActive ? activeIcon : icon}
+        alt=""
+        className="size-12 shrink-0 object-contain"
+      />
 
       <span
         className={[
-          "text-[length:var(--text-body-14-md-tighter)] leading-[var(--text-body-14-md-tighter--line-height)] font-[var(--text-body-14-md-tighter--font-weight)]",
-          isActive
-            ? "text-[var(--color-neutral-900)]"
-            : "text-[var(--color-neutral-400)]",
+          "text-body-14-md-tighter max-w-full truncate px-1 transition-colors duration-300 ease-[ease-out] motion-reduce:transition-none",
+          isActive ? "text-neutral-900" : "text-neutral-600",
         ].join(" ")}
       >
         {name}
