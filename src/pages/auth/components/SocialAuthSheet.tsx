@@ -49,11 +49,22 @@ export default function SocialAuthSheet({
   mode,
 }: SocialAuthSheetProps) {
   const navigate = useNavigate();
+  // 로그인 결과·준비 중인 소셜 안내 (서버 로그인 실패 포함)
   const [notice, setNotice] = useState<Notice>(null);
+  // 구글 로그인 준비 상태 안내 (준비가 끝나면 GoogleLoginButton이 해제)
+  const [googleReadinessNotice, setGoogleReadinessNotice] = useState<
+    string | null
+  >(null);
   const copy = COPY[mode];
+  const visibleNotice: Notice =
+    notice ??
+    (googleReadinessNotice
+      ? { tone: "error", message: googleReadinessNotice }
+      : null);
 
   const handleGoogleCredential = async (idToken: string) => {
     setNotice(null);
+    setGoogleReadinessNotice(null);
 
     try {
       const { accessToken } = await apiRequest<AuthResult>("/auth/google", {
@@ -77,6 +88,7 @@ export default function SocialAuthSheet({
 
   // TODO(#279): 카카오·애플 로그인 API 연동 후 교체
   const showUnavailable = (providerName: string) => {
+    setGoogleReadinessNotice(null);
     setNotice({
       tone: "info",
       message: `${providerName} 로그인은 준비 중이에요.`,
@@ -85,6 +97,7 @@ export default function SocialAuthSheet({
 
   const handleClose = () => {
     setNotice(null);
+    setGoogleReadinessNotice(null);
     onClose();
   };
 
@@ -115,7 +128,11 @@ export default function SocialAuthSheet({
           <GoogleLoginButton
             label={`Google로 ${copy.action}`}
             onCredential={handleGoogleCredential}
-            onError={(message) => setNotice({ tone: "error", message })}
+            onReadinessNotice={(message) => {
+              // 구글 버튼을 누른 경우 가장 최근 안내만 보이도록 이전 안내를 지운다
+              if (message) setNotice(null);
+              setGoogleReadinessNotice(message);
+            }}
           />
         </div>
 
@@ -123,14 +140,16 @@ export default function SocialAuthSheet({
           회원가입 시 이용약관 및 개인정보 처리방침에 동의합니다.
         </p>
 
-        {notice && (
+        {visibleNotice && (
           <p
             role="status"
             className={`text-caption-12-md-tighter text-center ${
-              notice.tone === "error" ? "text-positive" : "text-neutral-600"
+              visibleNotice.tone === "error"
+                ? "text-positive"
+                : "text-neutral-600"
             }`}
           >
-            {notice.message}
+            {visibleNotice.message}
           </p>
         )}
       </div>

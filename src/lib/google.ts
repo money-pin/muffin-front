@@ -11,6 +11,7 @@ interface GoogleButtonOptions {
   theme?: "outline" | "filled_blue" | "filled_black";
   size?: "small" | "medium" | "large";
   width?: number;
+  locale?: string;
 }
 
 interface GoogleAccountsId {
