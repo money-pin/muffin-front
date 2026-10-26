@@ -28,7 +28,7 @@ export default function InvestHeader() {
 
   return (
     <>
-      <header>
+      <header data-invest-summary-header>
         <InvestAssetSummary
           totalAsset={asset?.totalAsset}
           profitAmount={profitAmount}
@@ -39,7 +39,10 @@ export default function InvestHeader() {
         />
       </header>
 
-      <div className="bg-neutral-0 sticky -top-px z-20 w-full shadow-[0_4px_2px_rgba(0,0,0,0.05)]">
+      <div
+        data-invest-sticky-tabs
+        className="bg-neutral-0 sticky -top-px z-20 w-full shadow-[0_4px_2px_rgba(0,0,0,0.05)]"
+      >
         <InvestTabBar />
       </div>
     </>
