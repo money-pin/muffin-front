@@ -8,6 +8,7 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
+  ariaLabel?: string;
 
   showCloseButton?: boolean;
   sideOffsetClassName?: string;
@@ -19,6 +20,7 @@ function Modal({
   isOpen,
   onClose,
   children,
+  ariaLabel,
   showCloseButton = false,
   sideOffsetClassName = "px-5",
   className = "rounded-[20px] px-6 py-8",
@@ -40,6 +42,7 @@ function Modal({
             <section
               role="dialog"
               aria-modal="true"
+              aria-label={ariaLabel}
               className={[
                 "relative w-full bg-[var(--color-neutral-0)]",
                 className,

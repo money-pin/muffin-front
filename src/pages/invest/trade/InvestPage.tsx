@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useBottomNavigationVisibility } from "@/layouts/bottomNavigationContext";
 
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
@@ -11,6 +12,8 @@ import InvestCompleteModal from "@/pages/invest/trade/components/InvestCompleteM
 import InvestConfirmBottomSheet from "@/pages/invest/trade/components/InvestConfirmBottomSheet";
 import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodayStatusPage";
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
+import InvestSectorGuideModal from "@/pages/invest/trade/components/InvestSectorGuideModal";
+import InvestSectorGuide from "@/pages/invest/trade/components/InvestSectorGuide";
 import ErrorModal from "@/components/common/ErrorModal";
 
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
@@ -46,6 +49,28 @@ function getIsKstWeekend(date: Date) {
 }
 
 function InvestPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isSectorGuidePromptOpen, setIsSectorGuidePromptOpen] = useState(false);
+  const isSectorGuideOpen = searchParams.get("guide") === "sectors";
+  const openSectorGuide = () => {
+    setIsSectorGuidePromptOpen(false);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("guide", "sectors");
+    setSearchParams(nextParams, {
+      state: { ...location.state, sectorGuideFromInvest: true },
+    });
+  };
+  const closeSectorGuide = () => {
+    if (location.state?.sectorGuideFromInvest) {
+      navigate(-1);
+    } else {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("guide");
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
   const queryClient = useQueryClient();
   const countBarRef = useRef<HTMLDivElement>(null);
   const bottomActionRef = useRef<HTMLDivElement>(null);
@@ -579,6 +604,16 @@ function InvestPage() {
             ))}
           </InvestAssetSectionLayout>
 
+          <div className="flex w-full justify-center">
+            <button
+              type="button"
+              onClick={() => setIsSectorGuidePromptOpen(true)}
+              className="text-caption-12-md-tighter min-h-11 rounded-xl border-[0.7px] border-neutral-100 bg-white/[0.08] px-3 text-neutral-600"
+            >
+              섹터별 종목 확인하기
+            </button>
+          </div>
+
           {selectedAsset && selectedQuantity > 0 && (
             <InvestAssetCountBar
               key={selectedAsset.id}
@@ -642,6 +677,12 @@ function InvestPage() {
         onClose={() => setIsCompleteModalOpen(false)}
         onConfirm={handleCompleteModalConfirm}
       />
+      <InvestSectorGuideModal
+        isOpen={isSectorGuidePromptOpen}
+        onClose={() => setIsSectorGuidePromptOpen(false)}
+        onView={openSectorGuide}
+      />
+      {isSectorGuideOpen && <InvestSectorGuide onClose={closeSectorGuide} />}
       {apiErrorModal}
       <ErrorModal
         isOpen={!!investmentErrorState}
