@@ -1,9 +1,13 @@
+import type { ButtonHTMLAttributes } from "react";
+
 export type SocialProvider = "kakao" | "apple" | "google";
 
-interface SocialLoginButtonProps {
+interface SocialLoginButtonProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "type" | "children"
+> {
   provider: SocialProvider;
   label: string;
-  onClick?: () => void;
 }
 
 // 브랜드 가이드 색상(카카오 #FEE500, 애플 #050708, 구글 텍스트 #1F1F1F)은 디자인 토큰이 아니라
@@ -69,15 +73,16 @@ const PROVIDER_ICON: Record<SocialProvider, () => React.JSX.Element> = {
 export default function SocialLoginButton({
   provider,
   label,
-  onClick,
+  className = "",
+  ...buttonProps
 }: SocialLoginButtonProps) {
   const Icon = PROVIDER_ICON[provider];
 
   return (
     <button
       type="button"
-      onClick={onClick}
-      className={`text-body-16-md-tighter flex h-12 w-full items-center justify-center gap-2 rounded-[30px] ${PROVIDER_CLASS[provider]}`}
+      {...buttonProps}
+      className={`text-body-16-md-tighter flex h-12 w-full items-center justify-center gap-2 rounded-[30px] ${PROVIDER_CLASS[provider]} ${className}`}
     >
       <Icon />
       {label}
