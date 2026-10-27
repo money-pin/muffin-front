@@ -127,6 +127,7 @@ export default function SocialAuthSheet({
           />
           <GoogleLoginButton
             label={`Google로 ${copy.action}`}
+            text={mode === "signup" ? "continue_with" : "signin_with"}
             onCredential={handleGoogleCredential}
             onReadinessNotice={(message) => {
               // 구글 버튼을 누른 경우 가장 최근 안내만 보이도록 이전 안내를 지운다
