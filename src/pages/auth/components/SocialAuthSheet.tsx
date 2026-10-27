@@ -1,12 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import BottomSheet from "@/components/common/BottomSheet";
 import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import SocialLoginButton from "@/components/common/SocialLoginButton";
-import { apiRequest } from "@/lib/api";
-import { saveAccessToken } from "@/lib/auth";
-import { resolveEntryRoute } from "@/lib/mypageApi";
 
 type SocialAuthMode = "signup" | "login";
 
@@ -14,6 +10,8 @@ interface SocialAuthSheetProps {
   isOpen: boolean;
   onClose: () => void;
   mode: SocialAuthMode;
+  // 시트를 열 때 바로 보여줄 안내 (구글 로그인 실패 후 돌아온 경우)
+  initialNotice?: string;
 }
 
 const COPY: Record<
@@ -32,63 +30,26 @@ const COPY: Record<
   },
 };
 
-// POST /auth/google 응답 result
-interface AuthResult {
-  accessToken: string;
-}
-
 type Notice = { tone: "info" | "error"; message: string } | null;
 
 // 소셜 로그인 시트 (Figma 런칭 전 수정: 회원가입·로그인)
 // 가입·로그인 모두 같은 API를 쓰고, 이후 분기는 resolveEntryRoute가 맡는다.
 // - 처음 가입: 온보딩 미완료 → /onboarding (닉네임부터)
 // - 기존 회원: /home
+// 구글은 로그인 페이지로 이동했다가 GoogleCallbackPage에서 마무리한다. (#291)
 export default function SocialAuthSheet({
   isOpen,
   onClose,
   mode,
+  initialNotice,
 }: SocialAuthSheetProps) {
-  const navigate = useNavigate();
-  // 로그인 결과·준비 중인 소셜 안내 (서버 로그인 실패 포함)
-  const [notice, setNotice] = useState<Notice>(null);
-  // 구글 로그인 준비 상태 안내 (준비가 끝나면 GoogleLoginButton이 해제)
-  const [googleReadinessNotice, setGoogleReadinessNotice] = useState<
-    string | null
-  >(null);
+  const [notice, setNotice] = useState<Notice>(
+    initialNotice ? { tone: "error", message: initialNotice } : null,
+  );
   const copy = COPY[mode];
-  const visibleNotice: Notice =
-    notice ??
-    (googleReadinessNotice
-      ? { tone: "error", message: googleReadinessNotice }
-      : null);
-
-  const handleGoogleCredential = async (idToken: string) => {
-    setNotice(null);
-    setGoogleReadinessNotice(null);
-
-    try {
-      const { accessToken } = await apiRequest<AuthResult>("/auth/google", {
-        method: "POST",
-        body: { idToken },
-      });
-
-      saveAccessToken(accessToken);
-      const entryRoute = await resolveEntryRoute();
-      navigate(entryRoute, { replace: true });
-    } catch (error) {
-      setNotice({
-        tone: "error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "구글 로그인에 실패했어요. 잠시 후 다시 시도해주세요.",
-      });
-    }
-  };
 
   // TODO(#279): 카카오·애플 로그인 API 연동 후 교체
   const showUnavailable = (providerName: string) => {
-    setGoogleReadinessNotice(null);
     setNotice({
       tone: "info",
       message: `${providerName} 로그인은 준비 중이에요.`,
@@ -97,7 +58,6 @@ export default function SocialAuthSheet({
 
   const handleClose = () => {
     setNotice(null);
-    setGoogleReadinessNotice(null);
     onClose();
   };
 
@@ -127,13 +87,7 @@ export default function SocialAuthSheet({
           />
           <GoogleLoginButton
             label={`Google로 ${copy.action}`}
-            text={mode === "signup" ? "continue_with" : "signin_with"}
-            onCredential={handleGoogleCredential}
-            onReadinessNotice={(message) => {
-              // 구글 버튼을 누른 경우 가장 최근 안내만 보이도록 이전 안내를 지운다
-              if (message) setNotice(null);
-              setGoogleReadinessNotice(message);
-            }}
+            onUnavailable={(message) => setNotice({ tone: "error", message })}
           />
         </div>
 
@@ -141,16 +95,14 @@ export default function SocialAuthSheet({
           회원가입 시 이용약관 및 개인정보 처리방침에 동의합니다.
         </p>
 
-        {visibleNotice && (
+        {notice && (
           <p
             role="status"
             className={`text-caption-12-md-tighter text-center ${
-              visibleNotice.tone === "error"
-                ? "text-positive"
-                : "text-neutral-600"
+              notice.tone === "error" ? "text-positive" : "text-neutral-600"
             }`}
           >
-            {visibleNotice.message}
+            {notice.message}
           </p>
         )}
       </div>

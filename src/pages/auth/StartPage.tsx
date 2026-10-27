@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Button from "@/components/common/Button";
 import Logo from "@/components/common/Logo";
 import MuffinVideo from "@/components/common/MuffinVideo";
 import { ONBOARDING_START_VIDEO } from "@/lib/characterVideos";
 import { prefersReducedMotion } from "@/lib/motion";
+import type { AuthErrorState } from "./GoogleCallbackPage";
 import SocialAuthSheet from "./components/SocialAuthSheet";
 
 const BUBBLE_TEXT = "오늘 코스피는 왜 내렸을까?";
@@ -63,7 +64,16 @@ function SpeechBubble() {
 // [시작하기] → 서비스 소개, [로그인하기] → 소셜 로그인 시트
 function StartPage() {
   const navigate = useNavigate();
-  const [isLoginSheetOpen, setIsLoginSheetOpen] = useState(false);
+  const location = useLocation();
+  // 구글 로그인에 실패하고 돌아오면 로그인 시트를 열고 이유를 보여준다 (#291)
+  const authError = (location.state as AuthErrorState | null)?.authError;
+  const [isLoginSheetOpen, setIsLoginSheetOpen] = useState(Boolean(authError));
+
+  const handleLoginSheetClose = () => {
+    setIsLoginSheetOpen(false);
+    // 새로고침 때 실패 안내가 다시 뜨지 않도록 기록에서 지운다
+    if (authError) navigate(location.pathname, { replace: true, state: null });
+  };
 
   return (
     // 배경: 화면 아래쪽에서 퍼지는 복숭아빛 원형 그라데이션 (Figma 온보딩 배경)
@@ -103,8 +113,9 @@ function StartPage() {
 
       <SocialAuthSheet
         isOpen={isLoginSheetOpen}
-        onClose={() => setIsLoginSheetOpen(false)}
+        onClose={handleLoginSheetClose}
         mode="login"
+        initialNotice={authError}
       />
     </main>
   );
