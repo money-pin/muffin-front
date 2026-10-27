@@ -12,6 +12,9 @@ interface GoogleButtonOptions {
   size?: "small" | "medium" | "large";
   width?: number;
   locale?: string;
+  text?: "signin_with" | "signup_with" | "continue_with" | "signin";
+  shape?: "rectangular" | "pill" | "circle" | "square";
+  logo_alignment?: "left" | "center";
 }
 
 interface GoogleAccountsId {
