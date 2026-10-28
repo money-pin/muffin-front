@@ -70,8 +70,11 @@ function InvestAssetCountBar({
     inputRef,
   );
   const isDraftValid = !getQuantityError(draft, maxQuantity);
-  const displayedAmount =
-    isEditing && isDraftValid ? Number(draft) * unitAmount : totalAmount;
+  const displayedAmount = !isEditing
+    ? totalAmount
+    : isDraftValid
+      ? Number(draft) * unitAmount
+      : null;
   const increaseEnabled =
     !disabled &&
     (isEditing ? isDraftValid && Number(draft) < maxQuantity : canIncrease);
@@ -142,7 +145,11 @@ function InvestAssetCountBar({
                 {name}
               </strong>
               <span className="text-body-14-md shrink-0 whitespace-nowrap text-neutral-700">
-                ({formatNumber(displayedAmount)}원)
+                (
+                {displayedAmount === null
+                  ? " - "
+                  : formatNumber(displayedAmount)}
+                원)
               </span>
             </div>
 
