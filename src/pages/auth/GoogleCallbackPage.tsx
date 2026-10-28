@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/api";
 import { saveAccessToken } from "@/lib/auth";
 import { readGoogleCallback } from "@/lib/google";
 import { resolveEntryRoute } from "@/lib/mypageApi";
+import HomePageSkeleton from "@/pages/home/components/HomePageSkeleton";
 
 // POST /auth/google 응답 result
 interface AuthResult {
@@ -20,7 +21,7 @@ const DEFAULT_ERROR_MESSAGE =
 
 // 구글 로그인 후 돌아오는 화면 (#291)
 // ID 토큰을 앱 토큰으로 바꾼 뒤 처음 가입이면 /onboarding, 기존 회원이면 /home으로 보낸다.
-// 실패하면 로그인 시트를 열고 이유를 보여준다. 처리 중에는 빈 화면만 둔다.
+// 실패하면 로그인 시트를 열고 이유를 보여준다. 처리 중에는 홈 스켈레톤을 보여준다.
 // 모든 이동은 replace라 토큰이 담긴 콜백 주소는 방문 기록에 남지 않는다.
 export default function GoogleCallbackPage() {
   const navigate = useNavigate();
@@ -55,12 +56,10 @@ export default function GoogleCallbackPage() {
     void completeLogin();
   }, [navigate]);
 
-  // 화면에는 아무것도 그리지 않고, 스크린리더에만 처리 중임을 알린다 (#296)
+  // 로그인 후 대부분 홈으로 가므로 홈 스켈레톤을 보여준다 (#296)
   return (
-    <main aria-busy="true" className="min-h-dvh bg-white">
-      <span className="sr-only" role="status">
-        로그인 중
-      </span>
-    </main>
+    <div className="flex min-h-dvh flex-col">
+      <HomePageSkeleton />
+    </div>
   );
 }
