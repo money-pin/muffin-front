@@ -110,6 +110,18 @@ export function useInvestmentSelection({
         const targetId = current.selectedAssetId;
         if (!targetId) return current;
 
+        if (
+          delta > 0 &&
+          (current.quantities[targetId] ?? 0) + delta >
+            getMaxInvestableQuantity(
+              current.quantities,
+              targetId,
+              unitAmount,
+              totalBudget,
+            )
+        )
+          return current;
+
         const nextQuantities = updateInvestmentQuantity(
           current.quantities,
           targetId,
@@ -129,6 +141,37 @@ export function useInvestmentSelection({
     [totalBudget, unitAmount],
   );
 
+  const addSelectedQuantity = useCallback(
+    (quantity: number) => {
+      if (!Number.isSafeInteger(quantity) || quantity <= 0) return;
+      changeQuantity(quantity);
+    },
+    [changeQuantity],
+  );
+
+  const setSelectedQuantity = useCallback(
+    (quantity: number) => {
+      if (!Number.isSafeInteger(quantity) || quantity < 0) return;
+      setSelection((current) => {
+        const targetId = current.selectedAssetId;
+        if (!targetId) return current;
+        const nextQuantities = updateInvestmentQuantity(
+          current.quantities,
+          targetId,
+          quantity,
+          unitAmount,
+          totalBudget,
+        );
+        return {
+          ...current,
+          quantities: nextQuantities,
+          selectedAssetId: nextQuantities[targetId] ? targetId : null,
+        };
+      });
+    },
+    [unitAmount, totalBudget],
+  );
+
   const resetSelection = useCallback(() => {
     setSelection((current) => ({
       ...current,
@@ -141,6 +184,9 @@ export function useInvestmentSelection({
     quantities,
     selectedAssetId,
     selectedQuantity,
+    selectedMaxQuantity,
+    setSelectedQuantity,
+    addSelectedQuantity,
     selectedTotalAmount: selectedQuantity * unitAmount,
     totalAmount,
     remainingBudget,

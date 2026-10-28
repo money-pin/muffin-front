@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useBottomNavigationVisibility } from "@/layouts/bottomNavigationContext";
 
 import InvestAssetCard from "@/pages/invest/trade/components/InvestAssetCard";
+import InvestAssetSectionLayout from "@/pages/invest/trade/components/InvestAssetSectionLayout";
 import InvestAssetCountBar from "@/pages/invest/trade/components/InvestAssetCountBar";
 import InvestBottomAction from "@/pages/invest/trade/components/InvestBottomAction";
 import InvestBudgetCard from "@/pages/invest/trade/components/InvestBudgetCard";
@@ -9,6 +12,8 @@ import InvestCompleteModal from "@/pages/invest/trade/components/InvestCompleteM
 import InvestConfirmBottomSheet from "@/pages/invest/trade/components/InvestConfirmBottomSheet";
 import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodayStatusPage";
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
+import InvestSectorGuideModal from "@/pages/invest/trade/components/InvestSectorGuideModal";
+import InvestSectorGuide from "@/pages/invest/trade/components/InvestSectorGuide";
 import ErrorModal from "@/components/common/ErrorModal";
 
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
@@ -44,7 +49,31 @@ function getIsKstWeekend(date: Date) {
 }
 
 function InvestPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isSectorGuidePromptOpen, setIsSectorGuidePromptOpen] = useState(false);
+  const isSectorGuideOpen = searchParams.get("guide") === "sectors";
+  const openSectorGuide = () => {
+    setIsSectorGuidePromptOpen(false);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("guide", "sectors");
+    setSearchParams(nextParams, {
+      state: { ...location.state, sectorGuideFromInvest: true },
+    });
+  };
+  const closeSectorGuide = () => {
+    if (location.state?.sectorGuideFromInvest) {
+      navigate(-1);
+    } else {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("guide");
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
   const queryClient = useQueryClient();
+  const countBarRef = useRef<HTMLDivElement>(null);
+  const bottomActionRef = useRef<HTMLDivElement>(null);
 
   const investmentSectorsQuery = useInvestmentSectorsQuery();
   const todayInvestmentQuery = useTodayInvestmentQuery();
@@ -54,6 +83,10 @@ function InvestPage() {
 
   const [now, setNow] = useState(() => new Date());
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isQuantityBarReady, setIsQuantityBarReady] = useState(false);
+  const [isQuantityKeyboardOpen, setIsQuantityKeyboardOpen] = useState(false);
+  const [isQuantityEditing, setIsQuantityEditing] = useState(false);
+  const setNavigationHidden = useBottomNavigationVisibility();
 
   useEffect(() => {
     const refreshTimeAndStatus = () => {
@@ -145,6 +178,9 @@ function InvestPage() {
     quantities: assetQuantities,
     selectedAssetId,
     selectedQuantity,
+    selectedMaxQuantity,
+    setSelectedQuantity,
+    addSelectedQuantity,
     selectedTotalAmount: selectedAssetTotalAmount,
     totalAmount: totalInvestAmount,
     remainingBudget,
@@ -272,6 +308,12 @@ function InvestPage() {
   });
 
   const hasAssetCountBar = Boolean(selectedAsset && selectedQuantity > 0);
+  const isInputActive =
+    screenMode === "trade" && hasAssetCountBar && isQuantityKeyboardOpen;
+  useEffect(() => {
+    setNavigationHidden(isInputActive);
+    return () => setNavigationHidden(false);
+  }, [isInputActive, setNavigationHidden]);
   const isEditChanged = isEditMode && isChanged;
 
   const bottomActionVariant =
@@ -281,7 +323,7 @@ function InvestPage() {
         ? "editCancel"
         : "purchase";
 
-  const tradePageBottomPadding = hasAssetCountBar ? "pb-[240px]" : "pb-[176px]";
+  const tradePageBottomPadding = hasAssetCountBar ? "pb-[300px]" : "pb-[176px]";
 
   const handleAssetClick = (assetId: InvestAssetId) => {
     const asset = assetById.get(assetId);
@@ -307,6 +349,18 @@ function InvestPage() {
     setConfirmInvestmentErrorMessage("");
 
     incrementSelectedAsset();
+  };
+
+  const handleQuantityAdd = (quantity: number) => {
+    if (!isInvestmentAvailable || isSubmittingInvestment) return;
+    setConfirmInvestmentErrorMessage("");
+    addSelectedQuantity(quantity);
+  };
+
+  const handleQuantityChange = (quantity: number) => {
+    if (!isInvestmentAvailable || isSubmittingInvestment) return;
+    setConfirmInvestmentErrorMessage("");
+    setSelectedQuantity(quantity);
   };
 
   const handleReset = () => {
@@ -335,11 +389,7 @@ function InvestPage() {
   const handleStartEdit = () => {
     if (!canEditTodayInvestment) return;
 
-    const firstConfirmedAssetId =
-      allAssets.find((asset) => (confirmedQuantities[asset.id] ?? 0) > 0)?.id ??
-      null;
-
-    replaceQuantities(confirmedQuantities, firstConfirmedAssetId);
+    replaceQuantities(confirmedQuantities);
     setConfirmInvestmentErrorMessage("");
     setIsEditMode(true);
   };
@@ -474,9 +524,10 @@ function InvestPage() {
         </div>
       ) : (
         <div
+          data-invest-trade
           aria-busy={todayInvestmentQuery.isFetching}
           className={[
-            "-mb-[80px] flex flex-1 flex-col gap-5 bg-[var(--color-neutral-50)] px-5 pt-5",
+            "-mb-[80px] flex flex-1 flex-col gap-5 bg-[var(--color-neutral-50)] px-5 pt-6 [overflow-anchor:none]",
             tradePageBottomPadding,
           ].join(" ")}
         >
@@ -493,80 +544,121 @@ function InvestPage() {
             </p>
           )}
 
-          {INVEST_ASSET_SECTIONS.map((section) => (
-            <div key={section.id} className="flex flex-col gap-2">
-              <h2 className="text-[length:var(--text-body-16-bd-tighter)] leading-[var(--text-body-16-bd-tighter--line-height)] font-[var(--text-body-16-bd-tighter--font-weight)] text-[var(--color-neutral-900)]">
-                {section.title}
-              </h2>
+          <InvestAssetSectionLayout
+            hasSelection={hasAssetCountBar}
+            onReadyChange={setIsQuantityBarReady}
+            controlsRef={hasAssetCountBar ? countBarRef : bottomActionRef}
+          >
+            {INVEST_ASSET_SECTIONS.map((section) => (
+              <section
+                key={section.id}
+                aria-label={section.title}
+                className="flex flex-col"
+              >
+                <div
+                  data-invest-section-heading
+                  className="visible h-[var(--invest-title-height,auto)] overflow-hidden opacity-100 transition-[height,opacity,visibility] duration-300 ease-[ease-out] group-data-[compact=true]/sections:invisible group-data-[compact=true]/sections:h-0 group-data-[compact=true]/sections:opacity-0 motion-reduce:transition-none"
+                >
+                  <h2 className="text-body-16-bd-tighter pb-2 text-neutral-900">
+                    {section.title}
+                  </h2>
+                </div>
 
-              <div className="grid grid-cols-4 gap-[10px]">
-                {section.items.map((asset) => {
-                  const quantity = assetQuantities[asset.id] ?? 0;
-                  const sector = sectorByCode.get(asset.sectorCode);
-                  const isDisabled = !sector;
+                <div
+                  data-invest-card-row
+                  className="grid grid-cols-4 gap-[10px]"
+                >
+                  {section.items.map((asset) => {
+                    const quantity = assetQuantities[asset.id] ?? 0;
+                    const sector = sectorByCode.get(asset.sectorCode);
+                    const isDisabled = !sector;
 
-                  const isSelected =
-                    selectedAssetId === asset.id && quantity > 0;
-                  const isPurchased =
-                    selectedAssetId !== asset.id && quantity > 0;
+                    const isSelected =
+                      selectedAssetId === asset.id && quantity > 0;
+                    const isPurchased =
+                      selectedAssetId !== asset.id && quantity > 0;
 
-                  return (
-                    <InvestAssetCard
-                      key={asset.id}
-                      name={asset.name}
-                      icon={asset.icon}
-                      activeIcon={asset.activeIcon}
-                      status={
-                        isSelected
-                          ? "selected"
-                          : isPurchased
-                            ? "purchased"
-                            : "default"
-                      }
-                      quantity={quantity}
-                      onClick={() => {
-                        if (isDisabled) return;
-                        handleAssetClick(asset.id);
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+                    return (
+                      <InvestAssetCard
+                        key={asset.id}
+                        name={asset.name}
+                        icon={asset.icon}
+                        activeIcon={asset.activeIcon}
+                        status={
+                          isSelected
+                            ? "selected"
+                            : isPurchased
+                              ? "purchased"
+                              : "default"
+                        }
+                        quantity={quantity}
+                        onClick={() => {
+                          if (isDisabled) return;
+                          handleAssetClick(asset.id);
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </InvestAssetSectionLayout>
+
+          <div className="flex w-full justify-center">
+            <button
+              type="button"
+              onClick={() => setIsSectorGuidePromptOpen(true)}
+              className="text-caption-12-md-tighter min-h-11 rounded-xl border-[0.7px] border-neutral-100 bg-white/[0.08] px-3 text-neutral-600"
+            >
+              섹터별 종목 확인하기
+            </button>
+          </div>
 
           {selectedAsset && selectedQuantity > 0 && (
             <InvestAssetCountBar
+              key={selectedAsset.id}
+              containerRef={countBarRef}
+              isVisible={isQuantityBarReady}
+              onKeyboardVisibilityChange={setIsQuantityKeyboardOpen}
+              onEditingChange={setIsQuantityEditing}
               name={selectedAsset.name}
               totalAmount={selectedAssetTotalAmount}
+              unitAmount={unitAmount}
               quantity={selectedQuantity}
+              maxQuantity={selectedMaxQuantity}
+              disabled={isSubmittingInvestment || !isInvestmentAvailable}
               canDecrease={canDecrease}
               canIncrease={canIncrease}
               onDecrease={handleDecrease}
               onIncrease={handleIncrease}
+              onQuantityAdd={handleQuantityAdd}
+              onQuantityChange={handleQuantityChange}
             />
           )}
 
-          <InvestBottomAction
-            selectedTotalAmount={totalInvestAmount}
-            variant={bottomActionVariant}
-            disabled={
-              isSubmittingInvestment ||
-              !isInvestmentAvailable ||
-              (bottomActionVariant !== "editCancel" &&
-                (!hasAnyInvestment || !isWithinBudget))
-            }
-            resetDisabled={isSubmittingInvestment}
-            showTopShadow={!hasAssetCountBar}
-            onReset={handleReset}
-            onAction={
-              bottomActionVariant === "editCancel"
-                ? handleEditCancel
-                : bottomActionVariant === "editSubmit"
-                  ? handleEditSubmit
-                  : handlePurchase
-            }
-          />
+          {!isInputActive && !(hasAssetCountBar && isQuantityEditing) && (
+            <InvestBottomAction
+              containerRef={bottomActionRef}
+              selectedTotalAmount={totalInvestAmount}
+              variant={bottomActionVariant}
+              disabled={
+                isSubmittingInvestment ||
+                !isInvestmentAvailable ||
+                (bottomActionVariant !== "editCancel" &&
+                  (!hasAnyInvestment || !isWithinBudget))
+              }
+              resetDisabled={isSubmittingInvestment}
+              showTopShadow={!hasAssetCountBar}
+              onReset={handleReset}
+              onAction={
+                bottomActionVariant === "editCancel"
+                  ? handleEditCancel
+                  : bottomActionVariant === "editSubmit"
+                    ? handleEditSubmit
+                    : handlePurchase
+              }
+            />
+          )}
         </div>
       )}
 
@@ -586,6 +678,12 @@ function InvestPage() {
         onClose={() => setIsCompleteModalOpen(false)}
         onConfirm={handleCompleteModalConfirm}
       />
+      <InvestSectorGuideModal
+        isOpen={isSectorGuidePromptOpen}
+        onClose={() => setIsSectorGuidePromptOpen(false)}
+        onView={openSectorGuide}
+      />
+      {isSectorGuideOpen && <InvestSectorGuide onClose={closeSectorGuide} />}
       {apiErrorModal}
       <ErrorModal
         isOpen={!!investmentErrorState}
