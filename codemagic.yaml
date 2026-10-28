@@ -1,0 +1,50 @@
+# Codemagic: Mac 없이 클라우드에서 iOS 앱을 빌드해 TestFlight로 올린다. (#264)
+# 처음 연결하는 방법은 docs/capacitor-ios.md "클라우드 빌드" 참고.
+# 빌드 시간을 아끼기 위해 자동 실행 없이 Codemagic 화면에서 직접 실행한다.
+workflows:
+  ios-testflight:
+    name: iOS TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      # Codemagic Teams > Integrations > App Store Connect에 등록한 API 키 이름
+      app_store_connect: muffin-asc
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: kr.ai.muffin
+      node: 22
+      groups:
+        # VITE_API_BASE_URL, VITE_GOOGLE_CLIENT_ID (웹 빌드에 들어가는 값)
+        - muffin_env
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+        # TODO(#264): App Store Connect에서 앱 생성 후 '앱 정보 > Apple ID' 숫자로 교체
+        APP_STORE_APPLE_ID: 0
+    scripts:
+      - name: 의존성 설치
+        script: |
+          corepack enable
+          pnpm install --frozen-lockfile
+      - name: 웹 빌드 후 iOS에 복사
+        script: |
+          pnpm build
+          npx cap sync ios
+      - name: 서명 설정
+        script: xcode-project use-profiles
+      - name: 빌드 번호 올리기 (TestFlight 최신 번호 + 1)
+        script: |
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          cd ios/App && agvtool new-version -all $((LATEST + 1))
+      - name: ipa 빌드
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

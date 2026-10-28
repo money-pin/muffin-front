@@ -7,8 +7,9 @@ import RequireAuth from "@/routes/RequireAuth";
 import RedirectIfAuth from "@/routes/RedirectIfAuth";
 
 import SplashPage from "@/pages/auth/SplashPage";
-import LoginPage from "@/pages/auth/LoginPage";
-import SignupPage from "@/pages/auth/SignupPage";
+import StartPage from "@/pages/auth/StartPage";
+import GoogleCallbackPage from "@/pages/auth/GoogleCallbackPage";
+import IntroPage from "@/pages/auth/intro/IntroPage";
 import OnboardingPage from "@/pages/onboarding/OnboardingPage";
 import HomePage from "@/pages/home/HomePage";
 import NewsPage from "@/pages/news/NewsPage";
@@ -34,17 +35,22 @@ export const router = createBrowserRouter([
         path: "splash",
         element: <SplashPage />,
       },
-      // 로그인/회원가입 — 이미 로그인했으면 홈으로
+      // 구글 로그인 후 돌아오는 주소 (Google Cloud Console 리디렉션 URI와 일치해야 함)
+      {
+        path: "auth/google/callback",
+        element: <GoogleCallbackPage />,
+      },
+      // 시작(로그인)·서비스 소개 — 이미 로그인했으면 홈으로
       {
         element: <RedirectIfAuth />,
         children: [
           {
             path: "login",
-            element: <LoginPage />,
+            element: <StartPage />,
           },
           {
-            path: "signup",
-            element: <SignupPage />,
+            path: "intro",
+            element: <IntroPage />,
           },
         ],
       },

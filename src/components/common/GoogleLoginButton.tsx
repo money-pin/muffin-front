@@ -1,78 +1,41 @@
-import { useEffect, useRef, useState } from "react";
-
 import SocialLoginButton from "./SocialLoginButton";
-import { loadGoogleIdentity } from "@/lib/google";
+import { startGoogleLogin } from "@/lib/google";
 
 interface GoogleLoginButtonProps {
-  onCredential: (idToken: string) => void;
-  onError?: (message: string) => void;
+  label: string;
+  // 구글 로그인을 시작할 수 없을 때 안내 (Client ID 미설정 등)
+  onUnavailable?: (message: string) => void;
 }
 
-// Figma 디자인(SocialLoginButton)을 유지하기 위해, 구글이 렌더한 실제 버튼을
-// 투명하게 겹쳐 클릭을 위임한다. (One Tap prompt()는 표시가 보장되지 않음)
+const UNAVAILABLE_MESSAGE =
+  "지금은 구글 로그인을 사용할 수 없어요. 잠시 후 다시 시도해주세요.";
+
+// Figma 디자인 버튼. 누르면 구글 로그인 페이지로 이동한다. (#291)
+// 로그인 결과는 GoogleCallbackPage(/auth/google/callback)에서 처리한다.
 export default function GoogleLoginButton({
-  onCredential,
-  onError,
+  label,
+  onUnavailable,
 }: GoogleLoginButtonProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const [isReady, setIsReady] = useState(false);
-
-  // 콜백이 바뀌어도 GIS를 다시 초기화하지 않도록 ref로 최신 값 유지
-  const onCredentialRef = useRef(onCredential);
-  const onErrorRef = useRef(onError);
-  useEffect(() => {
-    onCredentialRef.current = onCredential;
-    onErrorRef.current = onError;
-  });
-
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-  useEffect(() => {
+  const handleClick = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
       console.warn(
-        "VITE_GOOGLE_CLIENT_ID가 설정되지 않아 구글 로그인을 초기화하지 않습니다.",
+        "VITE_GOOGLE_CLIENT_ID가 설정되지 않아 구글 로그인을 시작하지 않습니다.",
       );
+      onUnavailable?.(UNAVAILABLE_MESSAGE);
       return;
     }
 
-    let cancelled = false;
-
-    loadGoogleIdentity()
-      .then((google) => {
-        if (cancelled || !overlayRef.current) return;
-
-        google.accounts.id.initialize({
-          client_id: clientId,
-          callback: (response) => onCredentialRef.current(response.credential),
-        });
-
-        google.accounts.id.renderButton(overlayRef.current, {
-          type: "standard",
-          size: "large",
-          width: 400,
-        });
-
-        setIsReady(true);
-      })
-      .catch((error: Error) => {
-        if (!cancelled) onErrorRef.current?.(error.message);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [clientId]);
+    try {
+      startGoogleLogin(clientId);
+    } catch (error) {
+      // sessionStorage를 쓸 수 없는 환경 등
+      console.warn("구글 로그인 시작 실패:", error);
+      onUnavailable?.(UNAVAILABLE_MESSAGE);
+    }
+  };
 
   return (
-    <div className="relative">
-      <SocialLoginButton />
-      <div
-        ref={overlayRef}
-        aria-hidden="true"
-        className={`absolute inset-0 overflow-hidden opacity-0 ${
-          isReady ? "" : "pointer-events-none"
-        }`}
-      />
-    </div>
+    <SocialLoginButton provider="google" label={label} onClick={handleClick} />
   );
 }
