@@ -70,6 +70,23 @@ export interface InvestmentSectorsResult {
   groups: InvestmentSectorGroup[];
 }
 
+export interface SectorGuideItem {
+  sectorCode: InvestSectorCode;
+  name: string;
+  description: string | null;
+  referenceAsset: {
+    type: "ETF" | "CRYPTO";
+    code: string;
+    name: string;
+    description: string | null;
+  };
+}
+
+export interface SectorGuideResult {
+  totalCount: number;
+  sectors: SectorGuideItem[];
+}
+
 export type TodayInvestmentStatus =
   | "AVAILABLE"
   | "CONFIRMED"

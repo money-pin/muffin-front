@@ -527,7 +527,7 @@ function InvestPage() {
           data-invest-trade
           aria-busy={todayInvestmentQuery.isFetching}
           className={[
-            "-mb-[80px] flex flex-1 flex-col gap-5 bg-[var(--color-neutral-50)] px-5 pt-5 [overflow-anchor:none]",
+            "-mb-[80px] flex flex-1 flex-col gap-5 bg-[var(--color-neutral-50)] px-5 pt-6 [overflow-anchor:none]",
             tradePageBottomPadding,
           ].join(" ")}
         >
@@ -623,6 +623,7 @@ function InvestPage() {
               onEditingChange={setIsQuantityEditing}
               name={selectedAsset.name}
               totalAmount={selectedAssetTotalAmount}
+              unitAmount={unitAmount}
               quantity={selectedQuantity}
               maxQuantity={selectedMaxQuantity}
               disabled={isSubmittingInvestment || !isInvestmentAvailable}

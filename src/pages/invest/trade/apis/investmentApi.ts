@@ -4,8 +4,16 @@ import type {
   ConfirmInvestmentRequest,
   ConfirmInvestmentResult,
   InvestmentSectorsResult,
+  SectorGuideResult,
   TodayInvestmentResult,
 } from "@/pages/invest/trade/types/invest";
+
+export function getSectorGuide() {
+  return apiRequest<SectorGuideResult>("/api/sectors/guide", {
+    method: "GET",
+    auth: true,
+  });
+}
 
 export function getInvestmentSectors() {
   return apiRequest<InvestmentSectorsResult>("/api/sectors", {

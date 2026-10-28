@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   confirmInvestment,
   getInvestmentSectors,
+  getSectorGuide,
   getTodayInvestment,
   updateInvestment,
 } from "@/pages/invest/trade/apis/investmentApi";
@@ -10,8 +11,19 @@ import {
 export const investmentQueryKeys = {
   all: ["investment"] as const,
   sectors: () => [...investmentQueryKeys.all, "sectors"] as const,
+  sectorGuide: () => [...investmentQueryKeys.all, "sectorGuide"] as const,
   today: () => [...investmentQueryKeys.all, "today"] as const,
 };
+
+// 안내 화면이 열려 마운트될 때만 조회하며 투자 선택 상태와 분리한다.
+export function useSectorGuideQuery() {
+  return useQuery({
+    queryKey: investmentQueryKeys.sectorGuide(),
+    queryFn: getSectorGuide,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+}
 
 export function useInvestmentSectorsQuery() {
   return useQuery({

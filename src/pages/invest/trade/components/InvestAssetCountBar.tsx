@@ -15,6 +15,7 @@ interface InvestAssetCountBarProps {
   onEditingChange: (isEditing: boolean) => void;
   name: string;
   totalAmount: number;
+  unitAmount: number;
   quantity: number;
   maxQuantity: number;
   disabled: boolean;
@@ -46,6 +47,7 @@ function InvestAssetCountBar({
   onEditingChange,
   name,
   totalAmount,
+  unitAmount,
   quantity,
   maxQuantity,
   disabled,
@@ -68,6 +70,8 @@ function InvestAssetCountBar({
     inputRef,
   );
   const isDraftValid = !getQuantityError(draft, maxQuantity);
+  const displayedAmount =
+    isEditing && isDraftValid ? Number(draft) * unitAmount : totalAmount;
   const increaseEnabled =
     !disabled &&
     (isEditing ? isDraftValid && Number(draft) < maxQuantity : canIncrease);
@@ -138,7 +142,7 @@ function InvestAssetCountBar({
                 {name}
               </strong>
               <span className="text-body-14-md shrink-0 whitespace-nowrap text-neutral-700">
-                ({formatNumber(totalAmount)}원)
+                ({formatNumber(displayedAmount)}원)
               </span>
             </div>
 
