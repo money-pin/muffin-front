@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import SectionHeader from "@/components/common/SectionHeader";
-import TabBar from "@/components/common/TabBar";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
+import newsIcon from "@/assets/icon-24px/news-active.svg";
 import NewsCard from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import TodayBriefingCard from "./components/TodayBriefingCard";
@@ -14,30 +14,11 @@ import ErrorModal from "@/components/common/ErrorModal";
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
 import { useApiErrorModal } from "@/lib/useApiErrorModal";
 
-type NewsTabType = "all" | "economy" | "stock" | "world";
-
-const newsTabs = [
-  { value: "all", label: "전체" },
-  { value: "economy", label: "경제" },
-  { value: "stock", label: "증권" },
-  { value: "world", label: "세계" },
-] as const;
-
-const TAB_CATEGORY_ID: Record<Exclude<NewsTabType, "all">, number> = {
-  economy: 1,
-  stock: 2,
-  world: 3,
-};
-
 export default function NewsPage() {
-  const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
-
   // 오늘의 브리핑 (#298). 실패하거나 공개 전이면 카드만 숨기고 뉴스 목록은 그대로 보여준다.
   const { data: briefing } = useBriefing();
   const showBriefing = isBriefingVisible(briefing);
 
-  const categoryId =
-    currentTab === "all" ? undefined : TAB_CATEGORY_ID[currentTab];
   const {
     data: newsData,
     fetchNextPage,
@@ -47,7 +28,7 @@ export default function NewsPage() {
     isError,
     error: newsListError,
     refetch,
-  } = useNewsList(categoryId);
+  } = useNewsList();
 
   const newsItems = newsData?.pages.flatMap((page) => page.items) ?? [];
 
@@ -116,19 +97,26 @@ export default function NewsPage() {
         </section>
       )}
 
-      <div
-        className={`sticky -top-px z-10 w-full border-b border-neutral-100 bg-neutral-50 ${showBriefing ? "mt-8" : ""}`}
+      {/* 머핀 뉴스 (Figma 런칭 전 수정 > 뉴스: 카테고리 탭 없이 전체 목록) */}
+      <section
+        className={`flex flex-col gap-2 px-5 pb-24 ${showBriefing ? "mt-8" : ""}`}
       >
-        <TabBar
-          tabs={newsTabs}
-          currentTab={currentTab}
-          onTabChange={(value) => setCurrentTab(value as NewsTabType)}
-          className="bg-neutral-50"
-        />
-      </div>
+        <div className="px-1">
+          <SectionHeader
+            title="머핀 뉴스"
+            icon={
+              <img
+                src={newsIcon}
+                alt=""
+                aria-hidden="true"
+                className="size-5 shrink-0 object-contain"
+                draggable={false}
+              />
+            }
+          />
+        </div>
 
-      <section className="flex flex-col gap-3 px-5 py-5 pb-24">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 py-2">
           {newsItems.map((news) => (
             <NewsCard
               key={news.newsId}
@@ -138,11 +126,12 @@ export default function NewsPage() {
               publishedAt={news.publishedAt}
               viewCount={news.viewCount}
               initialScrapped={news.isScrapped}
+              showThumbnail={false}
             />
           ))}
         </div>
 
-        {!isLoading && hasNextPage && (
+        {hasNextPage && (
           <div
             ref={loadMoreRef}
             className="text-caption-12-md flex h-10 items-center justify-center text-neutral-400"
@@ -151,7 +140,7 @@ export default function NewsPage() {
           </div>
         )}
 
-        {!isLoading && newsItems.length === 0 && (
+        {newsItems.length === 0 && (
           <p className="py-10 text-center text-neutral-400">
             표시할 뉴스가 없어요.
           </p>

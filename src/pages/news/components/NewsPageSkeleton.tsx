@@ -1,12 +1,5 @@
-import TabBar from "@/components/common/TabBar";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
-
-const newsTabs = [
-  { value: "all", label: "전체" },
-  { value: "economy", label: "경제" },
-  { value: "stock", label: "증권" },
-  { value: "world", label: "세계" },
-] as const;
+import newsIcon from "@/assets/icon-24px/news-active.svg";
 
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return <div aria-hidden="true" className={`bg-neutral-100 ${className}`} />;
@@ -32,12 +25,10 @@ function BriefingCardSkeleton() {
   );
 }
 
-// 리스트 카드 스켈레톤 (NewsCard: 350x100, radius 12, border 1px, padding L/R 12)
+// 리스트 카드 스켈레톤 (뉴스 탭 NewsCard: 썸네일 없음, 350x100, radius 12, padding L/R 12)
 function NewsCardSkeleton() {
   return (
     <div className="bg-neutral-0 flex h-[100px] w-full items-center gap-4 rounded-[12px] border border-neutral-100 px-3">
-      {/* 썸네일 74x74, radius 8 */}
-      <SkeletonBlock className="size-[74px] flex-shrink-0 rounded-[8px]" />
       {/* 텍스트 영역 236 Fill x 74 space-between: 제목 그룹(38) + 메타(22) */}
       <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch py-[13px]">
         {/* 제목 그룹 236x38, gap 8: 16(full) + 16(112) */}
@@ -55,9 +46,8 @@ function NewsCardSkeleton() {
   );
 }
 
-// 뉴스 페이지 로딩 스켈레톤 (오늘의 브리핑 + 탭 + 리스트).
+// 뉴스 페이지 로딩 스켈레톤 (오늘의 브리핑 + 머핀 뉴스).
 // 색상은 전부 neutral-100(#E2E2E2 = 명세 Neutral/Gray05).
-// 탭 바는 실제 컴포넌트를 그대로 노출한다(명세상 탭은 스켈레톤 대상 아님).
 export default function NewsPageSkeleton() {
   return (
     <div
@@ -82,21 +72,25 @@ export default function NewsPageSkeleton() {
         <BriefingCardSkeleton />
       </section>
 
-      {/* 탭 바 (실제 컴포넌트, 스켈레톤 아님) */}
-      <div className="mt-8 w-full">
-        <TabBar
-          tabs={newsTabs}
-          currentTab="all"
-          onTabChange={() => {}}
-          className="bg-neutral-50"
-        />
-      </div>
-
-      {/* 뉴스 리스트 (컨테이너 464 높이에 카드 4개, gap 8) */}
-      <section className="mt-6 flex flex-col gap-2 px-5 pb-24">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <NewsCardSkeleton key={index} />
-        ))}
+      {/* 머핀 뉴스 */}
+      <section className="mt-8 flex flex-col gap-2 px-5 pb-24">
+        <div className="flex h-[26px] items-center gap-[4px] px-1">
+          <img
+            src={newsIcon}
+            alt=""
+            aria-hidden="true"
+            className="h-[20px] w-[20px] shrink-0 object-contain"
+            draggable={false}
+          />
+          <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
+            머핀 뉴스
+          </h2>
+        </div>
+        <div className="flex flex-col gap-2 py-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <NewsCardSkeleton key={index} />
+          ))}
+        </div>
       </section>
     </div>
   );
