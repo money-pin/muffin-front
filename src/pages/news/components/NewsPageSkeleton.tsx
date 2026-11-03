@@ -12,24 +12,21 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
   return <div aria-hidden="true" className={`bg-neutral-100 ${className}`} />;
 }
 
-// 캐러셀 카드 스켈레톤 (TodayNewsCarouselCard: 310x291, padding 20, radius md)
-function CarouselCardSkeleton() {
+// 오늘의 브리핑 카드 스켈레톤 (TodayBriefingCard: padding 20, radius 16, 한 줄 요약 + 이슈 3줄)
+function BriefingCardSkeleton() {
   return (
-    <div className="bg-neutral-0 flex w-full flex-col gap-3 rounded-[16px] border border-neutral-100 p-5">
-      {/* 이미지 310x201, radius sm */}
-      <SkeletonBlock className="h-[201px] w-full rounded-[8px]" />
-      {/* 텍스트 영역 310x78 space-between: 제목 프레임(44) + 메타(22) */}
-      <div className="flex h-[78px] flex-col justify-between">
-        {/* 제목 프레임 310x44 space-between: 18(full) + 18(241) */}
-        <div className="flex h-[44px] flex-col justify-between">
-          <SkeletonBlock className="h-[18px] w-full rounded-[4px]" />
-          <SkeletonBlock className="h-[18px] w-[241px] max-w-full rounded-[4px]" />
-        </div>
-        {/* 메타 줄 310x22 space-between: 뱃지+날짜(102) / 조회수(80) */}
-        <div className="flex h-[22px] items-center justify-between">
-          <SkeletonBlock className="h-[18px] w-[102px] rounded-[4px]" />
-          <SkeletonBlock className="h-[18px] w-[80px] rounded-[4px]" />
-        </div>
+    <div className="bg-neutral-0 flex w-full flex-col gap-4 rounded-[16px] border border-neutral-100 p-5">
+      <div className="flex h-[44px] flex-col justify-between">
+        <SkeletonBlock className="h-[18px] w-full rounded-[4px]" />
+        <SkeletonBlock className="h-[18px] w-[180px] max-w-full rounded-[4px]" />
+      </div>
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="flex h-[22px] items-center gap-1">
+            <SkeletonBlock className="h-[22px] w-[45px] rounded-[4px]" />
+            <SkeletonBlock className="h-4 w-[160px] max-w-full rounded-[4px]" />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -58,7 +55,7 @@ function NewsCardSkeleton() {
   );
 }
 
-// 뉴스 페이지 로딩 스켈레톤 (캐러셀 + 탭 + 리스트).
+// 뉴스 페이지 로딩 스켈레톤 (오늘의 브리핑 + 탭 + 리스트).
 // 색상은 전부 neutral-100(#E2E2E2 = 명세 Neutral/Gray05).
 // 탭 바는 실제 컴포넌트를 그대로 노출한다(명세상 탭은 스켈레톤 대상 아님).
 export default function NewsPageSkeleton() {
@@ -68,9 +65,9 @@ export default function NewsPageSkeleton() {
       aria-label="뉴스 정보를 불러오는 중"
       className="relative flex min-h-dvh w-full flex-col bg-[#F5F5F5] pt-5 text-black"
     >
-      {/* 따끈한 금융 소식 (캐러셀) */}
-      <section className="flex w-full flex-col gap-3">
-        <div className="flex h-[26px] items-center gap-[4px] px-5">
+      {/* 오늘의 브리핑 */}
+      <section className="flex w-full flex-col gap-2 px-5">
+        <div className="flex h-[26px] items-center gap-[4px] px-1">
           <img
             src={megaphoneIcon}
             alt=""
@@ -79,18 +76,10 @@ export default function NewsPageSkeleton() {
             draggable={false}
           />
           <h2 className="text-[16px] leading-[160%] font-bold text-[#1B1B1B]">
-            따끈한 금융 소식
+            오늘의 브리핑
           </h2>
         </div>
-        {/* Carousel 자체 인디케이터(활성 도트)를 노출하지 않으려고
-            컴포넌트로 감싸지 않고 바깥 레이아웃(px-5)만 재현한다. */}
-        <div className="flex w-full flex-col items-center gap-3">
-          <div className="w-full px-5">
-            <CarouselCardSkeleton />
-          </div>
-          {/* 캐러셀 인디케이터 (명세: 회색 바 하나 76x8, radius round, #E2E2E2) */}
-          <SkeletonBlock className="h-2 w-[76px] rounded-full" />
-        </div>
+        <BriefingCardSkeleton />
       </section>
 
       {/* 탭 바 (실제 컴포넌트, 스켈레톤 아님) */}

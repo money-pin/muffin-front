@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import Carousel from "@/components/common/Carousel";
 import SectionHeader from "@/components/common/SectionHeader";
 import TabBar from "@/components/common/TabBar";
 import megaphoneIcon from "@/assets/icon-20px/megaphone.svg";
 import NewsCard from "./components/NewsCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
-import TodayNewsCarouselCard from "./components/TodayNewsCarouselCard";
+import TodayBriefingCard from "./components/TodayBriefingCard";
 import NewsPageSkeleton from "./components/NewsPageSkeleton";
-import { useNewsList, useTodayNews } from "./newsQueries";
+import { useNewsList } from "./newsQueries";
+import { isBriefingVisible } from "@/lib/briefingApi";
+import { useBriefing } from "@/pages/briefing/briefingQueries";
 import ErrorModal from "@/components/common/ErrorModal";
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
 import { useApiErrorModal } from "@/lib/useApiErrorModal";
@@ -31,15 +32,9 @@ const TAB_CATEGORY_ID: Record<Exclude<NewsTabType, "all">, number> = {
 export default function NewsPage() {
   const [currentTab, setCurrentTab] = useState<NewsTabType>("all");
 
-  const {
-    data: todayData,
-    isLoading: isTodayNewsLoading,
-    isError: isTodayNewsError,
-    error: todayNewsError,
-    refetch: refetchTodayNews,
-  } = useTodayNews();
-  const todayNewsList = todayData?.items ?? [];
-  const hasTodayNews = todayNewsList.length > 0;
+  // 오늘의 브리핑 (#298). 실패하거나 공개 전이면 카드만 숨기고 뉴스 목록은 그대로 보여준다.
+  const { data: briefing } = useBriefing();
+  const showBriefing = isBriefingVisible(briefing);
 
   const categoryId =
     currentTab === "all" ? undefined : TAB_CATEGORY_ID[currentTab];
@@ -69,23 +64,22 @@ export default function NewsPage() {
     useApiErrorModal({
       onRetry: () => {
         void refetch();
-        void refetchTodayNews();
       },
     });
 
   useEffect(() => {
-    if (!isError && !isTodayNewsError) return;
-    queueMicrotask(() => showError(isError ? newsListError : todayNewsError));
-  }, [isError, isTodayNewsError, newsListError, todayNewsError, showError]);
+    if (!isError) return;
+    queueMicrotask(() => showError(newsListError));
+  }, [isError, newsListError, showError]);
 
-  // 초기 로딩(캐러셀·리스트 첫 조회) 동안 페이지 전체 스켈레톤 노출.
+  // 초기 로딩(리스트 첫 조회) 동안 페이지 전체 스켈레톤 노출.
   // 홈/마이페이지와 동일한 "페이지 통째 교체" 패턴.
-  if (isTodayNewsLoading || isLoading) {
+  if (isLoading) {
     return <NewsPageSkeleton />;
   }
 
   // 조회 실패 시 페이지 대신 네트워크 오류 모달을 노출한다.
-  if (isError || isTodayNewsError) {
+  if (isError) {
     return (
       <>
         <div className="min-h-dvh w-full bg-neutral-50" />
@@ -102,36 +96,29 @@ export default function NewsPage() {
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-neutral-50 pt-5 text-neutral-900">
-      <section className="flex w-full flex-col gap-3">
-        <div className="px-5">
-          <SectionHeader
-            title="따끈한 금융 소식"
-            icon={
-              <img
-                src={megaphoneIcon}
-                alt=""
-                aria-hidden="true"
-                className="size-5 shrink-0 object-contain"
-                draggable={false}
-              />
-            }
-          />
-        </div>
-
-        {hasTodayNews ? (
-          <Carousel>
-            {todayNewsList.map((news) => (
-              <TodayNewsCarouselCard key={news.newsId} news={news} />
-            ))}
-          </Carousel>
-        ) : (
-          <div className="bg-neutral-0 text-body-14-md mx-5 flex h-[331px] items-center justify-center rounded-[16px] border border-neutral-100 text-neutral-400">
-            표시할 금융 소식이 없어요.
+      {showBriefing && briefing && (
+        <section className="flex w-full flex-col gap-2 px-5">
+          <div className="px-1">
+            <SectionHeader
+              title="오늘의 브리핑"
+              icon={
+                <img
+                  src={megaphoneIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="size-5 shrink-0 object-contain"
+                  draggable={false}
+                />
+              }
+            />
           </div>
-        )}
-      </section>
+          <TodayBriefingCard briefing={briefing} />
+        </section>
+      )}
 
-      <div className="sticky -top-px z-10 mt-4 w-full border-b border-neutral-100 bg-neutral-50">
+      <div
+        className={`sticky -top-px z-10 w-full border-b border-neutral-100 bg-neutral-50 ${showBriefing ? "mt-8" : ""}`}
+      >
         <TabBar
           tabs={newsTabs}
           currentTab={currentTab}

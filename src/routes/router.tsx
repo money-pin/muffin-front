@@ -15,6 +15,7 @@ import HomePage from "@/pages/home/HomePage";
 import NewsPage from "@/pages/news/NewsPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
 import QuizPage from "@/pages/quiz/QuizPage";
+import BriefingPage from "@/pages/briefing/BriefingPage";
 import InvestLayout from "@/pages/invest/InvestLayout";
 import InvestPage from "@/pages/invest/trade/InvestPage";
 import StatsPage from "@/pages/invest/stats/StatsPage";
@@ -111,6 +112,11 @@ export const router = createBrowserRouter([
               {
                 path: "quiz",
                 element: <QuizPage />,
+              },
+              // 오늘의 브리핑 (?date=YYYY-MM-DD로 특정 날짜)
+              {
+                path: "briefing",
+                element: <BriefingPage />,
               },
               {
                 path: "invest/profit-history",
