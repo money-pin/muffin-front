@@ -45,7 +45,7 @@ function TopBarLayout() {
   return (
     <>
       <div
-        className={`fixed top-0 left-1/2 z-50 w-full max-w-[var(--max-width-app)] -translate-x-1/2 ${bgClass}`}
+        className={`fixed top-0 left-1/2 z-50 w-full max-w-[var(--max-width-app)] -translate-x-1/2 pt-[var(--safe-top)] ${bgClass}`}
       >
         <TopBar
           title={topBar.title}

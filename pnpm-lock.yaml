@@ -14,6 +14,9 @@ importers:
       '@capacitor/ios':
         specifier: ^8.5.2
         version: 8.5.2(@capacitor/core@8.5.2)
+      '@capgo/capacitor-social-login':
+        specifier: 8.7.6
+        version: 8.7.6(@capacitor/core@8.5.2)
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.1(vite@8.1.0(@types/node@24.13.2)(jiti@2.7.0)(yaml@2.9.0))
@@ -23,6 +26,9 @@ importers:
       '@tanstack/react-query-devtools':
         specifier: ^5.101.1
         version: 5.101.1(@tanstack/react-query@5.101.1(react@19.2.7))(react@19.2.7)
+      '@team-lepisode/capacitor-kakao-login':
+        specifier: 8.1.0
+        version: 8.1.0(@capacitor/core@8.5.2)
       axios:
         specifier: ^1.18.1
         version: 1.18.1
@@ -184,6 +190,11 @@ packages:
     resolution: {integrity: sha512-eOT2S67AfTFG7KN0T3oxwAajrJz4rSye+ODfvChiwrk0F/+kWufFM1qU6cDjGJUOfwdAoeuEpZyWHSwZlu4GFg==}
     peerDependencies:
       '@capacitor/core': ^8.5.0
+
+  '@capgo/capacitor-social-login@8.7.6':
+    resolution: {integrity: sha512-/TP72D0mAXhWcXAPljGB4Xju/Wvxb3giYg+sU+A7fnWUh9buXHA/LESSmdDSvKnNKEiFobevu/swW2Fkafi9RQ==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
 
   '@emnapi/core@1.11.1':
     resolution: {integrity: sha512-RSvbQmHzdKzNsLYa/wHrbc3KN4sYLKAdPZxqiM2HATqv/SBk2/ENSHpvXGaLOMcsAyz0poEGqkmmKYG3OWiJEQ==}
@@ -522,6 +533,11 @@ packages:
     resolution: {integrity: sha512-ZnONUuQKJe1bJMStXUL1s5uKN9FcfC28j5cK+iDZcdSHtUv1wtin1cGc/Oewhf2Oc4eKY7lggtpvT/AbMmhHew==}
     peerDependencies:
       react: ^18 || ^19
+
+  '@team-lepisode/capacitor-kakao-login@8.1.0':
+    resolution: {integrity: sha512-jFillXIF7qjn6UAN+NjJIAlTEf4YX6cFrs6VhZEYKozuHPbd57ewHSk40D9TyB12dsBpTXce73fwhJ1zir0pWw==}
+    peerDependencies:
+      '@capacitor/core': ^8.0.0
 
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
@@ -1931,6 +1947,11 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.2
 
+  '@capgo/capacitor-social-login@8.7.6(@capacitor/core@8.5.2)':
+    dependencies:
+      '@capacitor/core': 8.5.2
+      tslib: 2.8.1
+
   '@emnapi/core@1.11.1':
     dependencies:
       '@emnapi/wasi-threads': 1.2.2
@@ -2238,6 +2259,10 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.101.1
       react: 19.2.7
+
+  '@team-lepisode/capacitor-kakao-login@8.1.0(@capacitor/core@8.5.2)':
+    dependencies:
+      '@capacitor/core': 8.5.2
 
   '@tybys/wasm-util@0.10.3':
     dependencies:

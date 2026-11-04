@@ -1,8 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import BottomSheet from "@/components/common/BottomSheet";
 import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import SocialLoginButton from "@/components/common/SocialLoginButton";
+import { resolveEntryRoute } from "@/lib/mypageApi";
+import {
+  isNativeApp,
+  loginWithAppleNative,
+  loginWithGoogleNative,
+  loginWithKakaoNative,
+  SocialLoginCancelledError,
+} from "@/lib/socialLogin";
 
 type SocialAuthMode = "signup" | "login";
 
@@ -36,7 +45,9 @@ type Notice = { tone: "info" | "error"; message: string } | null;
 // 가입·로그인 모두 같은 API를 쓰고, 이후 분기는 resolveEntryRoute가 맡는다.
 // - 처음 가입: 온보딩 미완료 → /onboarding (닉네임부터)
 // - 기존 회원: /home
-// 구글은 로그인 페이지로 이동했다가 GoogleCallbackPage에서 마무리한다. (#291)
+// - iOS 앱: 카카오·애플·구글 모두 앱 SDK로 로그인 (#266)
+// - 웹: 구글만 로그인 페이지로 이동했다가 GoogleCallbackPage에서 마무리 (#291).
+//   카카오·애플은 백엔드가 앱에서 발급된 토큰만 받아 앱에서만 지원한다.
 export default function SocialAuthSheet({
   isOpen,
   onClose,
@@ -48,11 +59,36 @@ export default function SocialAuthSheet({
   );
   const copy = COPY[mode];
 
-  // TODO(#279): 카카오·애플 로그인 API 연동 후 교체
-  const showUnavailable = (providerName: string) => {
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isNative = isNativeApp();
+
+  const runNativeLogin = async (login: () => Promise<void>) => {
+    if (isSubmitting) return;
+    setNotice(null);
+    setIsSubmitting(true);
+    try {
+      await login();
+      navigate(await resolveEntryRoute(), { replace: true });
+    } catch (error) {
+      if (!(error instanceof SocialLoginCancelledError)) {
+        setNotice({
+          tone: "error",
+          message:
+            error instanceof Error && error.message
+              ? error.message
+              : "로그인에 실패했어요. 잠시 후 다시 시도해주세요.",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const showAppOnly = (providerName: string) => {
     setNotice({
       tone: "info",
-      message: `${providerName} 로그인은 준비 중이에요.`,
+      message: `${providerName} 로그인은 머핀 앱에서 이용할 수 있어요.`,
     });
   };
 
@@ -78,17 +114,36 @@ export default function SocialAuthSheet({
           <SocialLoginButton
             provider="kakao"
             label={`Kakao로 ${copy.action}`}
-            onClick={() => showUnavailable("카카오")}
+            disabled={isSubmitting}
+            onClick={() =>
+              isNative
+                ? void runNativeLogin(loginWithKakaoNative)
+                : showAppOnly("카카오")
+            }
           />
           <SocialLoginButton
             provider="apple"
             label={`Apple로 ${copy.action}`}
-            onClick={() => showUnavailable("애플")}
+            disabled={isSubmitting}
+            onClick={() =>
+              isNative
+                ? void runNativeLogin(loginWithAppleNative)
+                : showAppOnly("애플")
+            }
           />
-          <GoogleLoginButton
-            label={`Google로 ${copy.action}`}
-            onUnavailable={(message) => setNotice({ tone: "error", message })}
-          />
+          {isNative ? (
+            <SocialLoginButton
+              provider="google"
+              label={`Google로 ${copy.action}`}
+              disabled={isSubmitting}
+              onClick={() => void runNativeLogin(loginWithGoogleNative)}
+            />
+          ) : (
+            <GoogleLoginButton
+              label={`Google로 ${copy.action}`}
+              onUnavailable={(message) => setNotice({ tone: "error", message })}
+            />
+          )}
         </div>
 
         <p className="text-caption-12-md-tighter text-center text-neutral-400">

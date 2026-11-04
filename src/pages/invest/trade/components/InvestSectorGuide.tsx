@@ -132,7 +132,7 @@ export default function InvestSectorGuide({ onClose }: InvestSectorGuideProps) {
         className="fixed inset-0 z-[60] overflow-y-auto bg-white outline-none"
       >
         <div className="mx-auto min-h-full w-full max-w-[var(--max-width-app)]">
-          <header className="sticky top-0 z-10 bg-white [&_button]:size-11">
+          <header className="sticky top-0 z-10 bg-white pt-[var(--safe-top)] [&_button]:size-11">
             <TopBar
               title="섹터별 종목"
               showBack

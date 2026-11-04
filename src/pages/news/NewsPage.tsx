@@ -147,7 +147,7 @@ export default function NewsPage() {
         )}
       </section>
 
-      <ScrollToTopButton className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-[112px] z-40" />
+      <ScrollToTopButton className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-[calc(112px+var(--safe-bottom))] z-40" />
     </div>
   );
 }

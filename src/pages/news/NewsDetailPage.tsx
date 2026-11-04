@@ -398,7 +398,7 @@ export default function NewsDetailPage() {
       <ScrollToTopButton
         onClick={handleScrollToTop}
         scrollTargetRef={containerRef}
-        className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-6 z-40"
+        className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-[calc(24px+var(--safe-bottom))] z-40"
       />
 
       <BottomSheet

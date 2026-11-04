@@ -1,16 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { apiRequest } from "@/lib/api";
-import { saveAccessToken } from "@/lib/auth";
 import { readGoogleCallback } from "@/lib/google";
 import { resolveEntryRoute } from "@/lib/mypageApi";
+import { exchangeSocialToken } from "@/lib/socialLogin";
 import HomePageSkeleton from "@/pages/home/components/HomePageSkeleton";
-
-// POST /auth/google 응답 result
-interface AuthResult {
-  accessToken: string;
-}
 
 export interface AuthErrorState {
   authError: string;
@@ -35,12 +29,7 @@ export default function GoogleCallbackPage() {
     const completeLogin = async () => {
       try {
         const idToken = readGoogleCallback(window.location.hash);
-        const { accessToken } = await apiRequest<AuthResult>("/auth/google", {
-          method: "POST",
-          body: { idToken },
-        });
-
-        saveAccessToken(accessToken);
+        await exchangeSocialToken("google", { idToken });
         navigate(await resolveEntryRoute(), { replace: true });
       } catch (error) {
         const state: AuthErrorState = {

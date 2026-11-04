@@ -20,7 +20,7 @@ export default function HomePageSkeleton() {
       aria-label="홈 정보를 불러오는 중"
       className="flex min-h-full flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.2)_23.6%,rgba(255,194,102,0.2)_36.4%),linear-gradient(#fff,#fff)]"
     >
-      <header className="sticky top-0 z-30 flex h-[52px] shrink-0 items-center bg-white px-5">
+      <header className="sticky top-[var(--safe-top)] z-30 flex h-[52px] shrink-0 items-center bg-white px-5">
         <Logo size="xs" />
       </header>
 

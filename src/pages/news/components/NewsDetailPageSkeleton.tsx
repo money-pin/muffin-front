@@ -183,7 +183,7 @@ export default function NewsDetailPageSkeleton() {
       {/* 스크롤투탑 버튼 (명세대로 노출, 로딩 중엔 동작 없음) */}
       <ScrollToTopButton
         onClick={() => {}}
-        className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-6 z-40"
+        className="fixed right-[calc((100vw-min(100vw,var(--max-width-app)))/2+20px)] bottom-[calc(24px+var(--safe-bottom))] z-40"
       />
     </div>
   );

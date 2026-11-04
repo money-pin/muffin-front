@@ -18,7 +18,7 @@ function SplashPage() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-white">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-white">
       <div className="animate-splash-logo">
         <Logo tagline />
       </div>

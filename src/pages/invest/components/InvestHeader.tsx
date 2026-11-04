@@ -41,7 +41,7 @@ export default function InvestHeader() {
 
       <div
         data-invest-sticky-tabs
-        className="bg-neutral-0 sticky -top-px z-20 w-full shadow-[0_4px_2px_rgba(0,0,0,0.05)]"
+        className="bg-neutral-0 sticky top-[calc(var(--safe-top)-1px)] z-20 w-full shadow-[0_4px_2px_rgba(0,0,0,0.05)]"
       >
         <InvestTabBar />
       </div>

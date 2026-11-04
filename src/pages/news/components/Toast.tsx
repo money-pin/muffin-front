@@ -33,7 +33,7 @@ export default function Toast({
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-6 z-[60] mx-auto w-full max-w-[var(--max-width-app)] px-5"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(24px+var(--safe-bottom))] z-[60] mx-auto w-full max-w-[var(--max-width-app)] px-5"
       role="status"
       aria-live="polite"
     >

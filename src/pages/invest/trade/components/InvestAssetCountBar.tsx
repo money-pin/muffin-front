@@ -129,7 +129,7 @@ function InvestAssetCountBar({
         inert={!isVisible}
         style={isKeyboardOpen ? { bottom: keyboardInset } : undefined}
         onBlur={handleEditorBlur}
-        className="fixed bottom-[156px] left-1/2 z-40 w-full max-w-[var(--max-width-app)] -translate-x-1/2"
+        className="fixed bottom-[calc(156px+var(--safe-bottom))] left-1/2 z-40 w-full max-w-[var(--max-width-app)] -translate-x-1/2"
       >
         <div
           ref={panelRef}
