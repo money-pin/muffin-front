@@ -52,8 +52,7 @@ pnpm cap:sync   # = pnpm build && cap sync ios (웹 빌드 결과를 ios/에 복
 
 ### 3. 빌드하고 아이폰에 설치
 
-1. `dev` → `ios` PR을 머지하면 Codemagic이 자동으로 빌드합니다 ([브랜치 전략](branch-strategy.md)).
-   - 직접 돌리려면 Codemagic에서 `iOS TestFlight` 워크플로를 `ios` 브랜치로 **Start build**
+1. Codemagic에서 `iOS TestFlight` 워크플로를 `ios` 브랜치로 **Start build** ([브랜치 전략](branch-strategy.md))
 2. 빌드가 끝나면 App Store Connect의 TestFlight에 자동 업로드됩니다(처리까지 수 분~수십 분).
 3. 아이폰에 **TestFlight** 앱 설치 → 테스터로 초대받은 계정으로 로그인 → 머핀 설치
    - 팀원은 App Store Connect **TestFlight → 내부 테스트** 그룹에 추가
