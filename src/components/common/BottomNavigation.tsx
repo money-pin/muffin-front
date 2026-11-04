@@ -25,7 +25,7 @@ export default function BottomNavigation() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-1/2 flex h-[80px] w-full max-w-[var(--max-width-app)] -translate-x-1/2 items-start justify-between border-t border-neutral-100 bg-white px-8 pt-1">
+    <nav className="fixed bottom-0 left-1/2 flex h-[calc(80px+var(--safe-bottom))] w-full max-w-[var(--max-width-app)] -translate-x-1/2 items-start justify-between border-t border-neutral-100 bg-white px-8 pt-1">
       {TABS.map(({ label, path, Active, Inactive }) => {
         const active =
           location.pathname === path ||

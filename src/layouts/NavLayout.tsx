@@ -7,7 +7,7 @@ function BottomNavLayout() {
   const [isNavigationHidden, setIsNavigationHidden] = useState(false);
   return (
     <BottomNavigationVisibilityContext.Provider value={setIsNavigationHidden}>
-      <main className="min-h-dvh pb-[80px]">
+      <main className="min-h-dvh pb-[calc(80px+var(--safe-bottom))]">
         <Outlet />
       </main>
 

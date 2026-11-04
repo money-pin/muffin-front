@@ -98,7 +98,7 @@ function MyPage() {
   );
 
   return (
-    <div className="flex min-h-[calc(100dvh-80px)] flex-col bg-neutral-50">
+    <div className="flex min-h-[calc(100dvh-80px-var(--safe-top)-var(--safe-bottom))] flex-col bg-neutral-50">
       <div className="bg-white pb-[clamp(12px,4vw,16px)]">
         <header className="flex h-[52px] items-center justify-end px-5">
           <button

@@ -52,7 +52,7 @@ function InvestBottomAction({
       ref={containerRef}
       onBlur={onBlur}
       className={[
-        "fixed bottom-[80px] left-1/2 z-30 flex h-[76px] w-full max-w-[var(--max-width-app)] -translate-x-1/2 items-center gap-2 bg-[var(--color-neutral-0)] py-3 pr-[17px] pl-5",
+        "fixed bottom-[calc(80px+var(--safe-bottom))] left-1/2 z-30 flex h-[76px] w-full max-w-[var(--max-width-app)] -translate-x-1/2 items-center gap-2 bg-[var(--color-neutral-0)] py-3 pr-[17px] pl-5",
         showTopShadow ? "shadow-[0_-1px_6.6px_rgba(0,0,0,0.07)]" : "",
       ].join(" ")}
     >
