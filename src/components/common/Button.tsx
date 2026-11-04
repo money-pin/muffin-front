@@ -1,6 +1,6 @@
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: "primary" | "secondary" | "outline" | "soft";
+  variant?: "primary" | "secondary" | "outline" | "soft" | "neutral";
   disabled?: boolean;
   onClick?: () => void;
   className?: string;
@@ -21,6 +21,8 @@ export default function Button({
     outline: "border border-primary text-primary bg-white",
     // Figma PurchaseButton second: 연한 주황 배경 + primary-200 테두리 (예: 투자 결과 바텀시트 보조 버튼)
     soft: "border border-primary-200 bg-primary-50 text-primary",
+    // Figma 퀴즈 결과 보조 버튼(홈으로 돌아가기): 회색 배경 + 회색 글자
+    neutral: "bg-neutral-50 text-neutral-400",
   };
   // Figma: disabled = Neutral/Gray06 배경(#F5F5F5)
   const disabledStyle = "bg-neutral-50 text-neutral-400 border-transparent";
