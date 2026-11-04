@@ -14,6 +14,19 @@ const config: CapacitorConfig = {
     // TODO(#271): Safe Area CSS 적용 전까지는 네이티브 실행 시 상단이 상태바에 겹칠 수 있음
     contentInset: "never",
   },
+  plugins: {
+    // 앱 소셜 로그인 (#266): 구글·애플만 쓰고 나머지 SDK는 앱에 넣지 않는다.
+    // 카카오는 @team-lepisode/capacitor-kakao-login을 쓴다.
+    SocialLogin: {
+      providers: {
+        google: true,
+        apple: true,
+        facebook: false,
+        twitter: false,
+      },
+      logLevel: 1,
+    },
+  },
 };
 
 export default config;

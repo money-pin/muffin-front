@@ -59,6 +59,21 @@ pnpm cap:sync   # = pnpm build && cap sync ios (웹 빌드 결과를 ios/에 복
 
 빌드 번호는 TestFlight 최신 번호 + 1로 자동 증가합니다. 앱 버전(1.0)은 출시 시 Xcode 프로젝트의 `MARKETING_VERSION`에서 올립니다.
 
+## 앱 소셜 로그인 설정 (#266)
+
+앱에서는 카카오·애플·구글 모두 각 SDK로 로그인하고, 받은 ID 토큰을 `POST /auth/{kakao|apple|google}`로 보냅니다.
+웹은 구글만 지원합니다(카카오·애플은 백엔드가 앱에서 발급된 토큰만 받음).
+
+| 항목   | 할 일                                                                                                   | 넣을 곳                                         |
+| ------ | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 카카오 | 카카오 디벨로퍼스 > 플랫폼 > iOS에 번들 ID `kr.ai.muffin` 등록, 카카오 로그인·**OpenID Connect** 활성화 | 네이티브 앱 키 → `VITE_KAKAO_NATIVE_APP_KEY`    |
+| 구글   | Google Cloud Console > 사용자 인증 정보 > OAuth 클라이언트 ID > **iOS** (번들 ID `kr.ai.muffin`) 생성   | iOS 클라이언트 ID → `VITE_GOOGLE_IOS_CLIENT_ID` |
+| 애플   | Apple Developer > Identifiers > `kr.ai.muffin`에 **Sign in with Apple** 체크                            | 코드 설정 완료 (`App/App.entitlements`)         |
+| 백엔드 | 구글 토큰 검증에 iOS 클라이언트 ID도 허용 (앱 로그인 토큰의 aud가 iOS 클라이언트 ID)                    | 백엔드 환경 변수                                |
+
+- 두 값은 Codemagic 환경 변수 그룹 `muffin_env`에 넣습니다. 웹 빌드 값과 함께 앱 코드에 들어가고, `codemagic.yaml`이 Info.plist의 로그인 복귀 주소(URL scheme)에도 넣어 줍니다.
+- 애플 계정 회원 탈퇴 시 앱이 애플 로그인을 한 번 더 띄워 받은 `authorizationCode`를 탈퇴 API에 보냅니다.
+
 ## iOS 의존성 관리: SPM
 
 Capacitor 8 기본값인 **Swift Package Manager(SPM)** 를 사용합니다. CocoaPods는 필요 없습니다.

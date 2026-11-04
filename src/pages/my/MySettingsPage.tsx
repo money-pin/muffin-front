@@ -4,8 +4,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { ApiError } from "@/lib/api";
-import { clearAccessToken } from "@/lib/auth";
+import { clearAccessToken, getAuthProvider } from "@/lib/auth";
 import { logout, withdraw } from "@/lib/authApi";
+import {
+  getAppleWithdrawalCode,
+  isNativeApp,
+  SocialLoginCancelledError,
+} from "@/lib/socialLogin";
 import ErrorModal from "@/components/common/ErrorModal";
 import { getErrorMessage, type ErrorMessageInfo } from "@/lib/errorMessages";
 import {
@@ -116,9 +121,23 @@ function MySettingsPage() {
 
   // 회원 탈퇴: 서버 소프트 딜리트가 성공했을 때만 로컬 토큰을 지운다.
   // (로그아웃과 달리 실패 시 계정이 남으므로 성공처럼 처리하면 안 됨)
+  // 애플 계정은 애플 연결 해제를 위해 탈퇴 직전 애플 로그인을 한 번 더 받는다(앱에서만 가능).
   const handleWithdraw = async () => {
     try {
-      await withdraw();
+      let authorizationCode: string | undefined;
+      if (getAuthProvider() === "apple" && isNativeApp()) {
+        try {
+          authorizationCode = await getAppleWithdrawalCode();
+        } catch (error) {
+          // 애플 로그인 창을 닫으면 탈퇴를 진행하지 않는다
+          if (error instanceof SocialLoginCancelledError) {
+            setWithdrawModalOpen(false);
+            return;
+          }
+          throw error;
+        }
+      }
+      await withdraw({ authorizationCode });
     } catch (error) {
       setWithdrawModalOpen(false);
       setWithdrawError(
