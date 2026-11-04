@@ -11,14 +11,18 @@ let package = Package(
             targets: ["CapApp-SPM"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.5.2")
+        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.5.2"),
+        .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/.pnpm/@capgo+capacitor-social-login@8.7.6_@capacitor+core@8.5.2/node_modules/@capgo/capacitor-social-login"),
+        .package(name: "TeamLepisodeCapacitorKakaoLogin", path: "../../../node_modules/.pnpm/@team-lepisode+capacitor-kakao-login@8.1.0_@capacitor+core@8.5.2/node_modules/@team-lepisode/capacitor-kakao-login")
     ],
     targets: [
         .target(
             name: "CapApp-SPM",
             dependencies: [
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
-                .product(name: "Cordova", package: "capacitor-swift-pm")
+                .product(name: "Cordova", package: "capacitor-swift-pm"),
+                .product(name: "CapgoCapacitorSocialLogin", package: "CapgoCapacitorSocialLogin"),
+                .product(name: "TeamLepisodeCapacitorKakaoLogin", package: "TeamLepisodeCapacitorKakaoLogin")
             ]
         )
     ]

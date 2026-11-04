@@ -10,10 +10,14 @@ export async function logout() {
 }
 
 // 회원 탈퇴 (소프트 딜리트)
-export async function withdraw() {
+// 애플 계정은 탈퇴 직전 다시 로그인해 받은 authorizationCode를 보내고(애플 연결 해제),
+// 구글·카카오 계정은 빈 body로 탈퇴한다. (AUTH-09-2)
+export async function withdraw(options: { authorizationCode?: string } = {}) {
   return apiRequest<void>("/api/auth/account", {
     method: "DELETE",
-    body: {},
+    body: options.authorizationCode
+      ? { authorizationCode: options.authorizationCode }
+      : {},
     auth: true,
   });
 }

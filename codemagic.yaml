@@ -17,6 +17,7 @@ workflows:
       node: 22
       groups:
         # VITE_API_BASE_URL, VITE_GOOGLE_CLIENT_ID (웹 빌드에 들어가는 값)
+        # VITE_KAKAO_NATIVE_APP_KEY, VITE_GOOGLE_IOS_CLIENT_ID (앱 소셜 로그인, #266)
         - muffin_env
       vars:
         XCODE_PROJECT: ios/App/App.xcodeproj
@@ -39,10 +40,15 @@ workflows:
           LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
           cd ios/App && agvtool new-version -all $((LATEST + 1))
       - name: ipa 빌드
+        # 소셜 로그인 복귀 주소(Info.plist URL scheme)에 들어갈 값을 빌드 설정으로 넘긴다 (#266)
+        # - KAKAO_NATIVE_APP_KEY: 카카오 네이티브 앱 키
+        # - GOOGLE_IOS_URL_SCHEME: 구글 iOS 클라이언트 ID를 뒤집은 값 (com.googleusercontent.apps.xxxx)
         script: |
+          GOOGLE_IOS_URL_SCHEME="com.googleusercontent.apps.${VITE_GOOGLE_IOS_CLIENT_ID%.apps.googleusercontent.com}"
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --archive-xcargs "KAKAO_NATIVE_APP_KEY=$VITE_KAKAO_NATIVE_APP_KEY GOOGLE_IOS_URL_SCHEME=$GOOGLE_IOS_URL_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
