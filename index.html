@@ -3,10 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <!-- maximum-scale=1: iOS에서 입력창(14px) 포커스 시 화면 자동 확대 방지 -->
+    <!-- maximum-scale=1: iOS에서 입력창(14px) 포커스 시 화면 자동 확대 방지
+         viewport-fit=cover: iOS 앱에서 노치·홈 인디케이터 영역까지 그리고 env(safe-area-inset-*)로 피한다 (#271) -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
     />
     <title>머핀</title>
     <meta

@@ -34,6 +34,7 @@ export const router = createBrowserRouter([
       // 공개 라우트 (로그인 불필요)
       {
         path: "splash",
+        handle: { fullBleed: true },
         element: <SplashPage />,
       },
       // 구글 로그인 후 돌아오는 주소 (Google Cloud Console 리디렉션 URI와 일치해야 함)
@@ -47,10 +48,12 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "login",
+            handle: { fullBleed: true },
             element: <StartPage />,
           },
           {
             path: "intro",
+            handle: { fullBleed: true },
             element: <IntroPage />,
           },
         ],
@@ -81,6 +84,7 @@ export const router = createBrowserRouter([
               {
                 path: "news",
                 element: <NewsPage />,
+                handle: { statusBarBg: "var(--color-neutral-50)" },
               },
               {
                 path: "invest",
