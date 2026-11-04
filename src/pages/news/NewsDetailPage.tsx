@@ -5,8 +5,6 @@ import Badge from "@/components/common/Badge";
 import ErrorModal from "@/components/common/ErrorModal";
 import bookmarkFill from "@/assets/icon-24px/bookmark-fill.svg";
 import bookmarkLineWhite from "@/assets/icon-24px/bookmark-line-white.svg";
-import newsImpactNegativeIcon from "@/assets/icon-16px/news-impact-negative.svg";
-import newsImpactPositiveIcon from "@/assets/icon-16px/news-impact-positive.svg";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import wordSaveActiveIcon from "@/assets/icon-28px/wordsave-active.svg";
 import wordSaveIcon from "@/assets/icon-28px/wordsave.svg";
@@ -14,12 +12,18 @@ import { ApiError } from "@/lib/api";
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
 import { useApiErrorModal } from "@/lib/useApiErrorModal";
 import type { SectorImpactItem } from "@/lib/newsApi";
+import { useTodayInvestmentQuery } from "@/pages/invest/trade/investQueries";
+import { useTodayQuizQuery } from "@/pages/quiz/api/queries";
 import {
   formatCategoryName,
   formatRelativeDate,
   getNewsCategoryImage,
 } from "@/lib/newsFormat";
 import NewsDetailPageSkeleton from "./components/NewsDetailPageSkeleton";
+import NewsFlowCta from "./components/NewsFlowCta";
+import SectorPredictionCard, {
+  type SectorGuess,
+} from "./components/SectorPredictionCard";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import TermBottomSheetSkeleton from "./components/TermBottomSheetSkeleton";
 import Toast from "./components/Toast";
@@ -34,10 +38,35 @@ import {
   useUnsaveTermById,
 } from "./newsQueries";
 
-function splitImpacts(impacts: SectorImpactItem[]) {
-  const positive = impacts.filter((sector) => sector.impact === "POSITIVE");
-  const negative = impacts.filter((sector) => sector.impact === "NEGATIVE");
-  return { positive, negative };
+// 섹터 예측 대상: AI 분석에서 상승·하락으로 나온 섹터 (영향 없음은 제외)
+function getPredictionSectors(impacts: SectorImpactItem[]) {
+  return impacts.filter((sector) => sector.impact !== "NEUTRAL");
+}
+
+// 사용자가 고른 섹터 예측은 뉴스별로 기기에 저장해 다시 들어와도 결과를 보여준다
+const SECTOR_GUESS_KEY_PREFIX = "muffin:sectorGuess:";
+
+function loadSectorGuesses(newsId: number): Record<string, SectorGuess> {
+  try {
+    const saved = localStorage.getItem(`${SECTOR_GUESS_KEY_PREFIX}${newsId}`);
+    return saved ? (JSON.parse(saved) as Record<string, SectorGuess>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveSectorGuesses(
+  newsId: number,
+  guesses: Record<string, SectorGuess>,
+) {
+  try {
+    localStorage.setItem(
+      `${SECTOR_GUESS_KEY_PREFIX}${newsId}`,
+      JSON.stringify(guesses),
+    );
+  } catch {
+    // 저장 실패(프라이빗 모드 등)는 무시
+  }
 }
 
 // 마지막 글자의 받침 유무로 "이란?"/"란?" 선택.
@@ -70,51 +99,6 @@ function renderMarkdownBold(content: string) {
   });
 }
 
-interface ImpactCardProps {
-  type: "positive" | "negative";
-  sectors: SectorImpactItem[];
-}
-
-function ImpactCard({ type, sectors }: ImpactCardProps) {
-  const isPositive = type === "positive";
-  const iconSrc = isPositive ? newsImpactPositiveIcon : newsImpactNegativeIcon;
-
-  return (
-    <section className="bg-neutral-0 flex w-full flex-col gap-3 rounded-[12px] border border-neutral-100 p-4">
-      <div className="flex items-center gap-1 px-1">
-        <img
-          src={iconSrc}
-          alt=""
-          aria-hidden="true"
-          className="size-4 shrink-0 object-contain"
-          draggable={false}
-        />
-        <p className="text-body-16-md-tighter text-neutral-700">
-          <span
-            className={`font-bold ${
-              isPositive ? "text-positive" : "text-negative"
-            }`}
-          >
-            {isPositive ? "긍정" : "부정"}
-          </span>{" "}
-          반응이 나타나요!
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {sectors.map((sector) => (
-          <span
-            key={sector.sectorCode}
-            className="text-caption-12-md-tighter flex h-[22px] items-center rounded-[4px] bg-neutral-50 px-2 text-neutral-700"
-          >
-            {sector.sectorName}
-          </span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function NewsDetailPage() {
   const navigate = useNavigate();
   const { newsId } = useParams<{ newsId: string }>();
@@ -142,6 +126,14 @@ export default function NewsDetailPage() {
     refetch: refetchDetail,
   } = useNewsDetail(idNum);
   const { data: impactData } = useSectorImpacts(idNum);
+  // 뉴스마다 고른 예측. 이번 방문에 고른 값이 없으면 기기에 저장된 값을 쓴다
+  const [guessesByNews, setGuessesByNews] = useState<
+    Record<number, Record<string, SectorGuess>>
+  >({});
+  const sectorGuesses = guessesByNews[idNum] ?? loadSectorGuesses(idNum);
+  // 하단 다음 단계 카드: 오늘 퀴즈 전이면 퀴즈, 퀴즈를 끝냈고 투자 전이면 모의투자 (#309)
+  const { data: todayQuiz } = useTodayQuizQuery();
+  const { data: todayInvestment } = useTodayInvestmentQuery();
   const {
     data: cardData,
     isError: isCardError,
@@ -250,7 +242,22 @@ export default function NewsDetailPage() {
     );
   }
 
-  const { positive, negative } = splitImpacts(impactData?.sectorImpacts ?? []);
+  const predictionSectors = getPredictionSectors(
+    impactData?.sectorImpacts ?? [],
+  );
+  const handleSectorGuess = (sectorCode: string, guess: SectorGuess) => {
+    const next = { ...sectorGuesses, [sectorCode]: guess };
+    saveSectorGuesses(idNum, next);
+    setGuessesByNews((current) => ({ ...current, [idNum]: next }));
+  };
+  const isQuizPending =
+    todayQuiz?.quizSetStatus === "PUBLISHED" &&
+    todayQuiz.sessionStatus !== "FINISHED";
+  const flowCta = isQuizPending
+    ? "quiz"
+    : todayInvestment?.status === "AVAILABLE"
+      ? "invest"
+      : null;
   const cards = cardData?.cards ?? [];
   const displayCategoryName = formatCategoryName(detail.categoryName);
   const isExplanationPending =
@@ -338,26 +345,35 @@ export default function NewsDetailPage() {
             <p className="text-caption-12-md-tighter pt-3 pb-2 text-neutral-400">
               AI가 요약·작성한 콘텐츠에요
             </p>
-
-            {(positive.length > 0 || negative.length > 0) && (
-              <div className="flex flex-col gap-2 pt-1">
-                {positive.length > 0 && (
-                  <ImpactCard type="positive" sectors={positive} />
-                )}
-                {negative.length > 0 && (
-                  <ImpactCard type="negative" sectors={negative} />
-                )}
-                <p className="text-caption-12-md-tighter text-neutral-400">
-                  AI가 뉴스를 바탕으로 분석한 결과라 실제 투자 판단과 다를 수
-                  있어요
-                </p>
-              </div>
-            )}
           </section>
         </article>
 
+        {/* 섹터 예측 (Figma 런칭 전 수정 > 뉴스 상세 보기, #309) */}
+        {predictionSectors.length > 0 && (
+          <section
+            aria-label="섹터 예측"
+            className="flex w-full flex-col gap-3 bg-neutral-50/80 px-5 pt-5"
+          >
+            {predictionSectors.map((sector) => (
+              <SectorPredictionCard
+                key={sector.sectorCode}
+                sector={sector}
+                guess={sectorGuesses[sector.sectorCode] ?? null}
+                onGuess={(guess) => handleSectorGuess(sector.sectorCode, guess)}
+              />
+            ))}
+            <p className="text-caption-12-md-tighter px-1 text-center text-neutral-400">
+              AI가 뉴스를 바탕으로 분석한 결과라 실제 투자 판단과 다를 수 있어요
+            </p>
+          </section>
+        )}
+
         {cards.length > 0 ? (
-          <section className="flex w-full flex-col gap-3 bg-neutral-50/80 px-5 pt-5 pb-10">
+          <section
+            className={`flex w-full flex-col gap-3 bg-neutral-50/80 px-5 ${
+              predictionSectors.length > 0 ? "pt-7" : "pt-5"
+            } ${flowCta ? "pb-0" : "pb-10"}`}
+          >
             {cards.map((card) => (
               <div
                 key={card.cardOrder}
@@ -393,6 +409,16 @@ export default function NewsDetailPage() {
             </p>
           </section>
         ) : null}
+
+        {/* 다음 단계: 퀴즈 → 모의투자 (#309) */}
+        {flowCta && (
+          <section className="w-full bg-neutral-50/80 px-5 pt-7 pb-10">
+            <NewsFlowCta
+              type={flowCta}
+              onClick={() => navigate(flowCta === "quiz" ? "/quiz" : "/invest")}
+            />
+          </section>
+        )}
       </div>
 
       <ScrollToTopButton

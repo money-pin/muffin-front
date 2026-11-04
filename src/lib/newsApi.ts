@@ -51,6 +51,8 @@ export interface SectorImpactItem {
   sectorCode: string;
   sectorName: string;
   impact: SectorImpact;
+  // 섹터 변동 이유 (백엔드 추가 예정, 없으면 이유 없이 결과만 보여준다)
+  reason?: string | null;
 }
 
 export interface NewsSectorImpactResponse {

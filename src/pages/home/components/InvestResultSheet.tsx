@@ -9,8 +9,8 @@ interface InvestResultSheetProps {
   isOpen: boolean;
   onClose: () => void;
   result: SettlementResult;
+  onBriefingClick?: () => void; // 오늘의 브리핑 보기 → 브리핑 (#309)
   onDetailClick?: () => void; // 섹터별 상세 내역 → 수익 통계
-  onInvestClick?: () => void; // 오늘 투자하러 가기 → 모의투자
 }
 
 // Figma 투자 결과 모달: 날짜 헤더 + 결과 문구(수익/손실 분기)
@@ -19,8 +19,8 @@ export default function InvestResultSheet({
   isOpen,
   onClose,
   result,
+  onBriefingClick,
   onDetailClick,
-  onInvestClick,
 }: InvestResultSheetProps) {
   const up = result.profit >= 0;
 
@@ -106,10 +106,10 @@ export default function InvestResultSheet({
         </div>
 
         <div className="flex w-full flex-col gap-2">
-          <Button onClick={onDetailClick}>섹터별 상세 내역 보러가기</Button>
+          <Button onClick={onBriefingClick}>오늘의 브리핑 보기</Button>
 
-          <Button variant="soft" onClick={onInvestClick}>
-            오늘 투자하러 가기
+          <Button variant="soft" onClick={onDetailClick}>
+            섹터별 상세 내역 보기
           </Button>
         </div>
       </div>
