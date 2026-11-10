@@ -1,12 +1,12 @@
 import type { ProfitTrendPoint } from "@/pages/invest/stats/types";
 
-const GRID_STEP_COUNT = 4;
+const TARGET_GRID_STEP_COUNT = 4;
 const RECENT_DAY_COUNT = 7;
 const MS_PER_DAY = 86_400_000;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1_000;
 const AXIS_PADDING_RATIO = 0.15;
-const MIN_AXIS_PADDING = 0.1;
-const EMPTY_AXIS_RANGE = { minY: 0, maxY: 10 };
+const MIN_AXIS_SPAN = 3;
+const EMPTY_AXIS_RANGE = { minY: 0, maxY: 10, step: 2.5 };
 
 function getNiceStep(value: number) {
   if (value <= 0) return 1;
@@ -26,23 +26,28 @@ function getNiceStep(value: number) {
 }
 
 function getAxisRange(data: ProfitTrendPoint[]) {
-  const minValue = Math.min(...data.map((point) => point.value), 0);
-  const maxValue = Math.max(...data.map((point) => point.value), 0);
-  if (minValue === 0 && maxValue === 0) return EMPTY_AXIS_RANGE;
-
-  // 기존 작은 값 구간의 눈금을 유지한다.
-  if (minValue >= -1 && maxValue <= 1) return { minY: -2, maxY: 2 };
-
-  const padding = Math.max(
-    (maxValue - minValue) * AXIS_PADDING_RATIO,
-    MIN_AXIS_PADDING,
+  if (!data.length) return EMPTY_AXIS_RANGE;
+  const minValue = Math.min(...data.map((point) => point.value));
+  const maxValue = Math.max(...data.map((point) => point.value));
+  const center = minValue + (maxValue - minValue) / 2;
+  const span = Math.max(
+    MIN_AXIS_SPAN,
+    (maxValue - minValue) * (1 + AXIS_PADDING_RATIO * 2),
   );
-  const paddedMin = minValue < 0 ? minValue - padding : 0;
-  const paddedMax = maxValue > 0 ? maxValue + padding : 0;
-  const step = getNiceStep((paddedMax - paddedMin) / GRID_STEP_COUNT);
+  const paddedMin = center - span / 2;
+  const paddedMax = center + span / 2;
+  const step = getNiceStep((paddedMax - paddedMin) / TARGET_GRID_STEP_COUNT);
+  let minStep = Math.floor(paddedMin / step);
+  let maxStep = Math.ceil(paddedMax / step);
+  // 목표는 눈금 4~6개(격자 3~5칸). 간격을 유지하며 부족한 눈금만 균형 있게 추가한다.
+  while (maxStep - minStep < 3) {
+    if (minValue - minStep * step <= maxStep * step - maxValue) minStep--;
+    else maxStep++;
+  }
   return {
-    minY: Math.floor(paddedMin / step) * step,
-    maxY: Math.ceil(paddedMax / step) * step,
+    minY: minStep * step,
+    maxY: maxStep * step,
+    step,
   };
 }
 
@@ -77,12 +82,42 @@ export function createProfitRateGraphModel(
   const labels = points.length
     ? points.map((point) => formatDateLabel(point.label))
     : getRecentKstGraphLabels(now);
-  const { minY, maxY } = getAxisRange(points);
+  const { minY, maxY, step } = getAxisRange(points);
+  // 범위를 다시 4등분하면 -3.75% 같은 눈금이 생긴다. 계산한 간격을 유지한다.
   const ticks = Array.from(
-    { length: GRID_STEP_COUNT + 1 },
-    (_, index) => maxY - ((maxY - minY) / GRID_STEP_COUNT) * index,
+    { length: Math.round((maxY - minY) / step) + 1 },
+    (_, index) => Number((maxY - step * index).toPrecision(12)),
   );
   return { points, labels, minY, maxY, ticks };
+}
+
+// 화면 너비에만 반응하고, 데이터·눈금 수가 바뀌어도 카드 높이는 유지한다.
+export function getProfitGraphHeight(width: number) {
+  return Math.min((320 * 2) / 3, Math.max(180, (width * 2) / 3));
+}
+
+// 주어진 높이 안에서 격자 비율을 맞춘다. 날짜 간격이 과하게 좁아지지 않게 폭은 85% 이상 유지한다.
+export function getProfitGraphPlotSize(
+  availableWidth: number,
+  labelCount: number,
+  tickCount: number,
+  height = 200,
+) {
+  const maxPlotHeight = height - 40;
+  if (labelCount <= 1 || tickCount <= 1) {
+    return { width: availableWidth, height: maxPlotHeight };
+  }
+  const columns = labelCount - 1;
+  const rows = tickCount - 1;
+  const width = Math.min(
+    availableWidth,
+    Math.max(availableWidth * 0.85, (maxPlotHeight / rows) * columns),
+  );
+  const plotHeight = Math.min(
+    maxPlotHeight,
+    Math.max(maxPlotHeight * 0.75, (width / columns) * rows),
+  );
+  return { width, height: plotHeight };
 }
 
 // 첫 날짜와 마지막 날짜를 유지하고, 겹칠 때만 중간 라벨의 표시 간격을 늘린다.
