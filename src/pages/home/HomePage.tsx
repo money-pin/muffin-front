@@ -138,8 +138,8 @@ function HomePage() {
           isOpen={investResultOpen}
           onClose={() => setInvestResultOpen(false)}
           result={settlementResult}
+          onBriefingClick={() => navigate("/briefing")}
           onDetailClick={() => navigate("/invest/stats")}
-          onInvestClick={() => navigate("/invest")}
         />
       )}
 

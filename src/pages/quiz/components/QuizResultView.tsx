@@ -8,6 +8,8 @@ interface QuizResultViewProps {
   total: number;
   reward: number;
   onGoHome: () => void;
+  // 오늘 아직 투자하지 않았으면 받은 보상으로 투자하러 가는 버튼을 보여준다 (#309)
+  onGoInvest?: () => void;
 }
 
 function getResultMessage(correctCount: number, total: number) {
@@ -16,12 +18,14 @@ function getResultMessage(correctCount: number, total: number) {
   return "잘하셨어요!";
 }
 
-// Figma 퀴즈 결과: 원형 게이지(정답 비율) + 보상 카드 + 홈으로
+// Figma 퀴즈 결과: 원형 게이지(정답 비율) + 보상 카드
+// + [받은 머니로 투자하러 가기](오늘 투자 전일 때) + [홈으로 돌아가기]
 export default function QuizResultView({
   correctCount,
   total,
   reward,
   onGoHome,
+  onGoInvest,
 }: QuizResultViewProps) {
   const size = 180;
   const strokeWidth = 18;
@@ -112,8 +116,13 @@ export default function QuizResultView({
         </div>
       )}
 
-      <div className="mt-auto">
-        <Button onClick={onGoHome}>홈으로 돌아가기</Button>
+      <div className="mt-auto flex flex-col gap-4">
+        {onGoInvest && (
+          <Button onClick={onGoInvest}>받은 머니로 투자하러 가기</Button>
+        )}
+        <Button variant={onGoInvest ? "neutral" : "primary"} onClick={onGoHome}>
+          홈으로 돌아가기
+        </Button>
       </div>
     </div>
   );

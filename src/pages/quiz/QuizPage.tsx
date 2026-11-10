@@ -16,6 +16,7 @@ import {
   useTodayQuizQuery,
 } from "@/pages/quiz/api/queries";
 import type { QuizAttemptResult } from "@/pages/quiz/api/types";
+import { useTodayInvestmentQuery } from "@/pages/invest/trade/investQueries";
 
 type QuizPhase = "intro" | "question" | "result";
 
@@ -81,6 +82,9 @@ function QuizPage() {
   }, [setTopBar, resetTopBar, navigate]);
 
   const goHome = () => navigate("/home");
+  // 퀴즈 보상을 받은 뒤 오늘 아직 투자 전이면 모의투자로 바로 보낸다 (#309)
+  const todayInvestmentQuery = useTodayInvestmentQuery();
+  const canInvestToday = todayInvestmentQuery.data?.status === "AVAILABLE";
 
   // 재진입(PROGRESS)이면 인트로는 그대로 두고 시작 버튼 문구만 바꾼다.
   const isResume = todayQuizQuery.data?.sessionStatus === "PROGRESS";
@@ -156,6 +160,7 @@ function QuizPage() {
         total={progress.totalCount}
         reward={reward.amount}
         onGoHome={goHome}
+        onGoInvest={canInvestToday ? () => navigate("/invest") : undefined}
       />
     );
   }
