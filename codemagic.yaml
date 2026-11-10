@@ -17,11 +17,15 @@ workflows:
       node: 22
       groups:
         # VITE_API_BASE_URL, VITE_GOOGLE_CLIENT_ID (웹 빌드에 들어가는 값)
-        # VITE_KAKAO_NATIVE_APP_KEY, VITE_GOOGLE_IOS_CLIENT_ID (앱 소셜 로그인, #266)
         - muffin_env
       vars:
         XCODE_PROJECT: ios/App/App.xcodeproj
         XCODE_SCHEME: App
+        # 앱 소셜 로그인 (#266). 앱 안에 그대로 들어가는 공개 값이라 여기에 둔다
+        # 카카오 네이티브 앱 키 (카카오 디벨로퍼스 > 앱 키)
+        VITE_KAKAO_NATIVE_APP_KEY: 736e3d66fe47ab13b822bdf690b583dd
+        # 구글 iOS OAuth 클라이언트 ID (번들 ID kr.ai.muffin)
+        VITE_GOOGLE_IOS_CLIENT_ID: 33246503339-lvcq3fir358bancppob1umlbq3jnh9na.apps.googleusercontent.com
         # TODO(#264): App Store Connect에서 앱 생성 후 '앱 정보 > Apple ID' 숫자로 교체
         APP_STORE_APPLE_ID: 0
     scripts:
