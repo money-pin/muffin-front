@@ -71,7 +71,7 @@ pnpm cap:sync   # = pnpm build && cap sync ios (웹 빌드 결과를 ios/에 복
 | 애플   | Apple Developer > Identifiers > `kr.ai.muffin`에 **Sign in with Apple** 체크                            | 코드 설정 완료 (`App/App.entitlements`)         |
 | 백엔드 | 구글 토큰 검증에 iOS 클라이언트 ID도 허용 (앱 로그인 토큰의 aud가 iOS 클라이언트 ID)                    | 백엔드 환경 변수                                |
 
-- 두 값은 Codemagic 환경 변수 그룹 `muffin_env`에 넣습니다. 웹 빌드 값과 함께 앱 코드에 들어가고, `codemagic.yaml`이 Info.plist의 로그인 복귀 주소(URL scheme)에도 넣어 줍니다.
+- 두 값은 `codemagic.yaml`의 `vars`에 들어 있습니다(앱에 그대로 들어가는 공개 값). 웹 빌드 값과 함께 앱 코드에 들어가고, `codemagic.yaml`이 Info.plist의 로그인 복귀 주소(URL scheme)에도 넣어 줍니다.
 - 애플 계정 회원 탈퇴 시 앱이 애플 로그인을 한 번 더 띄워 받은 `authorizationCode`를 탈퇴 API에 보냅니다.
 
 ## iOS 의존성 관리: SPM
