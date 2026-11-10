@@ -84,10 +84,7 @@ export default function StatsPage() {
           data={statsData.cumulativeProfit}
           onClick={() => navigate("/invest/profit-history")}
         />
-        <ProfitRateTrendCard
-          data={statsData.trend}
-          isEmpty={!statsData.investDate}
-        />
+        <ProfitRateTrendCard data={statsData.trend} />
         <TopProfitSectorsCard sectors={statsData.topSectors} />
         {statsData.profile && (
           <InvestmentStyleCard profile={statsData.profile} />
