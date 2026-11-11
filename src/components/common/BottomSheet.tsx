@@ -7,6 +7,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { RemoveScroll } from "react-remove-scroll";
+import { useDialogFocus } from "@/lib/useDialogFocus";
 
 const ANIMATION_DURATION_MS = 300;
 const HALF_SNAP_RATIO = 0.46;
@@ -36,7 +37,15 @@ export default function BottomSheet({
   const [dragOffset, setDragOffset] = useState(0);
 
   const sheetRef = useRef<HTMLElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Keep focus/background isolation until the exit animation has completed.
+  useDialogFocus(
+    isMounted,
+    rootRef,
+    sheetRef,
+    isOpen ? onClose : undefined,
+    true,
+  );
   const dragStartYRef = useRef(0);
   const dragStartExpandedRef = useRef(false);
 
@@ -77,54 +86,6 @@ export default function BottomSheet({
 
     return () => window.cancelAnimationFrame(frame);
   }, [isOpen, isMounted, snapMode]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-    if (!isOpen || !isMounted) return;
-
-    if (!previousFocusRef.current) {
-      previousFocusRef.current =
-        document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null;
-    }
-
-    const frame = window.requestAnimationFrame(() => {
-      sheetRef.current?.focus();
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [isOpen, isMounted]);
-
-  useEffect(() => {
-    if (isMounted) return;
-
-    previousFocusRef.current?.focus();
-    previousFocusRef.current = null;
-  }, [isMounted]);
-
-  useEffect(() => {
-    return () => {
-      previousFocusRef.current?.focus();
-    };
-  }, []);
 
   const startSheetDrag = (
     event: ReactPointerEvent<HTMLDivElement>,
@@ -191,7 +152,10 @@ export default function BottomSheet({
 
   return createPortal(
     <RemoveScroll removeScrollBar={false}>
-      <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div
+        ref={rootRef}
+        className="fixed inset-0 z-50 flex items-end justify-center"
+      >
         <div
           aria-hidden="true"
           className={`bg-neutral-1000/50 absolute inset-0 transition-opacity duration-300 ${

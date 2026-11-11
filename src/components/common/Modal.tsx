@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { RemoveScroll } from "react-remove-scroll";
 
 import closeIcon from "@/assets/icon-24px/close.svg";
+import { useDialogFocus } from "@/lib/useDialogFocus";
 
 interface ModalProps {
   isOpen: boolean;
@@ -26,11 +27,18 @@ function Modal({
   className = "rounded-[20px] px-6 py-8",
   contentClassName = "flex flex-col items-center text-center",
 }: ModalProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  // Modal closing remains controlled by its existing buttons; Escape does not close it.
+  useDialogFocus(isOpen, rootRef, dialogRef);
   if (!isOpen || typeof document === "undefined") return null;
 
   return createPortal(
     <RemoveScroll>
-      <div className="fixed inset-0 z-50 flex justify-center bg-black/50">
+      <div
+        ref={rootRef}
+        className="fixed inset-0 z-50 flex justify-center bg-black/50"
+      >
         {/* 딤: 프레임 밖(전체화면) — #152 */}
         <div className="relative h-full w-full max-w-[var(--max-width-app)]">
           <div
@@ -40,6 +48,8 @@ function Modal({
             ].join(" ")}
           >
             <section
+              ref={dialogRef}
+              tabIndex={-1}
               role="dialog"
               aria-modal="true"
               aria-label={ariaLabel}
