@@ -35,14 +35,18 @@ export function mapStatsSummaryToStatsSummaryData(
       amount: response.cumulativeProfitAmount,
       rate: response.cumulativeProfitRate,
     },
-    trend: response.graph.flatMap((point) => {
-      if (!parseOptionalInvestmentResultDate(point.date)) return [];
+    // 정산 이력 유무는 수익률이 아닌 기준일로 판단합니다. 실제 0%는 유지합니다.
+    trend:
+      response.investDate === null
+        ? []
+        : response.graph.flatMap((point) => {
+            if (!parseOptionalInvestmentResultDate(point.date)) return [];
 
-      return {
-        label: point.date,
-        value: point.cumulativeProfitRate,
-      };
-    }),
+            return {
+              label: point.date,
+              value: point.cumulativeProfitRate,
+            };
+          }),
     topSectors: response.topSectors.flatMap((sector) => {
       if (!isTopSectorRank(sector.rank)) return [];
       const meta = getSectorMeta(sector.sectorCode, sector.sectorName);

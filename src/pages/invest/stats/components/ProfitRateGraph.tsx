@@ -1,276 +1,287 @@
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { ProfitTrendPoint } from "@/pages/invest/stats/types";
+import {
+  createProfitRateGraphModel,
+  formatProfitGraphRate,
+  getProfitGraphLabelIndices,
+  getProfitGraphPlotSize,
+  getProfitGraphHeight,
+} from "@/pages/invest/stats/utils/profitRateGraph";
 
 interface ProfitRateGraphProps {
   data: ProfitTrendPoint[];
-  isEmpty?: boolean;
 }
 
-const WIDTH = 291;
-const HEIGHT = 200;
-const PADDING_LEFT = 45;
+const DEFAULT_WIDTH = 291;
+const MIN_PADDING_LEFT = 45;
 const PADDING_RIGHT = 25;
 const PADDING_TOP = 10;
 const PADDING_BOTTOM = 30;
-const CHART_WIDTH = WIDTH - PADDING_LEFT - PADDING_RIGHT;
-const CHART_HEIGHT = HEIGHT - PADDING_TOP - PADDING_BOTTOM;
+const AXIS_FONT_SIZE = 12;
+const LABEL_AXIS_GAP = 10;
+const LABEL_EDGE_GAP = 4;
+const TICK_LENGTH = 6;
 const GRID_COLOR = "var(--color-neutral-100)";
 const LABEL_COLOR = "var(--color-neutral-400)";
 const LINE_COLOR = "var(--color-primary)";
 const AXIS_COLOR = "var(--color-neutral-400)";
-const AXIS_FONT_SIZE = 12;
-const GRID_DASH = "4 4";
-const TICK_LENGTH = 6;
-const GRID_STEP_COUNT = 4;
-const OVERLAP_THRESHOLD = 0.5;
-const EMPTY_AXIS_RANGE = { minY: 0, maxY: 10 };
-const RECENT_DAY_COUNT = 7;
-const MS_PER_DAY = 86_400_000;
-const AXIS_PADDING_RATIO = 0.15;
-const MIN_AXIS_PADDING = 0.1;
-const SMALL_VALUE_THRESHOLD = 1;
-const SMALL_VALUE_AXIS_RANGE = { minY: -2, maxY: 2 };
 
-function roundDownByStep(value: number, step: number) {
-  return Math.floor(value / step) * step;
-}
-
-function roundUpByStep(value: number, step: number) {
-  return Math.ceil(value / step) * step;
-}
-
-function getNiceStep(value: number) {
-  if (value <= 0) return 1;
-
-  const magnitude = 10 ** Math.floor(Math.log10(value));
-  const normalized = value / magnitude;
-  const niceNormalized =
-    normalized <= 1
-      ? 1
-      : normalized <= 2
-        ? 2
-        : normalized <= 2.5
-          ? 2.5
-          : normalized <= 5
-            ? 5
-            : 10;
-
-  return niceNormalized * magnitude;
-}
-
-function getAxisRange(data: ProfitTrendPoint[]) {
-  if (data.length === 0) {
-    return EMPTY_AXIS_RANGE;
-  }
-
-  const values = data.map((point) => point.value);
-  const minValue = Math.min(...values, 0);
-  const maxValue = Math.max(...values, 0);
-
-  if (minValue === 0 && maxValue === 0) {
-    return EMPTY_AXIS_RANGE;
-  }
-
-  if (minValue >= -SMALL_VALUE_THRESHOLD && maxValue <= SMALL_VALUE_THRESHOLD) {
-    return SMALL_VALUE_AXIS_RANGE;
-  }
-
-  const rawRange = maxValue - minValue;
-  const padding = Math.max(rawRange * AXIS_PADDING_RATIO, MIN_AXIS_PADDING);
-  const paddedMin = minValue < 0 ? minValue - padding : 0;
-  const paddedMax = maxValue > 0 ? maxValue + padding : 0;
-  const step = getNiceStep((paddedMax - paddedMin) / GRID_STEP_COUNT);
-  const minY = roundDownByStep(paddedMin, step);
-  const maxY = roundUpByStep(paddedMax, step);
-
-  if (minY === maxY) {
-    return { minY: minY - padding, maxY: maxY + padding };
-  }
-
-  return { minY, maxY };
-}
-
-function getGridValues(minY: number, maxY: number) {
-  const step = (maxY - minY) / GRID_STEP_COUNT;
-
-  return Array.from(
-    { length: GRID_STEP_COUNT + 1 },
-    (_, index) => maxY - step * index,
+export default function ProfitRateGraph({ data }: ProfitRateGraphProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltipWidth, setTooltipWidth] = useState(80);
+  const descriptionId = useId();
+  const model = createProfitRateGraphModel(data);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const selectedIndex = model.points.findIndex(
+    (point) => point.label === selectedLabel,
   );
-}
+  const selectedPoint = model.points[selectedIndex];
+  // 같은 눈금·날짜면 데이터 재조회 때마다 글자 폭을 다시 측정하지 않는다.
+  const labelKey = JSON.stringify({
+    x: model.labels,
+    y: model.ticks.map(formatProfitGraphRate),
+  });
+  const [layout, setLayout] = useState({
+    width: DEFAULT_WIDTH,
+    paddingLeft: MIN_PADDING_LEFT,
+    labelIndices: model.labels.map((_, index) => index),
+  });
 
-function getLabel(value: number) {
-  return `${Number(value.toFixed(2))}%`;
-}
+  useLayoutEffect(() => {
+    const tooltip = tooltipRef.current;
+    if (tooltip) setTooltipWidth(tooltip.getBoundingClientRect().width);
+  }, [selectedLabel, selectedPoint?.value, layout.width]);
 
-function formatXAxisLabel(value: string) {
-  const [, , month, day] =
-    /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/.exec(value) ?? [];
-
-  return month && day ? `${Number(month)}/${Number(day)}` : value;
-}
-
-function getDateParts(value: string, now = new Date()) {
-  const [, fullYear, fullMonth, fullDay] =
-    /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/.exec(value) ?? [];
-
-  if (fullYear && fullMonth && fullDay) {
-    return {
-      year: Number(fullYear),
-      month: Number(fullMonth),
-      day: Number(fullDay),
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const labels = JSON.parse(labelKey) as { x: string[]; y: string[] };
+    const svg = container.querySelector("svg");
+    if (!svg) return;
+    let active = true;
+    const measure = () => {
+      if (!active) return;
+      const width = container.getBoundingClientRect().width || DEFAULT_WIDTH;
+      // 라벨과 같은 SVG·폰트로 측정해 부호와 첫 자리까지 여백에 포함한다.
+      const text = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text",
+      );
+      text.setAttribute("font-size", String(AXIS_FONT_SIZE));
+      text.setAttribute("font-weight", "500");
+      text.setAttribute("visibility", "hidden");
+      text.setAttribute("aria-hidden", "true");
+      svg.appendChild(text);
+      let paddingLeft: number;
+      let labelIndices: number[];
+      try {
+        const textWidth = (label: string) => {
+          text.textContent = label;
+          const bounds = text.getBBox();
+          return Math.max(text.getComputedTextLength(), bounds.width);
+        };
+        paddingLeft = Math.max(
+          MIN_PADDING_LEFT,
+          Math.ceil(
+            Math.max(...labels.y.map(textWidth)) +
+              LABEL_AXIS_GAP +
+              LABEL_EDGE_GAP,
+          ),
+        );
+        labelIndices = getProfitGraphLabelIndices(
+          labels.x.map(textWidth),
+          getProfitGraphPlotSize(
+            width - paddingLeft - PADDING_RIGHT,
+            labels.x.length,
+            labels.y.length,
+            getProfitGraphHeight(width),
+          ).width,
+        );
+      } finally {
+        text.remove();
+      }
+      setLayout((previous) =>
+        previous.width === width &&
+        previous.paddingLeft === paddingLeft &&
+        previous.labelIndices.join() === labelIndices.join()
+          ? previous
+          : { width, paddingLeft, labelIndices },
+      );
     };
-  }
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    void document.fonts.ready.then(measure);
+    document.fonts.addEventListener("loadingdone", measure);
+    return () => {
+      active = false;
+      observer.disconnect();
+      document.fonts.removeEventListener("loadingdone", measure);
+    };
+  }, [labelKey]);
 
-  const [, shortMonth, shortDay] = /^(\d{1,2})\/(\d{1,2})$/.exec(value) ?? [];
-  if (!shortMonth || !shortDay) return null;
-
-  const currentYear = Number(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Seoul",
-      year: "numeric",
-    }).format(now),
+  const availableWidth = layout.width - layout.paddingLeft - PADDING_RIGHT;
+  const height = getProfitGraphHeight(layout.width);
+  const { width: plotWidth, height: chartHeight } = getProfitGraphPlotSize(
+    availableWidth,
+    model.labels.length,
+    model.ticks.length,
+    height,
   );
-
-  return {
-    year: currentYear,
-    month: Number(shortMonth),
-    day: Number(shortDay),
-  };
-}
-
-function getForwardDateLabels(startDate: string) {
-  const dateParts = getDateParts(startDate);
-  if (!dateParts) return null;
-
-  const startTime = Date.UTC(
-    dateParts.year,
-    dateParts.month - 1,
-    dateParts.day,
-  );
-
-  return Array.from({ length: RECENT_DAY_COUNT }, (_, index) => {
-    const date = new Date(startTime + index * MS_PER_DAY);
-
-    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
-  });
-}
-
-function getForwardDateLabelsFromToday(now = new Date()) {
-  const dateParts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-  }).formatToParts(now);
-  const year = Number(dateParts.find((part) => part.type === "year")?.value);
-  const month = Number(dateParts.find((part) => part.type === "month")?.value);
-  const day = Number(dateParts.find((part) => part.type === "day")?.value);
-  const currentDate = Date.UTC(year, month - 1, day);
-
-  return Array.from({ length: RECENT_DAY_COUNT }, (_, index) => {
-    const date = new Date(currentDate + index * MS_PER_DAY);
-
-    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
-  });
-}
-
-export default function ProfitRateGraph({
-  data,
-  isEmpty = false,
-}: ProfitRateGraphProps) {
-  const firstNonZeroIndex = data.findIndex((point) => point.value !== 0);
-  const hasProfitData = !isEmpty && firstNonZeroIndex >= 0;
-  const chartData = hasProfitData ? data.slice(firstNonZeroIndex) : [];
-  const forwardLabels =
-    firstNonZeroIndex > 0 && chartData.length > 0
-      ? getForwardDateLabels(chartData[0].label)
-      : null;
-  const labels = !hasProfitData
-    ? getForwardDateLabelsFromToday()
-    : (forwardLabels ?? data.map((point) => formatXAxisLabel(point.label)));
-  const { minY, maxY } = getAxisRange(chartData);
-  const yGridValues = getGridValues(minY, maxY);
-  const canDrawDot = chartData.length >= 1;
-  const canDrawLine = chartData.length >= 2;
-
-  const getX = (index: number) => {
-    if (labels.length <= 1) {
-      return PADDING_LEFT + CHART_WIDTH / 2;
-    }
-
-    return PADDING_LEFT + (index / (labels.length - 1)) * CHART_WIDTH;
-  };
-
+  const plotLeft = layout.paddingLeft + (availableWidth - plotWidth) / 2;
+  const plotTop =
+    PADDING_TOP + (height - PADDING_TOP - PADDING_BOTTOM - chartHeight) / 2;
+  const plotBottom = plotTop + chartHeight;
+  const getX = (index: number) =>
+    plotLeft +
+    (model.labels.length <= 1
+      ? plotWidth / 2
+      : (index / (model.labels.length - 1)) * plotWidth);
   const getY = (value: number) =>
-    PADDING_TOP +
-    CHART_HEIGHT -
-    ((value - minY) / (maxY - minY)) * CHART_HEIGHT;
-
-  const pathD = chartData
-    .map((point, index) => {
-      const x = getX(index);
-      const y = getY(point.value);
-
-      return `${index === 0 ? "M" : "L"} ${x} ${y}`;
-    })
+    plotTop +
+    chartHeight -
+    ((value - model.minY) / (model.maxY - model.minY)) * chartHeight;
+  const path = model.points
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"} ${getX(index)} ${getY(point.value)}`,
+    )
     .join(" ");
 
+  const selectPointAt = (clientX: number, bounds: DOMRect) => {
+    if (!model.points.length) return;
+    const x = ((clientX - bounds.left) / bounds.width) * layout.width;
+    const index =
+      model.points.length === 1
+        ? 0
+        : Math.round(((x - plotLeft) / plotWidth) * (model.points.length - 1));
+    setSelectedLabel(
+      model.points[Math.max(0, Math.min(model.points.length - 1, index))].label,
+    );
+  };
+
+  const tooltipLeft = selectedPoint
+    ? Math.max(
+        tooltipWidth / 2 + 4,
+        Math.min(layout.width - tooltipWidth / 2 - 4, getX(selectedIndex)),
+      )
+    : 0;
+
   return (
-    <div className="flex h-[200px] w-full max-w-[291px] items-center justify-center">
+    <div
+      ref={containerRef}
+      className="relative flex w-full max-w-[320px] min-w-0 items-center justify-center"
+      style={{ height }}
+    >
       <svg
-        width={WIDTH}
-        height={HEIGHT}
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        width={layout.width}
+        height={height}
+        viewBox={`0 0 ${layout.width} ${height}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label="최근 7일간 누적 수익률"
         className="h-full w-full select-none"
+        tabIndex={model.points.length ? 0 : undefined}
+        aria-describedby={
+          selectedPoint
+            ? `${descriptionId} ${descriptionId}-selection`
+            : descriptionId
+        }
+        onPointerMove={(event) => {
+          if (event.pointerType === "mouse")
+            selectPointAt(
+              event.clientX,
+              event.currentTarget.getBoundingClientRect(),
+            );
+        }}
+        onPointerDown={(event) => {
+          selectPointAt(
+            event.clientX,
+            event.currentTarget.getBoundingClientRect(),
+          );
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === "mouse") setSelectedLabel(null);
+        }}
+        onFocus={() =>
+          setSelectedLabel(
+            (previous) => previous ?? model.points[0]?.label ?? null,
+          )
+        }
+        onBlur={() => setSelectedLabel(null)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setSelectedLabel(null);
+            return;
+          }
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+            return;
+          event.preventDefault();
+          const index =
+            event.key === "Home"
+              ? 0
+              : event.key === "End"
+                ? model.points.length - 1
+                : Math.max(
+                    0,
+                    Math.min(
+                      model.points.length - 1,
+                      Math.max(0, selectedIndex) +
+                        (event.key === "ArrowRight" ? 1 : -1),
+                    ),
+                  );
+          setSelectedLabel(model.points[index]?.label ?? null);
+        }}
       >
+        <desc id={descriptionId}>
+          {model.points.length
+            ? model.points
+                .map(
+                  (point, index) =>
+                    `${model.labels[index]} ${formatProfitGraphRate(point.value)}`,
+                )
+                .join(", ")
+            : "표시할 수익률 데이터가 없습니다."}
+        </desc>
         <line
-          x1={PADDING_LEFT}
-          y1={PADDING_TOP}
-          x2={PADDING_LEFT}
-          y2={HEIGHT - PADDING_BOTTOM}
+          x1={plotLeft}
+          y1={plotTop}
+          x2={plotLeft}
+          y2={plotBottom}
           stroke={AXIS_COLOR}
-          strokeWidth="1"
         />
         <line
-          x1={PADDING_LEFT}
-          y1={HEIGHT - PADDING_BOTTOM}
-          x2={WIDTH - PADDING_RIGHT}
-          y2={HEIGHT - PADDING_BOTTOM}
+          x1={plotLeft}
+          y1={plotBottom}
+          x2={plotLeft + plotWidth}
+          y2={plotBottom}
           stroke={AXIS_COLOR}
-          strokeWidth="1"
         />
-
-        {labels.map((label, index) => {
-          const x = getX(index);
-          const isOverlappingYAxis =
-            Math.abs(x - PADDING_LEFT) <= OVERLAP_THRESHOLD;
-
-          return (
-            <g key={`x-grid-${label}-${index}`}>
-              {!isOverlappingYAxis && (
-                <line
-                  x1={x}
-                  y1={PADDING_TOP}
-                  x2={x}
-                  y2={HEIGHT - PADDING_BOTTOM}
-                  stroke={GRID_COLOR}
-                  strokeWidth="1"
-                  strokeDasharray={GRID_DASH}
-                />
-              )}
+        {model.labels.map((label, index) => (
+          <g key={`x-${label}-${index}`}>
+            {index > 0 && (
               <line
-                x1={x}
-                y1={HEIGHT - PADDING_BOTTOM}
-                x2={x}
-                y2={HEIGHT - PADDING_BOTTOM + TICK_LENGTH}
-                stroke={AXIS_COLOR}
-                strokeWidth="1"
+                x1={getX(index)}
+                y1={plotTop}
+                x2={getX(index)}
+                y2={plotBottom}
+                stroke={GRID_COLOR}
+                strokeDasharray="4 4"
               />
+            )}
+            <line
+              x1={getX(index)}
+              y1={plotBottom}
+              x2={getX(index)}
+              y2={plotBottom + TICK_LENGTH}
+              stroke={AXIS_COLOR}
+            />
+            {layout.labelIndices.includes(index) && (
               <text
-                x={x}
-                y={HEIGHT - 10}
+                x={getX(index)}
+                y={plotBottom + 20}
                 fill={LABEL_COLOR}
                 fontSize={AXIS_FONT_SIZE}
                 fontWeight="500"
@@ -278,71 +289,100 @@ export default function ProfitRateGraph({
               >
                 {label}
               </text>
-            </g>
-          );
-        })}
-
-        {yGridValues.map((value) => {
-          const y = getY(value);
-          const isOverlappingXAxis =
-            Math.abs(y - (HEIGHT - PADDING_BOTTOM)) <= OVERLAP_THRESHOLD;
-
-          return (
-            <g key={value}>
+            )}
+          </g>
+        ))}
+        {model.ticks.map((value) => (
+          <g key={value}>
+            <line
+              x1={plotLeft - TICK_LENGTH}
+              y1={getY(value)}
+              x2={plotLeft}
+              y2={getY(value)}
+              stroke={AXIS_COLOR}
+            />
+            {(value === 0 || Math.abs(getY(value) - plotBottom) > 0.5) && (
               <line
-                x1={PADDING_LEFT - TICK_LENGTH}
-                y1={y}
-                x2={PADDING_LEFT}
-                y2={y}
-                stroke={AXIS_COLOR}
-                strokeWidth="1"
+                x1={plotLeft}
+                y1={getY(value)}
+                x2={plotLeft + plotWidth}
+                y2={getY(value)}
+                stroke={
+                  value === 0 && model.points.length ? AXIS_COLOR : GRID_COLOR
+                }
+                strokeWidth={value === 0 && model.points.length ? 1.5 : 1}
+                strokeDasharray={
+                  value === 0 && model.points.length ? undefined : "4 4"
+                }
+                data-zero-baseline={
+                  value === 0 && model.points.length ? true : undefined
+                }
               />
-              {!isOverlappingXAxis && (
-                <line
-                  x1={PADDING_LEFT}
-                  y1={y}
-                  x2={WIDTH - PADDING_RIGHT}
-                  y2={y}
-                  stroke={GRID_COLOR}
-                  strokeWidth="1"
-                  strokeDasharray={GRID_DASH}
-                />
-              )}
-              <text
-                x={PADDING_LEFT - 10}
-                y={y + 5}
-                fill={LABEL_COLOR}
-                fontSize={AXIS_FONT_SIZE}
-                fontWeight="500"
-                textAnchor="end"
-              >
-                {getLabel(value)}
-              </text>
-            </g>
-          );
-        })}
-
-        {canDrawLine && (
+            )}
+            <text
+              x={plotLeft - LABEL_AXIS_GAP}
+              y={getY(value) + 5}
+              fill={LABEL_COLOR}
+              fontSize={AXIS_FONT_SIZE}
+              fontWeight="500"
+              textAnchor="end"
+            >
+              {formatProfitGraphRate(value)}
+            </text>
+          </g>
+        ))}
+        {model.points.length >= 2 && (
           <path
-            d={pathD}
+            d={path}
             stroke={LINE_COLOR}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         )}
-
-        {canDrawDot &&
-          chartData.map((point, index) => (
-            <circle
-              key={`dot-${point.label}-${index}`}
-              cx={getX(index)}
-              cy={getY(point.value)}
-              r="5"
-              fill={LINE_COLOR}
-            />
-          ))}
+        {model.points.map((point, index) => (
+          <circle
+            key={`${point.label}-${index}`}
+            cx={getX(index)}
+            cy={getY(point.value)}
+            r={index === selectedIndex ? 6 : 5}
+            fill={LINE_COLOR}
+          />
+        ))}
       </svg>
+      {!model.points.length && (
+        <p className="text-caption-12-md bg-neutral-0 pointer-events-none absolute top-1/2 left-1/2 w-max max-w-full -translate-x-1/2 -translate-y-1/2 px-2 text-center text-neutral-400">
+          표시할 수익률 데이터가 없습니다.
+        </p>
+      )}
+      {selectedPoint && (
+        <div
+          ref={tooltipRef}
+          id={`${descriptionId}-selection`}
+          role="status"
+          className="text-body-14-md bg-neutral-0 border-primary-200 pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-full border px-3 py-1 whitespace-nowrap text-neutral-700 shadow-sm"
+          style={{
+            left: tooltipLeft,
+            top: getY(selectedPoint.value) - 14,
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className="bg-neutral-0 border-primary-200 absolute -bottom-1 size-2 -translate-x-1/2 rotate-45 border-r border-b"
+            style={{
+              left: Math.max(
+                12,
+                Math.min(
+                  tooltipWidth - 12,
+                  getX(selectedIndex) - tooltipLeft + tooltipWidth / 2,
+                ),
+              ),
+            }}
+          />
+          <span className="sr-only">{selectedPoint.label} </span>
+          <span className="relative tabular-nums">{selectedPoint.value}%</span>
+        </div>
+      )}
     </div>
   );
 }

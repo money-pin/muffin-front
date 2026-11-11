@@ -26,7 +26,8 @@ export default function RecentNewsTab() {
           description="관심 있는 뉴스를 읽어보세요."
         />
       ) : (
-        <section className="flex flex-col gap-3 px-5 pt-3 pb-10">
+        // 뉴스 탭(머핀 뉴스)과 같은 카드: 썸네일 없음, 간격 8px
+        <section className="flex flex-col gap-2 px-5 pt-3 pb-10">
           {newsList.map((news) => (
             <NewsCard
               key={news.newsId}
