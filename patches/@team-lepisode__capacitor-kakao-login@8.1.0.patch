@@ -1,0 +1,13 @@
+diff --git a/Package.swift b/Package.swift
+index 1cf133459b6cb3180121984b99e7c4fbfb4666c0..0273f103e489e824a28b5f640b677c75a15a3e13 100644
+--- a/Package.swift
++++ b/Package.swift
+@@ -10,7 +10,7 @@ let package = Package(
+             targets: ["CapacitorKakaoLoginPlugin"])
+     ],
+     dependencies: [
+-        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", branch: "main"),
++        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "8.0.0"),
+         .package(url: "https://github.com/kakao/kakao-ios-sdk", .upToNextMajor(from: "2.23.0"))
+     ],
+     targets: [
