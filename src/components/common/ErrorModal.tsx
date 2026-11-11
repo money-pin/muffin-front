@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import Modal from "@/components/common/Modal";
 import errorAlertIcon from "@/assets/icon-40px/error-alert.svg";
 import type { ErrorMessageInfo } from "@/lib/errorMessages";
@@ -9,6 +10,8 @@ interface ErrorModalProps {
   onSecondaryAction?: () => void;
   onClose: () => void;
   isLoading?: boolean;
+  layerClassName?: string;
+  autoFocusPrimaryAction?: boolean;
 }
 
 export default function ErrorModal({
@@ -18,7 +21,20 @@ export default function ErrorModal({
   onSecondaryAction,
   onClose,
   isLoading = false,
+  layerClassName,
+  autoFocusPrimaryAction = false,
 }: ErrorModalProps) {
+  const primaryActionRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!isOpen || !autoFocusPrimaryAction) return;
+    // 뒤늦게 마운트되는 바텀시트의 초기 포커스 처리 이후에도 팝업을 우선한다.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() =>
+        primaryActionRef.current?.focus({ preventScroll: true }),
+      );
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [isOpen, autoFocusPrimaryAction]);
   const shouldShowIcon = info.showIcon ?? info.variant === "error";
   const iconBgClass =
     info.variant === "info" ? "bg-secondary-100" : "bg-neutral-50";
@@ -31,6 +47,9 @@ export default function ErrorModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      layerClassName={layerClassName}
+      trapFocus={autoFocusPrimaryAction}
+      ariaLabel={info.title}
       className="rounded-2xl px-5 pt-6 pb-5"
       contentClassName="flex flex-col items-center gap-6 text-center"
     >
@@ -72,6 +91,8 @@ export default function ErrorModal({
         <button
           type="button"
           onClick={onPrimaryAction}
+          ref={primaryActionRef}
+          autoFocus={autoFocusPrimaryAction}
           disabled={isLoading}
           className={`text-body-16-bd-tighter flex h-[50px] flex-1 items-center justify-center rounded-lg px-5 transition-opacity disabled:opacity-60 ${primaryClass}`}
         >
