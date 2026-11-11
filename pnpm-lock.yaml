@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@team-lepisode/capacitor-kakao-login@8.1.0':
+    hash: 41110a2771b32bfa609fefa3fd228f2b954a8461c42c441a52acbcf198a62b6b
+    path: patches/@team-lepisode__capacitor-kakao-login@8.1.0.patch
+
 importers:
 
   .:
@@ -28,7 +33,7 @@ importers:
         version: 5.101.1(@tanstack/react-query@5.101.1(react@19.2.7))(react@19.2.7)
       '@team-lepisode/capacitor-kakao-login':
         specifier: 8.1.0
-        version: 8.1.0(@capacitor/core@8.5.2)
+        version: 8.1.0(patch_hash=41110a2771b32bfa609fefa3fd228f2b954a8461c42c441a52acbcf198a62b6b)(@capacitor/core@8.5.2)
       axios:
         specifier: ^1.18.1
         version: 1.18.1
@@ -2260,7 +2265,7 @@ snapshots:
       '@tanstack/query-core': 5.101.1
       react: 19.2.7
 
-  '@team-lepisode/capacitor-kakao-login@8.1.0(@capacitor/core@8.5.2)':
+  '@team-lepisode/capacitor-kakao-login@8.1.0(patch_hash=41110a2771b32bfa609fefa3fd228f2b954a8461c42c441a52acbcf198a62b6b)(@capacitor/core@8.5.2)':
     dependencies:
       '@capacitor/core': 8.5.2
 
