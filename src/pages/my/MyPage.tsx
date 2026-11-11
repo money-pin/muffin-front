@@ -9,7 +9,7 @@ import { CHARACTER_LABELS, characterTypeToVariant } from "@/lib/character";
 import { getErrorMessage, type ErrorMessageInfo } from "@/lib/errorMessages";
 import { updateNickname, type MyHome, type WeekDay } from "@/lib/mypageApi";
 import { mypageQueryKeys, useMyHomeQuery } from "@/lib/mypageQueries";
-import { getNewsCategoryImage } from "@/lib/newsFormat";
+import NewsCard from "@/pages/news/components/NewsCard";
 import chevronRightIcon from "@/assets/icon-20px/iconarrow-gray03.svg";
 import settingIcon from "@/assets/icon-24px/setting.svg";
 
@@ -17,9 +17,7 @@ import MyPageSkeleton from "./components/MyPageSkeleton";
 import MyProfile from "./components/MyProfile";
 import StreakWeekCard from "./components/StreakWeekCard";
 import StorageShortcuts from "./components/StorageShortcuts";
-import RecentNewsList from "./components/RecentNewsList";
 import NicknameModal from "./components/NicknameModal";
-import type { MyRecentNews } from "./myData";
 
 // 스트릭 주간 카드는 일~토 순서를 기대한다 (API weeklyActivity를 이 순서로 정렬)
 const WEEK_ORDER: WeekDay[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -87,15 +85,7 @@ function MyPage() {
   );
   const todayIndex = new Date().getDay(); // 0=일 … 6=토 (WEEK_ORDER와 동일)
 
-  // 최근 읽은 뉴스: API 응답 → 카드 목록 형태로 매핑
-  const recentNewsList: MyRecentNews[] = (home?.recentNews ?? []).map(
-    (news) => ({
-      id: news.newsId,
-      title: news.title,
-      image: getNewsCategoryImage(news.categoryName),
-      bookmarked: news.isScrapped,
-    }),
-  );
+  const recentNewsList = home?.recentNews ?? [];
 
   return (
     <div className="flex min-h-[calc(100dvh-80px-var(--safe-top)-var(--safe-bottom))] flex-col bg-neutral-50">
@@ -161,10 +151,20 @@ function MyPage() {
               />
             </button>
           </div>
-          <RecentNewsList
-            newsList={recentNewsList}
-            onNewsClick={(newsId) => navigate(`/news/${newsId}`)}
-          />
+          {/* 뉴스 탭(머핀 뉴스)과 같은 카드 */}
+          <div className="flex flex-col gap-2">
+            {recentNewsList.map((news) => (
+              <NewsCard
+                key={news.newsId}
+                newsId={news.newsId}
+                title={news.title}
+                categoryName={news.categoryName}
+                publishedAt={news.publishedAt}
+                viewCount={news.viewCount}
+                initialScrapped={news.isScrapped}
+              />
+            ))}
+          </div>
         </section>
       </div>
 
