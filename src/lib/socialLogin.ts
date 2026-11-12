@@ -6,7 +6,7 @@ import { apiRequest } from "./api";
 import { saveAccessToken, saveAuthProvider, type AuthProvider } from "./auth";
 
 // 소셜 로그인 (#266)
-// - iOS 앱: 각 SDK로 로그인해 ID 토큰을 받는다 (백엔드가 앱 키·번들 ID로 발급된 토큰만 받음)
+// - iOS 앱: 각 SDK로 로그인해 ID 토큰을 받는다. Google aud는 서버용 웹 클라이언트 ID다.
 // - 웹: 구글만 리다이렉트 방식(src/lib/google.ts). 카카오·애플은 앱에서만 지원
 // 받은 ID 토큰은 POST /auth/{provider}로 넘겨 머핀 accessToken으로 바꾼다.
 
@@ -64,6 +64,8 @@ function initSocialLogin() {
     google: import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID
       ? {
           iOSClientId: import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID,
+          // 서버가 검증하는 aud. iOSClientId(앱 식별)와 역할이 다르다.
+          iOSServerClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           mode: "online",
         }
       : undefined,
@@ -126,11 +128,15 @@ export async function loginWithGoogleNative() {
   if (!import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID) {
     throw new Error("구글 앱 로그인이 설정되지 않았어요.");
   }
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()) {
+    throw new Error("구글 서버용 클라이언트 ID가 설정되지 않았어요.");
+  }
   await initSocialLogin();
   const { result } = await runNativeLogin(() =>
     SocialLogin.login({
       provider: "google",
-      options: { scopes: ["email", "profile"] },
+      // 기존 iOS aud 세션을 복원하지 않고 현재 serverClientID로 새로 인증한다.
+      options: { scopes: ["email", "profile"], forcePrompt: true },
     }),
   );
   if (result.responseType !== "online" || !result.idToken) {
