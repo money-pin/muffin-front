@@ -134,7 +134,8 @@ function handleKey(event: KeyboardEvent) {
           : 0
         : (index + (event.shiftKey ? -1 : 1) + stops.length) % stops.length;
     const target = stops[next] ?? top.dialog;
-    target.focus({ preventScroll: true });
+    // Keyboard navigation must reveal controls below the visible scroll area.
+    target.focus();
   }
 }
 
