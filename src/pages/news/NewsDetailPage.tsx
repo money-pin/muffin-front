@@ -14,11 +14,7 @@ import { useApiErrorModal } from "@/lib/useApiErrorModal";
 import type { SectorImpactItem } from "@/lib/newsApi";
 import { useTodayInvestmentQuery } from "@/pages/invest/trade/investQueries";
 import { useTodayQuizQuery } from "@/pages/quiz/api/queries";
-import {
-  formatCategoryName,
-  formatRelativeDate,
-  getNewsCategoryImage,
-} from "@/lib/newsFormat";
+import { formatArticleDate, formatCategoryName } from "@/lib/newsFormat";
 import NewsDetailPageSkeleton from "./components/NewsDetailPageSkeleton";
 import NewsFlowCta from "./components/NewsFlowCta";
 import SectorPredictionCard, {
@@ -271,14 +267,6 @@ export default function NewsDetailPage() {
       >
         <article className="bg-neutral-0 flex w-full flex-col">
           <div className="relative h-[225px] w-full shrink-0 overflow-hidden bg-neutral-900">
-            <img
-              src={getNewsCategoryImage(detail.categoryName)}
-              alt=""
-              aria-hidden="true"
-              className="h-full w-full object-cover opacity-55"
-              draggable={false}
-            />
-
             <header className="absolute top-3 left-0 z-10 flex w-full items-center justify-between px-5">
               <button
                 type="button"
@@ -318,7 +306,7 @@ export default function NewsDetailPage() {
               <div className="flex items-center gap-2">
                 <Badge>{displayCategoryName}</Badge>
                 <span className="text-caption-12-md-tighter text-neutral-100">
-                  {formatRelativeDate(detail.publishedAt)}
+                  {formatArticleDate(detail.publishedAt)}
                 </span>
               </div>
             </div>
@@ -342,7 +330,7 @@ export default function NewsDetailPage() {
               )}
             </p>
 
-            <p className="text-caption-12-md-tighter pt-3 pb-2 text-neutral-400">
+            <p className="text-caption-12-md-tighter pt-3 pb-2 text-right text-neutral-400">
               AI가 요약·작성한 콘텐츠에요
             </p>
           </section>

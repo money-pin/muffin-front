@@ -7,7 +7,6 @@ import {
   formatCategoryName,
   formatRelativeDate,
   formatViewCount,
-  getNewsCategoryImage,
 } from "@/lib/newsFormat";
 import { useToggleScrap } from "../newsQueries";
 
@@ -18,10 +17,9 @@ export interface NewsCardProps {
   publishedAt: string;
   viewCount: number;
   initialScrapped?: boolean;
-  // 뉴스 탭(Figma 런칭 전 수정)은 썸네일 없이, 마이페이지 목록은 썸네일과 함께 보여준다
-  showThumbnail?: boolean;
 }
 
+// 뉴스 카드 (Figma 런칭 전 수정 NewsCardv2): 썸네일 없이 제목·카테고리·날짜·조회수
 export default function NewsCard({
   newsId,
   title,
@@ -29,7 +27,6 @@ export default function NewsCard({
   publishedAt,
   viewCount,
   initialScrapped = false,
-  showThumbnail = true,
 }: NewsCardProps) {
   const navigate = useNavigate();
   const [optimisticScrapped, setOptimisticScrapped] = useState<boolean | null>(
@@ -58,18 +55,6 @@ export default function NewsCard({
       onClick={() => navigate(`/news/${newsId}`)}
       className="bg-neutral-0 flex h-[100px] w-full cursor-pointer items-center gap-4 rounded-[12px] border border-neutral-100 px-3"
     >
-      {showThumbnail && (
-        <div className="size-[74px] flex-shrink-0 overflow-hidden rounded-[8px]">
-          <img
-            src={getNewsCategoryImage(categoryName)}
-            alt=""
-            aria-hidden="true"
-            className="size-full object-cover"
-            draggable={false}
-          />
-        </div>
-      )}
-
       <div className="flex min-w-0 flex-1 self-stretch py-[13px]">
         <div className="flex min-w-0 flex-1 flex-col justify-between">
           <div className="flex max-h-10 items-start gap-2">

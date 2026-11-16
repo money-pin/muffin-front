@@ -42,6 +42,15 @@ export function formatViewCount(count: number): string {
   return `${count}회`;
 }
 
+// 뉴스 상세 날짜 (Figma 런칭 전 수정: 2026-05-08)
+export function formatArticleDate(isoDate: string): string {
+  const published = new Date(isoDate);
+  const yyyy = published.getFullYear();
+  const mm = String(published.getMonth() + 1).padStart(2, "0");
+  const dd = String(published.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export function formatRelativeDate(isoDate: string): string {
   const published = new Date(isoDate);
   const now = new Date();

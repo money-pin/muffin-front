@@ -63,16 +63,12 @@ export default function MyPageSkeleton() {
 
         <section className="flex flex-col gap-4">
           <SectionHeader title="최근 읽은 뉴스" />
-          <div className="flex gap-3 overflow-hidden">
+          <div className="flex flex-col gap-2">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div
+              <SkeletonBlock
                 key={index}
-                className="flex w-[130px] shrink-0 flex-col gap-2"
-              >
-                <SkeletonBlock className="h-[130px] w-[130px] rounded-[12px]" />
-                <SkeletonBlock className="h-4 w-full" />
-                <SkeletonBlock className="h-4 w-2/3" />
-              </div>
+                className="h-[100px] w-full rounded-[12px]"
+              />
             ))}
           </div>
         </section>

@@ -43,10 +43,14 @@ function getTabStops(dialog: HTMLElement) {
 }
 
 function getTopLayer() {
-  // Portals share z-index; DOM paint order, rather than effect order, decides the top layer.
+  // Respect explicit overlay priority (e.g. stats errors at z-60), then DOM paint order.
   return layers
     .filter((layer) => layer.root.isConnected)
     .sort((a, b) => {
+      const priority =
+        (Number.parseInt(getComputedStyle(a.root).zIndex, 10) || 0) -
+        (Number.parseInt(getComputedStyle(b.root).zIndex, 10) || 0);
+      if (priority) return priority;
       return a.root.compareDocumentPosition(b.root) &
         Node.DOCUMENT_POSITION_FOLLOWING
         ? -1

@@ -126,7 +126,6 @@ export default function NewsPage() {
               publishedAt={news.publishedAt}
               viewCount={news.viewCount}
               initialScrapped={news.isScrapped}
-              showThumbnail={false}
             />
           ))}
         </div>

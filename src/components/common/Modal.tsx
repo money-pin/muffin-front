@@ -10,11 +10,11 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   ariaLabel?: string;
-
   showCloseButton?: boolean;
   sideOffsetClassName?: string;
   className?: string;
   contentClassName?: string;
+  layerClassName?: string;
 }
 
 function Modal({
@@ -26,10 +26,11 @@ function Modal({
   sideOffsetClassName = "px-5",
   className = "rounded-[20px] px-6 py-8",
   contentClassName = "flex flex-col items-center text-center",
+  layerClassName = "z-50",
 }: ModalProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
-  // Modal closing remains controlled by its existing buttons; Escape does not close it.
+  // Closing remains controlled by each screen's existing buttons/handlers.
   useDialogFocus(isOpen, rootRef, dialogRef);
   if (!isOpen || typeof document === "undefined") return null;
 
@@ -37,7 +38,7 @@ function Modal({
     <RemoveScroll>
       <div
         ref={rootRef}
-        className="fixed inset-0 z-50 flex justify-center bg-black/50"
+        className={`fixed inset-0 ${layerClassName} flex justify-center bg-black/50`}
       >
         {/* 딤: 프레임 밖(전체화면) — #152 */}
         <div className="relative h-full w-full max-w-[var(--max-width-app)]">
@@ -68,7 +69,6 @@ function Modal({
                   <img src={closeIcon} alt="" className="h-6 w-6" />
                 </button>
               )}
-
               <div className={contentClassName}>{children}</div>
             </section>
           </div>

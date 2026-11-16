@@ -133,7 +133,7 @@ export function formatProfitHistoryTitle(
   period: ProfitHistoryPeriod,
   value?: string,
 ) {
-  if (period === "all") return "총 누적 수익률";
+  if (period === "all") return "총 매매수익률";
   if (!value) missingDate(period);
 
   switch (period) {

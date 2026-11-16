@@ -52,12 +52,6 @@ export default function RecentPerformanceSheetContent({
           )}
         </div>
 
-        {isError && (
-          <p className="bg-neutral-0 text-body-14-md rounded-xl border border-neutral-100 px-4 py-6 text-center text-neutral-600">
-            최근 투자 성과를 불러오지 못했습니다.
-          </p>
-        )}
-
         {!summary && !isError && (
           <p className="bg-neutral-0 text-body-14-md rounded-xl border border-neutral-100 px-4 py-6 text-center text-neutral-600">
             최근 정산 완료된 투자 성과가 없습니다.

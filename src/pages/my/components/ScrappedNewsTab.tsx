@@ -60,7 +60,7 @@ export default function ScrappedNewsTab() {
           description="뉴스를 스크랩해 보세요."
         />
       ) : (
-        <section className="mt-1 flex flex-col gap-3 px-5 pb-10">
+        <section className="mt-1 flex flex-col gap-2 px-5 pb-10">
           {sortedScraps.map((news) => (
             <NewsCard
               key={news.newsId}

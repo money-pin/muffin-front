@@ -1,7 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import bookmarkLineWhite from "@/assets/icon-24px/bookmark-line-white.svg";
-import newsImpactNegativeIcon from "@/assets/icon-16px/news-impact-negative.svg";
-import newsImpactPositiveIcon from "@/assets/icon-16px/news-impact-positive.svg";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import ScrollToTopButton from "./ScrollToTopButton";
 
@@ -12,40 +10,16 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
 // 긍정/부정 반응 카드 스켈레톤
 // (ImpactCard: rounded-12, border neutral-100, p-4, gap-3)
 // 명세: 헤더(아이콘+"긍정/부정 반응이 나타나요!")는 실제 노출, 섹터 태그 자리만 스켈레톤.
-function ImpactCardSkeleton({ type }: { type: "positive" | "negative" }) {
-  const isPositive = type === "positive";
-  const iconSrc = isPositive ? newsImpactPositiveIcon : newsImpactNegativeIcon;
-
+// 섹터 예측 카드 스켈레톤 (SectorPredictionCard 미선택 상태: 질문 + 상승/하락 버튼)
+function SectorPredictionSkeleton() {
   return (
-    <section className="bg-neutral-0 flex w-full flex-col gap-3 rounded-[12px] border border-neutral-100 p-4">
-      {/* 실제 헤더 (아이콘 + 텍스트) */}
-      <div className="flex items-center gap-1 px-1">
-        <img
-          src={iconSrc}
-          alt=""
-          aria-hidden="true"
-          className="size-4 shrink-0 object-contain"
-          draggable={false}
-        />
-        <p className="text-body-16-md-tighter text-neutral-700">
-          <span
-            className={`font-bold ${
-              isPositive ? "text-positive" : "text-negative"
-            }`}
-          >
-            {isPositive ? "긍정" : "부정"}
-          </span>{" "}
-          반응이 나타나요!
-        </p>
+    <div className="bg-neutral-0 flex w-full flex-col gap-3 rounded-[16px] p-5 shadow-[0_0_2px_rgba(0,0,0,0.08)]">
+      <SkeletonBlock className="h-[22px] w-[160px] rounded-[4px]" />
+      <div className="flex gap-2">
+        <SkeletonBlock className="h-10 flex-1 rounded-[8px]" />
+        <SkeletonBlock className="h-10 flex-1 rounded-[8px]" />
       </div>
-
-      {/* 섹터 태그 자리만 스켈레톤 (49×22, radius/xs) */}
-      <div className="flex flex-wrap gap-2">
-        <SkeletonBlock className="h-[22px] w-[49px] rounded-[4px]" />
-        <SkeletonBlock className="h-[22px] w-[49px] rounded-[4px]" />
-        <SkeletonBlock className="h-[22px] w-[49px] rounded-[4px]" />
-      </div>
-    </section>
+    </div>
   );
 }
 
@@ -160,17 +134,17 @@ export default function NewsDetailPageSkeleton() {
             </div>
 
             {/* AI 안내 문구 (실제 텍스트 노출) */}
-            <p className="text-caption-12-md-tighter pt-3 pb-2 text-neutral-400">
+            <p className="text-caption-12-md-tighter pt-3 pb-2 text-right text-neutral-400">
               AI가 요약·작성한 콘텐츠에요
             </p>
-
-            {/* 긍정/부정 반응 카드 (세로 2개, 데이터 유무 모르니 항상 노출) */}
-            <div className="flex flex-col gap-2 pt-1">
-              <ImpactCardSkeleton type="positive" />
-              <ImpactCardSkeleton type="negative" />
-            </div>
           </section>
         </article>
+
+        {/* 섹터 예측 카드 (회색 영역, 2개) */}
+        <section className="flex w-full flex-col gap-3 bg-neutral-50/80 px-5 pt-5">
+          <SectorPredictionSkeleton />
+          <SectorPredictionSkeleton />
+        </section>
 
         {/* 해설 카드 섹션 (neutral-50/80 배경, 카드 3개) */}
         <section className="flex w-full flex-col gap-3 bg-neutral-50/80 px-5 pt-5 pb-10">
