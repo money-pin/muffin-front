@@ -26,6 +26,8 @@ workflows:
         VITE_KAKAO_NATIVE_APP_KEY: 736e3d66fe47ab13b822bdf690b583dd
         # 구글 iOS OAuth 클라이언트 ID (번들 ID kr.ai.muffin)
         VITE_GOOGLE_IOS_CLIENT_ID: 33246503339-lvcq3fir358bancppob1umlbq3jnh9na.apps.googleusercontent.com
+        # Google Analytics(GA4) 웹 스트림 측정 ID (#325). 웹과 같은 스트림에 app_platform=ios로 보낸다
+        VITE_GA_MEASUREMENT_ID: G-HPLXLFVEYX
         # TODO(#264): App Store Connect에서 앱 생성 후 '앱 정보 > Apple ID' 숫자로 교체
         APP_STORE_APPLE_ID: 0
     scripts:
