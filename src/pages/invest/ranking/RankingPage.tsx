@@ -1,36 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import BottomSheet from "@/components/common/BottomSheet";
-import ErrorModal from "@/components/common/ErrorModal";
-import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
-import { useApiErrorModal } from "@/lib/useApiErrorModal";
+import QueryErrorModal from "@/components/common/QueryErrorModal";
 import { useWeeklyRankingQuery } from "@/pages/invest/ranking/api/queries";
 import MyRankingSection from "@/pages/invest/ranking/components/MyRankingSection";
 import RankingUserProfitSheetContent from "@/pages/invest/ranking/components/RankingUserProfitSheetContent";
 import WeeklyRankingSection from "@/pages/invest/ranking/components/WeeklyRankingSection";
 import type { WeeklyRankingItem } from "@/pages/invest/ranking/types";
+import {
+  resolveRankingSelection,
+  type RankingSelection,
+} from "./rankingSelection";
 
 function RankingPage() {
-  const [selectedUser, setSelectedUser] = useState<WeeklyRankingItem | null>(
-    null,
-  );
+  const [selection, setSelection] = useState<RankingSelection | null>(null);
   const [isProfitSheetOpen, setIsProfitSheetOpen] = useState(false);
   const sheetHistoryPushedRef = useRef(false);
   const weeklyRankingQuery = useWeeklyRankingQuery();
-  const { error, showError, closeError, handlePrimaryAction } =
-    useApiErrorModal({
-      onRetry: () => {
-        void weeklyRankingQuery.refetch();
-      },
-    });
 
   const rankingData = weeklyRankingQuery.data;
   const isRankingReady = rankingData?.status === "READY";
   const isRankingEmpty = rankingData?.status === "EMPTY";
   const isRankingCalculating = rankingData?.status === "CALCULATING";
+  const selectedUser = resolveRankingSelection(rankingData, selection);
 
   const handleRankingClick = (user: WeeklyRankingItem) => {
-    setSelectedUser(user);
+    if (!rankingData) return;
+    setSelection({ weekKey: rankingData.weekKey, user });
     setIsProfitSheetOpen(true);
 
     if (!sheetHistoryPushedRef.current) {
@@ -42,14 +38,13 @@ function RankingPage() {
     }
   };
 
-  const handleProfitSheetClose = () => {
-    if (sheetHistoryPushedRef.current) {
-      window.history.back();
-      return;
-    }
-
+  const handleProfitSheetClose = useCallback(() => {
     setIsProfitSheetOpen(false);
-  };
+    if (sheetHistoryPushedRef.current) {
+      sheetHistoryPushedRef.current = false;
+      window.history.back();
+    }
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -64,63 +59,77 @@ function RankingPage() {
   }, []);
 
   useEffect(() => {
-    if (!weeklyRankingQuery.isError) return;
-
+    if (!isProfitSheetOpen || selectedUser) return;
+    let cancelled = false;
     queueMicrotask(() => {
-      showError(weeklyRankingQuery.error);
+      if (!cancelled) handleProfitSheetClose();
     });
-  }, [showError, weeklyRankingQuery.error, weeklyRankingQuery.isError]);
+    return () => {
+      cancelled = true;
+    };
+  }, [handleProfitSheetClose, isProfitSheetOpen, selectedUser]);
 
   return (
     <>
-      <div className="bg-neutral-0 flex min-h-full w-full flex-col gap-10 pt-6">
+      <div
+        data-invest-ranking
+        className="bg-neutral-0 flex min-h-0 w-full flex-1 flex-col gap-10 pt-6"
+      >
         <h1 className="sr-only">모의투자 랭킹</h1>
 
-        {weeklyRankingQuery.isLoading && <RankingPageSkeleton />}
+        {weeklyRankingQuery.isLoading && !rankingData && (
+          <RankingPageSkeleton />
+        )}
 
-        {rankingData && !weeklyRankingQuery.isError && (
+        {rankingData && (
           <>
             <MyRankingSection
               weekLabel={rankingData.weekLabel}
               ranking={rankingData.myRank}
+              stateMessage={
+                isRankingCalculating
+                  ? {
+                      title: "나의 순위를 집계하고 있어요.",
+                      description: "집계가 끝나면 순위를 확인할 수 있어요.",
+                    }
+                  : undefined
+              }
             />
 
-            {isRankingReady && rankingData.top10.length > 0 && (
-              <WeeklyRankingSection
-                weekLabel={rankingData.weekLabel}
-                rankings={rankingData.top10}
-                onRankingClick={handleRankingClick}
-              />
-            )}
-
-            {(isRankingEmpty ||
-              isRankingCalculating ||
-              (isRankingReady && rankingData.top10.length === 0)) && (
-              <RankingStateMessage
-                message={
-                  isRankingCalculating
-                    ? "지난주 랭킹을 집계하고 있어요."
-                    : "아직 표시할 랭킹 데이터가 없어요."
-                }
-              />
-            )}
+            <WeeklyRankingSection
+              weekLabel={rankingData.weekLabel}
+              rankings={isRankingReady ? rankingData.top10 : []}
+              onRankingClick={handleRankingClick}
+              emptyMessage={
+                isRankingCalculating
+                  ? {
+                      title: "지난주 랭킹을 준비하고 있어요",
+                      description: "집계가 끝나면 순위를 확인할 수 있어요.",
+                    }
+                  : isRankingEmpty || rankingData.top10.length === 0
+                    ? {
+                        title: "아직 표시할 랭킹이 없어요",
+                        description:
+                          "모의투자에 참여하고 다음 랭킹에 도전해보세요!",
+                      }
+                    : undefined
+              }
+            />
           </>
         )}
       </div>
 
-      {weeklyRankingQuery.isError && !weeklyRankingQuery.isLoading && (
-        <ErrorModal
-          isOpen={!!error}
-          info={error?.info ?? DEFAULT_ERROR_MESSAGE}
-          onPrimaryAction={handlePrimaryAction}
-          onSecondaryAction={closeError}
-          onClose={closeError}
-          isLoading={weeklyRankingQuery.isFetching}
-        />
-      )}
+      <QueryErrorModal
+        error={weeklyRankingQuery.error}
+        errorUpdatedAt={weeklyRankingQuery.errorUpdatedAt}
+        isError={weeklyRankingQuery.isError}
+        isFetching={weeklyRankingQuery.isFetching}
+        hasData={!!rankingData}
+        onRetry={() => weeklyRankingQuery.refetch({ cancelRefetch: false })}
+      />
 
       <BottomSheet
-        isOpen={isProfitSheetOpen}
+        isOpen={isProfitSheetOpen && !!selectedUser}
         onClose={handleProfitSheetClose}
         ariaLabel={
           selectedUser
@@ -147,14 +156,6 @@ function RankingPageSkeleton() {
         <div className="h-[180px] animate-pulse rounded-xl bg-neutral-50" />
         <div className="h-[260px] animate-pulse rounded-xl bg-neutral-50" />
       </div>
-    </div>
-  );
-}
-
-function RankingStateMessage({ message }: { message: string }) {
-  return (
-    <div className="mx-5 flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-xl bg-neutral-50 px-5 text-center">
-      <p className="text-body-14-md text-neutral-600">{message}</p>
     </div>
   );
 }

@@ -17,18 +17,14 @@ export default function RankingUserProfitSheetContent({
   const sectors = [...(user.sectors ?? [])].sort(
     (a, b) => b.profitAmount - a.profitAmount,
   );
-  const totalProfitAmount = sectors.reduce(
-    (sum, sector) => sum + sector.profitAmount,
-    0,
-  );
-  const totalInvestmentAmount = sectors.reduce(
-    (sum, sector) => sum + sector.investmentAmount,
-    0,
-  );
-  const totalProfitRate =
-    totalInvestmentAmount === 0
-      ? 0
-      : (totalProfitAmount / totalInvestmentAmount) * 100;
+  // 목록과 상세 요약은 같은 서버 집계값을 사용한다. 섹터 합산으로 덮어쓰지 않는다.
+  const totalProfitAmount = user.weeklyProfit;
+  const totalInvestmentAmount =
+    user.totalInvestment ??
+    (sectors.length > 0
+      ? sectors.reduce((sum, sector) => sum + sector.investmentAmount, 0)
+      : null);
+  const totalProfitRate = user.weeklyProfitRate;
 
   return (
     <div className="flex flex-col px-5 pb-10">
@@ -66,7 +62,9 @@ export default function RankingUserProfitSheetContent({
               총 투자금
             </span>
             <span className="text-body-14-md text-neutral-600">
-              {formatCurrency(totalInvestmentAmount)}
+              {totalInvestmentAmount === null
+                ? "—"
+                : formatCurrency(totalInvestmentAmount)}
             </span>
           </div>
         </div>
@@ -78,6 +76,11 @@ export default function RankingUserProfitSheetContent({
         </h3>
 
         <div className="mt-3 flex flex-col gap-2">
+          {sectors.length === 0 && (
+            <p className="text-body-14-md py-5 text-center text-neutral-600">
+              표시할 섹터별 상세 내역이 없어요.
+            </p>
+          )}
           {sectors.map((sector) => (
             <article
               key={sector.id}
