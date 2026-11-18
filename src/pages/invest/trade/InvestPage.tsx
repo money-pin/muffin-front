@@ -9,6 +9,7 @@ import InvestAssetCountBar from "@/pages/invest/trade/components/InvestAssetCoun
 import InvestBottomAction from "@/pages/invest/trade/components/InvestBottomAction";
 import InvestBudgetCard from "@/pages/invest/trade/components/InvestBudgetCard";
 import InvestCompleteModal from "@/pages/invest/trade/components/InvestCompleteModal";
+import InvestQuizPromptModal from "@/pages/invest/trade/components/InvestQuizPromptModal";
 import InvestConfirmBottomSheet from "@/pages/invest/trade/components/InvestConfirmBottomSheet";
 import InvestTodayStatusPage from "@/pages/invest/trade/components/InvestTodayStatusPage";
 import InvestWeekendClosedPage from "@/pages/invest/trade/components/InvestWeekendClosedPage";
@@ -18,6 +19,7 @@ import ErrorModal from "@/components/common/ErrorModal";
 
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
 import { useInvestmentSubmission } from "@/pages/invest/trade/hooks/useInvestmentSubmission";
+import { useInvestmentQuizPrompt } from "@/pages/invest/trade/hooks/useInvestmentQuizPrompt";
 import { useInvestmentQueryError } from "@/pages/invest/trade/hooks/useInvestmentQueryError";
 import { INVESTMENT_AVAILABLE_STATUSES } from "@/pages/invest/trade/constants/investmentStatus";
 import { INVEST_ASSET_SECTIONS } from "@/pages/invest/trade/constants/investAsset";
@@ -202,6 +204,7 @@ function InvestPage() {
     setIsConfirmSheetOpen,
     isCompleteModalOpen,
     setIsCompleteModalOpen,
+    completedSubmission,
     confirmInvestmentErrorMessage,
     setConfirmInvestmentErrorMessage,
     pendingConfirmedQuantities,
@@ -307,6 +310,18 @@ function InvestPage() {
     needsSectorData,
   });
 
+  const canShowQuizPrompt =
+    screenMode === "status" &&
+    !isWeekend &&
+    !isEditMode &&
+    !isConfirmSheetOpen &&
+    !isSectorGuideOpen &&
+    !isSectorGuidePromptOpen &&
+    !apiErrorState &&
+    !investmentErrorState &&
+    !relevantQueryFailed;
+  const quizPrompt = useInvestmentQuizPrompt(canShowQuizPrompt);
+
   const hasAssetCountBar = Boolean(selectedAsset && selectedQuantity > 0);
   const isInputActive =
     screenMode === "trade" && hasAssetCountBar && isQuantityKeyboardOpen;
@@ -384,6 +399,8 @@ function InvestPage() {
 
   const handleCompleteModalConfirm = () => {
     setIsCompleteModalOpen(false);
+    if (canShowQuizPrompt)
+      void quizPrompt.showAfterCompletion(completedSubmission);
   };
 
   const handleStartEdit = () => {
@@ -677,6 +694,16 @@ function InvestPage() {
         isOpen={isCompleteModalOpen}
         onClose={() => setIsCompleteModalOpen(false)}
         onConfirm={handleCompleteModalConfirm}
+      />
+      <InvestQuizPromptModal
+        variant={
+          canShowQuizPrompt && !isCompleteModalOpen ? quizPrompt.variant : null
+        }
+        onClose={quizPrompt.dismiss}
+        onQuiz={() => {
+          quizPrompt.dismiss();
+          navigate("/quiz");
+        }}
       />
       <InvestSectorGuideModal
         isOpen={isSectorGuidePromptOpen}
