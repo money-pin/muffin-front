@@ -3,7 +3,7 @@ import ErrorModal from "@/components/common/ErrorModal";
 import { ApiError } from "@/lib/api";
 import { DEFAULT_ERROR_MESSAGE } from "@/lib/errorMessages";
 
-interface StatsQueryErrorModalProps {
+interface QueryErrorModalProps {
   error: unknown;
   errorUpdatedAt: number;
   isError: boolean;
@@ -15,7 +15,8 @@ interface StatsQueryErrorModalProps {
 }
 
 // 최초 메인은 재시도만, 상세 최초 실패는 나가기, 재조회 실패는 기존 화면 유지.
-export default function StatsQueryErrorModal({
+// TODO: 최초 실패의 나가기 경로는 앱 전체 오류 UX 정책 정리 시 함께 검토한다.
+export default function QueryErrorModal({
   error,
   errorUpdatedAt,
   isError,
@@ -24,7 +25,7 @@ export default function StatsQueryErrorModal({
   enabled = true,
   onRetry,
   onExit,
-}: StatsQueryErrorModalProps) {
+}: QueryErrorModalProps) {
   const [dismissedAt, setDismissedAt] = useState<number | null>(null);
   const retryingRef = useRef(false);
   const canClose = hasData || !!onExit;
