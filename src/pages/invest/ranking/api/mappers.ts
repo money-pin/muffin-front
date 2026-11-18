@@ -12,6 +12,7 @@ import type { MyRanking, WeeklyRankingItem } from "../types";
 
 export interface WeeklyRankingData {
   status: WeeklyRankingStatus;
+  weekKey: string;
   weekLabel: string;
   myRank: MyRanking;
   top10: WeeklyRankingItem[];
@@ -22,6 +23,7 @@ export function mapWeeklyRankingApiToData(
 ): WeeklyRankingData {
   return {
     status: response.rankingStatus,
+    weekKey: `${response.weekStartDate}/${response.weekEndDate}`,
     weekLabel: response.weekLabel,
     myRank: mapMyRanking(response.myRank),
     top10: response.top10.map(mapWeeklyRankingItem),
@@ -52,6 +54,7 @@ function mapWeeklyRankingItem(item: WeeklyRankingItemApi): WeeklyRankingItem {
     nickname: item.nickname,
     weeklyProfit: item.profitAmount,
     weeklyProfitRate: item.profitRate,
+    totalInvestment: item.detail?.totalInvestment,
     characterType: item.character?.characterType,
     sectors: item.detail?.sectors.map(mapRankingSectorDetail) ?? [],
   };
