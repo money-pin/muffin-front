@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import BottomSheet from "@/components/common/BottomSheet";
-import StatsQueryErrorModal from "@/pages/invest/stats/components/StatsQueryErrorModal";
+import QueryErrorModal from "@/components/common/QueryErrorModal";
 
 import {
   useStatsRecentDetailQuery,
@@ -79,7 +79,7 @@ export default function StatsPage() {
           isError={isRecentPerformanceError && !recentPerformanceDetail}
         />
       </BottomSheet>
-      <StatsQueryErrorModal
+      <QueryErrorModal
         error={statsSummaryError}
         errorUpdatedAt={statsSummaryErrorUpdatedAt}
         isError={isStatsSummaryError}
@@ -88,7 +88,7 @@ export default function StatsPage() {
         enabled={!isRecentPerformanceOpen}
         onRetry={() => refetchStatsSummary({ cancelRefetch: false })}
       />
-      <StatsQueryErrorModal
+      <QueryErrorModal
         error={recentPerformanceError}
         errorUpdatedAt={recentPerformanceErrorUpdatedAt}
         isError={isRecentPerformanceError}

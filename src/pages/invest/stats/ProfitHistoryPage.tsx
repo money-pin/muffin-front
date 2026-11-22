@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
-import StatsQueryErrorModal from "@/pages/invest/stats/components/StatsQueryErrorModal";
+import QueryErrorModal from "@/components/common/QueryErrorModal";
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { useStatsHistoryQuery } from "@/pages/invest/stats/api/queries";
 import ProfitHistoryPageSkeleton from "@/pages/invest/stats/components/ProfitHistoryPageSkeleton";
@@ -163,7 +163,7 @@ export default function ProfitHistoryPage() {
         </>
       )}
 
-      <StatsQueryErrorModal
+      <QueryErrorModal
         error={profitHistoryError}
         errorUpdatedAt={errorUpdatedAt}
         isError={isError}

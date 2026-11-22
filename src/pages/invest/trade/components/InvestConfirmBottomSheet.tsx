@@ -23,7 +23,7 @@ function InvestConfirmBottomSheet({
 }: InvestConfirmBottomSheetProps) {
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} ariaLabel="오늘의 투자 확정">
-      <div className="max-h-[calc(100dvh-36px)] overflow-y-auto overscroll-contain px-5 py-8">
+      <div className="max-h-[calc(100dvh-36px)] min-h-0 touch-pan-y overflow-y-auto overscroll-contain px-5 py-8 [-webkit-overflow-scrolling:touch]">
         <div className="flex flex-col gap-1">
           <h2 className="text-[length:var(--text-heading-18-bd)] leading-[var(--text-heading-18-bd--line-height)] font-[var(--text-heading-18-bd--font-weight)] tracking-[var(--text-heading-18-bd--letter-spacing)] text-[var(--color-neutral-900)]">
             오늘의 투자를 확정할까요?

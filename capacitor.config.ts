@@ -15,6 +15,9 @@ const config: CapacitorConfig = {
     contentInset: "never",
   },
   plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
     // 앱 소셜 로그인 (#266): 구글·애플만 쓰고 나머지 SDK는 앱에 넣지 않는다.
     // 카카오는 @team-lepisode/capacitor-kakao-login을 쓴다.
     SocialLogin: {

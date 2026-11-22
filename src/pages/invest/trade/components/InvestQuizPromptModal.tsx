@@ -22,20 +22,11 @@ export default function InvestQuizPromptModal({
       isOpen
       onClose={onClose}
       ariaLabel={copy.title}
-      trapFocus
       className="max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-[332px] overflow-y-auto overscroll-contain rounded-2xl px-5 pt-6 pb-5"
       contentClassName="text-center"
     >
       <div
         onKeyDown={(event) => {
-          // 공통 모달은 포커스 이동 시 스크롤을 막는다. 키보드로 이동한 버튼은
-          // 큰 글자·작은 화면에서도 모달 내부에서 보이도록 맞춘다.
-          if (
-            event.key === "Tab" &&
-            document.activeElement instanceof HTMLElement
-          ) {
-            document.activeElement.scrollIntoView({ block: "nearest" });
-          }
           if (event.key === "Escape") {
             event.preventDefault();
             event.stopPropagation();

@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import BottomSheet from "@/components/common/BottomSheet";
 import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import SocialLoginButton from "@/components/common/SocialLoginButton";
+import { trackAuth } from "@/lib/analytics";
+import type { AuthProvider } from "@/lib/auth";
 import { resolveEntryRoute } from "@/lib/mypageApi";
 import {
   isNativeApp,
@@ -63,13 +65,18 @@ export default function SocialAuthSheet({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isNative = isNativeApp();
 
-  const runNativeLogin = async (login: () => Promise<void>) => {
+  const runNativeLogin = async (
+    provider: AuthProvider,
+    login: () => Promise<void>,
+  ) => {
     if (isSubmitting) return;
     setNotice(null);
     setIsSubmitting(true);
     try {
       await login();
-      navigate(await resolveEntryRoute(), { replace: true });
+      const entryRoute = await resolveEntryRoute();
+      trackAuth(provider, entryRoute);
+      navigate(entryRoute, { replace: true });
     } catch (error) {
       if (!(error instanceof SocialLoginCancelledError)) {
         setNotice({
@@ -117,7 +124,7 @@ export default function SocialAuthSheet({
             disabled={isSubmitting}
             onClick={() =>
               isNative
-                ? void runNativeLogin(loginWithKakaoNative)
+                ? void runNativeLogin("kakao", loginWithKakaoNative)
                 : showAppOnly("카카오")
             }
           />
@@ -127,7 +134,7 @@ export default function SocialAuthSheet({
             disabled={isSubmitting}
             onClick={() =>
               isNative
-                ? void runNativeLogin(loginWithAppleNative)
+                ? void runNativeLogin("apple", loginWithAppleNative)
                 : showAppOnly("애플")
             }
           />
@@ -136,7 +143,9 @@ export default function SocialAuthSheet({
               provider="google"
               label={`Google로 ${copy.action}`}
               disabled={isSubmitting}
-              onClick={() => void runNativeLogin(loginWithGoogleNative)}
+              onClick={() =>
+                void runNativeLogin("google", loginWithGoogleNative)
+              }
             />
           ) : (
             <GoogleLoginButton

@@ -48,7 +48,6 @@ export default function ErrorModal({
       isOpen={isOpen}
       onClose={onClose}
       layerClassName={layerClassName}
-      trapFocus={autoFocusPrimaryAction}
       ariaLabel={info.title}
       className="rounded-2xl px-5 pt-6 pb-5"
       contentClassName="flex flex-col items-center gap-6 text-center"

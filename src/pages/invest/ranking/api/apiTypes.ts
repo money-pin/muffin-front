@@ -32,7 +32,7 @@ export interface WeeklyRankingItemApi {
   character?: WeeklyRankingCharacterApi | null;
   profitAmount: number;
   profitRate: number;
-  detail?: WeeklyRankingUserDetailApi;
+  detail?: WeeklyRankingUserDetailApi | null;
 }
 
 export interface WeeklyRankingApi {

@@ -27,7 +27,7 @@ export default function InvestLayout() {
   return (
     <div
       ref={layoutRef}
-      className="flex min-h-dvh flex-col has-[[data-invest-trade]]:min-h-[calc(100dvh+var(--invest-summary-height,0px)-80px)]"
+      className="flex min-h-dvh flex-col has-[[data-invest-ranking]]:min-h-[calc(100dvh-var(--safe-top)-80px-var(--safe-bottom))] has-[[data-invest-trade]]:min-h-[calc(100dvh+var(--invest-summary-height,0px)-80px)]"
     >
       <InvestHeader />
 
