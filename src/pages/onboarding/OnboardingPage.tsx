@@ -1,5 +1,6 @@
 import { Fragment, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { resolvePostLoginDestination } from "@/lib/notificationNavigation";
 
 import Indicator from "@/components/common/Indicator";
 import MuffinVideo from "@/components/common/MuffinVideo";
@@ -142,7 +143,7 @@ function OnboardingPage() {
         }
       }
 
-      navigate("/home", { replace: true });
+      navigate(resolvePostLoginDestination("/home"), { replace: true });
     } catch {
       setSubmitError("온보딩 완료에 실패했어요. 잠시 후 다시 시도해주세요.");
     } finally {

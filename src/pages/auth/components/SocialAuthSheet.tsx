@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import BottomSheet from "@/components/common/BottomSheet";
 import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import SocialLoginButton from "@/components/common/SocialLoginButton";
+import { resolvePostLoginDestination } from "@/lib/notificationNavigation";
 import { resolveEntryRoute } from "@/lib/mypageApi";
 import {
   isNativeApp,
@@ -69,7 +70,8 @@ export default function SocialAuthSheet({
     setIsSubmitting(true);
     try {
       await login();
-      navigate(await resolveEntryRoute(), { replace: true });
+      const entryRoute = await resolveEntryRoute();
+      navigate(resolvePostLoginDestination(entryRoute), { replace: true });
     } catch (error) {
       if (!(error instanceof SocialLoginCancelledError)) {
         setNotice({

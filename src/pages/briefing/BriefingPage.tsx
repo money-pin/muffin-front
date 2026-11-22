@@ -1,5 +1,10 @@
 import { useEffect, useRef } from "react";
-import { useOutletContext, useSearchParams } from "react-router-dom";
+import {
+  useNavigate,
+  useOutletContext,
+  useSearchParams,
+} from "react-router-dom";
+import { ApiError } from "@/lib/api";
 
 import ErrorModal from "@/components/common/ErrorModal";
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
@@ -23,6 +28,8 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
 export default function BriefingPage() {
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const fromNotification = searchParams.get("from") === "notification";
   const dateParam = searchParams.get("date");
   const briefingDate =
     dateParam && DATE_PATTERN.test(dateParam) ? dateParam : undefined;
@@ -51,10 +58,18 @@ export default function BriefingPage() {
 
   useEffect(() => {
     if (!isError) return;
+    if (fromNotification && error instanceof ApiError && error.code === "404") {
+      navigate("/news", { replace: true });
+      return;
+    }
     queueMicrotask(() => showError(error));
-  }, [isError, error, showError]);
+  }, [isError, error, showError, fromNotification, navigate]);
 
   const isVisible = isBriefingVisible(briefing);
+  useEffect(() => {
+    if (fromNotification && briefing && !isVisible)
+      navigate("/news", { replace: true });
+  }, [fromNotification, briefing, isVisible, navigate]);
 
   // 공개된 브리핑을 열면 날짜별로 한 번 열람 기록을 남긴다
   useEffect(() => {

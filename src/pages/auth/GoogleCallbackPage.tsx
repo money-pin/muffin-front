@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { readGoogleCallback } from "@/lib/google";
+import { resolvePostLoginDestination } from "@/lib/notificationNavigation";
 import { resolveEntryRoute } from "@/lib/mypageApi";
 import { exchangeSocialToken } from "@/lib/socialLogin";
 import HomePageSkeleton from "@/pages/home/components/HomePageSkeleton";
@@ -30,7 +31,8 @@ export default function GoogleCallbackPage() {
       try {
         const idToken = readGoogleCallback(window.location.hash);
         await exchangeSocialToken("google", { idToken });
-        navigate(await resolveEntryRoute(), { replace: true });
+        const entryRoute = await resolveEntryRoute();
+        navigate(resolvePostLoginDestination(entryRoute), { replace: true });
       } catch (error) {
         const state: AuthErrorState = {
           authError:

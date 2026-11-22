@@ -26,11 +26,13 @@ import MySettingsPage from "@/pages/my/MySettingsPage";
 import MyStoragePage from "@/pages/my/MyStoragePage";
 import ShowcasePage from "@/pages/_showcase/ShowcasePage";
 import NotFoundPage from "@/pages/NotFoundPage";
+import NotificationOpenPage from "@/pages/NotificationOpenPage";
 
 export const router = createBrowserRouter([
   {
     element: <MobileLayout />,
     children: [
+      { path: "notifications/open", element: <NotificationOpenPage /> },
       // 공개 라우트 (로그인 불필요)
       {
         path: "splash",

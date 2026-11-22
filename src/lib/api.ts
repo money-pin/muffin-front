@@ -1,4 +1,5 @@
 import { clearAccessToken, getAccessToken, saveAccessToken } from "./auth";
+import { rememberNotificationDestination } from "./notificationNavigation";
 
 // 백엔드 공통 응답 봉투
 interface ApiEnvelope<T> {
@@ -38,6 +39,9 @@ if (!BASE_URL) {
 
 // 만료 세션 정리 후 로그인으로 이동 (이미 로그인 화면이면 이동하지 않음)
 function redirectToLogin() {
+  rememberNotificationDestination(
+    window.location.pathname + window.location.search,
+  );
   clearAccessToken();
   if (window.location.pathname !== LOGIN_PATH) {
     window.location.replace(LOGIN_PATH);
