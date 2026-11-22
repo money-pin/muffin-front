@@ -5,6 +5,7 @@ import BottomSheet from "@/components/common/BottomSheet";
 import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import SocialLoginButton from "@/components/common/SocialLoginButton";
 import { trackAuth } from "@/lib/analytics";
+import { resolvePostLoginDestination } from "@/lib/notificationNavigation";
 import type { AuthProvider } from "@/lib/auth";
 import { resolveEntryRoute } from "@/lib/mypageApi";
 import {
@@ -76,7 +77,7 @@ export default function SocialAuthSheet({
       await login();
       const entryRoute = await resolveEntryRoute();
       trackAuth(provider, entryRoute);
-      navigate(entryRoute, { replace: true });
+      navigate(resolvePostLoginDestination(entryRoute), { replace: true });
     } catch (error) {
       if (!(error instanceof SocialLoginCancelledError)) {
         setNotice({

@@ -6,6 +6,7 @@ import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { ApiError } from "@/lib/api";
 import { clearAccessToken, getAuthProvider } from "@/lib/auth";
 import { logout, withdraw } from "@/lib/authApi";
+import { clearNotificationDestination } from "@/lib/notificationNavigation";
 import {
   getAppleWithdrawalCode,
   isNativeApp,
@@ -115,6 +116,7 @@ function MySettingsPage() {
     } catch {
       // 무시 — 로컬 세션은 아래에서 정리
     }
+    clearNotificationDestination();
     clearAccessToken();
     navigate("/login", { replace: true });
   };
@@ -151,6 +153,7 @@ function MySettingsPage() {
       );
       return;
     }
+    clearNotificationDestination();
     clearAccessToken();
     navigate("/login", { replace: true });
   };
