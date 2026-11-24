@@ -6,13 +6,26 @@ const ACCESS_TOKEN_KEY = "muffin:accessToken";
 const AUTH_PROVIDER_KEY = "muffin:authProvider";
 
 export type AuthProvider = "google" | "kakao" | "apple";
+export const AUTH_SESSION_CHANGED_EVENT = "muffin:auth-session-changed";
+// 한 앱 실행 안에서 로그인/로그아웃과 단순 access token 갱신을 구분한다.
+let sessionRevision = 0;
+export const getAuthSessionRevision = () => sessionRevision;
+function notifySessionChanged() {
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+}
 
-export function saveAccessToken(token: string) {
+export function saveAccessToken(
+  token: string,
+  { preserveSession = false }: { preserveSession?: boolean } = {},
+) {
+  if (!preserveSession) sessionRevision++;
   try {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
   } catch {
     // 저장 실패(프라이빗 모드 등)는 무시
   }
+  notifySessionChanged();
 }
 
 export function getAccessToken(): string | null {
@@ -43,12 +56,14 @@ export function getAuthProvider(): AuthProvider | null {
 }
 
 export function clearAccessToken() {
+  sessionRevision++;
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(AUTH_PROVIDER_KEY);
   } catch {
     // 삭제 실패는 무시
   }
+  notifySessionChanged();
 }
 
 export function isLoggedIn(): boolean {

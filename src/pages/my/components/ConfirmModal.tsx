@@ -4,6 +4,7 @@ interface ConfirmModalProps {
   description?: string;
   confirmLabel: string;
   danger?: boolean; // 회원 탈퇴 등 위험 동작 — 빨간(positive 토큰) 스타일
+  isLoading?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -15,6 +16,7 @@ export default function ConfirmModal({
   description,
   confirmLabel,
   danger = false,
+  isLoading = false,
   onCancel,
   onConfirm,
 }: ConfirmModalProps) {
@@ -25,7 +27,7 @@ export default function ConfirmModal({
       <div
         aria-hidden="true"
         className="bg-neutral-1000/45 absolute inset-0"
-        onClick={onCancel}
+        onClick={isLoading ? undefined : onCancel}
       />
 
       <div className="relative z-10 w-[calc(100%-40px)] max-w-[326px] rounded-[16px] bg-white px-4 pt-7 pb-4">
@@ -41,6 +43,7 @@ export default function ConfirmModal({
         <div className="mt-6 flex gap-2">
           <button
             type="button"
+            disabled={isLoading}
             onClick={onCancel}
             className="text-body-16-bd-tighter h-[48px] flex-1 rounded-[12px] bg-neutral-50 text-neutral-400"
           >
@@ -48,12 +51,13 @@ export default function ConfirmModal({
           </button>
           <button
             type="button"
+            disabled={isLoading}
             onClick={onConfirm}
             className={`text-body-16-bd-tighter h-[48px] flex-1 rounded-[12px] ${
               danger ? "bg-positive-50 text-positive" : "bg-primary text-white"
             }`}
           >
-            {confirmLabel}
+            {isLoading ? "처리 중..." : confirmLabel}
           </button>
         </div>
       </div>

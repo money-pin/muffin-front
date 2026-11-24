@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { TopBarOutletContext } from "@/layouts/TopBarLayout";
 import { ApiError } from "@/lib/api";
 import { clearAccessToken, getAuthProvider } from "@/lib/auth";
-import { logout, withdraw } from "@/lib/authApi";
+import { withdraw } from "@/lib/authApi";
+import { logoutSession } from "@/lib/logoutSession";
 import { clearNotificationDestination } from "@/lib/notificationNavigation";
 import {
   getAppleWithdrawalCode,
@@ -27,13 +28,14 @@ import chevronRightIcon from "@/assets/icon-24px/chevron-right-thin.svg";
 import PrivacyPolicyModal from "@/pages/legal/PrivacyPolicyModal";
 
 import SettingToggle from "./components/SettingToggle";
+import IosPushPermissionCard from "./components/IosPushPermissionCard";
 import ConfirmModal from "./components/ConfirmModal";
 import { APP_VERSION } from "./myData";
 
 type NotificationKey = keyof NotificationSettings;
 
 const NOTIFICATION_ROWS: { key: NotificationKey; label: string }[] = [
-  { key: "newsUpdate", label: "뉴스 업데이트 알림" },
+  { key: "newsUpdate", label: "뉴스·브리핑 알림" },
   { key: "dailyQuiz", label: "일일 퀴즈 알림" },
   { key: "investResult", label: "투자 결과 알림" },
   { key: "rankingChange", label: "랭킹 변동 알림" },
@@ -85,7 +87,6 @@ function LinkRow({ label, danger = false, onClick }: LinkRowProps) {
 }
 
 // Figma 설정: 알림 토글 / 계정(로그아웃·회원 탈퇴 모달) / 고객지원 / 약관 / 앱 정보
-// 알림 상태·로그아웃·탈퇴 동작은 API 연동 전 화면만 구현
 function MySettingsPage() {
   const navigate = useNavigate();
   const { setTopBar, resetTopBar } = useOutletContext<TopBarOutletContext>();
@@ -102,23 +103,31 @@ function MySettingsPage() {
     },
   });
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
+  const logoutInFlight = useRef(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
   const [withdrawError, setWithdrawError] = useState<ErrorMessageInfo | null>(
     null,
   );
 
-  // 로그아웃: 백엔드에서 토큰 무효화 후 로컬 토큰 삭제.
-  // API가 실패해도 로컬은 비우고 로그인 화면으로 보낸다(세션 종료 보장).
+  // 서버 해제는 짧게 시도하되 실패해도 기기 로그인 정보·조회 캐시는 정리한다.
   const handleLogout = async () => {
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    setLogoutPending(true);
     try {
-      await logout();
-    } catch {
-      // 무시 — 로컬 세션은 아래에서 정리
+      const result = await logoutSession();
+      if (result.loggedOut) {
+        void queryClient.cancelQueries();
+        queryClient.clear();
+        navigate("/login", { replace: true });
+      }
+    } finally {
+      logoutInFlight.current = false;
+      setLogoutPending(false);
+      setLogoutModalOpen(false);
     }
-    clearNotificationDestination();
-    clearAccessToken();
-    navigate("/login", { replace: true });
   };
 
   // 회원 탈퇴: 서버 소프트 딜리트가 성공했을 때만 로컬 토큰을 지운다.
@@ -177,6 +186,7 @@ function MySettingsPage() {
   return (
     <div className="bg-neutral-0 flex flex-col gap-6 px-5 pt-2 pb-12">
       <Section title="알림 설정">
+        <IosPushPermissionCard />
         {NOTIFICATION_ROWS.map(({ key, label }) => (
           <div
             key={key}
@@ -226,7 +236,10 @@ function MySettingsPage() {
         isOpen={logoutModalOpen}
         title="로그아웃 하시겠어요?"
         confirmLabel="확인"
-        onCancel={() => setLogoutModalOpen(false)}
+        isLoading={logoutPending}
+        onCancel={() => {
+          if (!logoutInFlight.current) setLogoutModalOpen(false);
+        }}
         onConfirm={handleLogout}
       />
       <ConfirmModal
