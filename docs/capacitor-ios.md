@@ -78,6 +78,22 @@ pnpm cap:sync   # = pnpm build && cap sync ios (웹 빌드 결과를 ios/에 복
 `ios/App/App/public`, `capacitor.config.json` 등 생성 파일은 `ios/.gitignore`로 제외됩니다.
 클라우드 빌드는 매번 이 과정을 자동으로 실행하므로, 웹 코드만 바꿨다면 별도 커밋이 필요 없습니다.
 
+## Mac에서 직접 실행 (시뮬레이터·내 아이폰)
+
+1. `ios` 브랜치에서 `.env.local`에 `VITE_API_BASE_URL`, `VITE_GOOGLE_CLIENT_ID`, `VITE_KAKAO_NATIVE_APP_KEY`, `VITE_GOOGLE_IOS_CLIENT_ID` 입력 (`.env.example` 참고)
+2. `pnpm install` → `pnpm build` → `npx cap sync ios` → `npx cap open ios`
+3. Xcode에서 기기(시뮬레이터 또는 연결한 아이폰)를 고르고 ▶ 실행
+   - 카카오·구글 로그인 복귀 주소는 프로젝트 빌드 설정에 들어 있어 따로 입력하지 않아도 됩니다.
+
+내 아이폰에 무료 Apple ID로 설치할 때 (아래 변경은 **커밋하지 않기**)
+
+- Signing & Capabilities → Team에 내 Apple ID 선택, **Sign in with Apple 항목 삭제** (유료 계정 전용)
+- 번들 ID를 쓸 수 없다는 오류가 나면 `kr.ai.muffin.dev`처럼 잠깐 바꿔서 실행
+- 아이폰 설정 → 개인정보 보호 및 보안 → 개발자 모드 켜기, 첫 실행 후 일반 → VPN 및 기기 관리에서 신뢰
+- 무료 Apple ID로 설치한 앱은 7일 뒤 다시 실행(▶)해야 하고, 애플 로그인은 테스트할 수 없습니다.
+
+카카오 로그인 플러그인은 Capacitor 버전 충돌을 막기 위해 `patches/`에서 의존성 버전을 고정합니다(`pnpm install` 시 자동 적용).
+
 ## 클라우드 빌드 (Mac 없이 TestFlight로 테스트)
 
 > **Apple Developer Program(유료, 연 $99) 가입이 먼저 필요합니다.** TestFlight는 유료 계정에서만 쓸 수 있습니다.
@@ -122,7 +138,7 @@ pnpm cap:sync   # = pnpm build && cap sync ios (웹 빌드 결과를 ios/에 복
 | 애플   | Apple Developer > Identifiers > `kr.ai.muffin`에 **Sign in with Apple** 체크                            | 코드 설정 완료 (`App/App.entitlements`)         |
 | 백엔드 | 구글 토큰 검증에 iOS 클라이언트 ID도 허용 (앱 로그인 토큰의 aud가 iOS 클라이언트 ID)                    | 백엔드 환경 변수                                |
 
-- 두 값은 Codemagic 환경 변수 그룹 `muffin_env`에 넣습니다. 웹 빌드 값과 함께 앱 코드에 들어가고, `codemagic.yaml`이 Info.plist의 로그인 복귀 주소(URL scheme)에도 넣어 줍니다.
+- 두 값은 `codemagic.yaml`의 `vars`에 들어 있습니다(앱에 그대로 들어가는 공개 값). 웹 빌드 값과 함께 앱 코드에 들어가고, `codemagic.yaml`이 Info.plist의 로그인 복귀 주소(URL scheme)에도 넣어 줍니다.
 - 애플 계정 회원 탈퇴 시 앱이 애플 로그인을 한 번 더 띄워 받은 `authorizationCode`를 탈퇴 API에 보냅니다.
 
 ## iOS 의존성 관리: SPM

@@ -1,0 +1,2 @@
+patchedDependencies:
+  '@team-lepisode/capacitor-kakao-login@8.1.0': patches/@team-lepisode__capacitor-kakao-login@8.1.0.patch
