@@ -12,8 +12,9 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.5.2"),
+        .package(name: "CapacitorPushNotifications", path: "../../../node_modules/.pnpm/@capacitor+push-notifications@8.1.3_@capacitor+core@8.5.2/node_modules/@capacitor/push-notifications"),
         .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/.pnpm/@capgo+capacitor-social-login@8.7.6_@capacitor+core@8.5.2/node_modules/@capgo/capacitor-social-login"),
-        .package(name: "TeamLepisodeCapacitorKakaoLogin", path: "../../../node_modules/.pnpm/@team-lepisode+capacitor-kakao-login@8.1.0_@capacitor+core@8.5.2/node_modules/@team-lepisode/capacitor-kakao-login")
+        .package(name: "TeamLepisodeCapacitorKakaoLogin", path: "../../../node_modules/.pnpm/@team-lepisode+capacitor-ka_87795ecdb9802a7c2fc957b629579714/node_modules/@team-lepisode/capacitor-kakao-login")
     ],
     targets: [
         .target(
@@ -21,6 +22,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
                 .product(name: "Cordova", package: "capacitor-swift-pm"),
+                .product(name: "CapacitorPushNotifications", package: "CapacitorPushNotifications"),
                 .product(name: "CapgoCapacitorSocialLogin", package: "CapgoCapacitorSocialLogin"),
                 .product(name: "TeamLepisodeCapacitorKakaoLogin", package: "TeamLepisodeCapacitorKakaoLogin")
             ]
