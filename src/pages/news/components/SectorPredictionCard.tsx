@@ -58,9 +58,12 @@ export default function SectorPredictionCard({
   guess,
   onGuess,
 }: SectorPredictionCardProps) {
-  const isPositive = sector.impact === "POSITIVE";
+  // 강한 상승(STRONG_POSITIVE)도 상승, 강한 하락(STRONG_NEGATIVE)도 하락으로 본다 (#331)
+  const isPositive =
+    sector.impact === "POSITIVE" || sector.impact === "STRONG_POSITIVE";
+  const answer: SectorGuess = isPositive ? "POSITIVE" : "NEGATIVE";
   const isAnswered = guess !== null;
-  const isCorrect = guess === sector.impact;
+  const isCorrect = guess === answer;
   const reason = sector.reason?.trim();
 
   return (

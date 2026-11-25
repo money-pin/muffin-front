@@ -29,7 +29,10 @@ export default function QuizIntro({
           className="aspect-square w-[calc(min(100vw,var(--max-width-app))*0.8)] object-contain"
         />
         <p className="text-heading-20-bd text-center break-keep whitespace-pre-line text-neutral-900">
-          {`${nickname}님, 오늘 구운 뉴스들로\n반죽을 만들어볼까요?`}
+          {/* 닉네임이 없으면 이름 없이 기본 문구만 보여준다 (#331) */}
+          {nickname.trim()
+            ? `${nickname.trim()}님, 오늘 구운 뉴스들로\n반죽을 만들어볼까요?`
+            : "오늘 구운 뉴스들로\n반죽을 만들어볼까요?"}
         </p>
       </div>
 

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { readGoogleCallback } from "@/lib/google";
 import { trackAuth } from "@/lib/analytics";
 import { resolveEntryRoute } from "@/lib/mypageApi";
-import { exchangeSocialToken } from "@/lib/socialLogin";
+import { exchangeSocialToken, getLoginErrorMessage } from "@/lib/socialLogin";
 import HomePageSkeleton from "@/pages/home/components/HomePageSkeleton";
 
 export interface AuthErrorState {
@@ -12,7 +12,7 @@ export interface AuthErrorState {
 }
 
 const DEFAULT_ERROR_MESSAGE =
-  "구글 로그인에 실패했어요. 잠시 후 다시 시도해주세요.";
+  "구글 로그인에 실패했어요. 네트워크 상태를 확인하고 다시 시도해주세요.";
 
 // 구글 로그인 후 돌아오는 화면 (#291)
 // ID 토큰을 앱 토큰으로 바꾼 뒤 처음 가입이면 /onboarding, 기존 회원이면 /home으로 보낸다.
@@ -36,10 +36,7 @@ export default function GoogleCallbackPage() {
         navigate(entryRoute, { replace: true });
       } catch (error) {
         const state: AuthErrorState = {
-          authError:
-            error instanceof Error && error.message
-              ? error.message
-              : DEFAULT_ERROR_MESSAGE,
+          authError: getLoginErrorMessage(error, DEFAULT_ERROR_MESSAGE),
         };
         navigate("/login", { replace: true, state });
       }
