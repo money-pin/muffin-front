@@ -1,11 +1,12 @@
 import { apiRequest } from "./api";
 
 // 로그아웃 (accessToken blacklist + refreshToken 쿠키 만료)
-export async function logout() {
+export async function logout(signal?: AbortSignal) {
   return apiRequest<void>("/api/auth/logout", {
     method: "POST",
     body: {},
     auth: true,
+    signal,
   });
 }
 
