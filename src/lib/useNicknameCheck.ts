@@ -7,6 +7,7 @@ import { getNicknameFormatStatus } from "./nickname";
 export type NicknameCheckStatus =
   | "empty" // 입력 전
   | "invalid" // 형식 오류(2~6자, 한글/영문/숫자/공백)
+  | "own" // 이미 내 닉네임으로 저장된 값(서버 확인 불필요)
   | "banned" // 서버가 사용할 수 없는 단어로 판단(비속어 등)
   | "checking"
   | "available"
@@ -21,14 +22,27 @@ interface CheckResult {
 }
 
 // 닉네임 형식 확인 후, 입력이 멈추면 서버에 사용 가능 여부를 묻는다 (#333)
-// 결과는 비동기 콜백에서만 저장하고, 표시 상태는 렌더에서 파생한다.
-export function useNicknameCheck(value: string): NicknameCheckStatus {
+// ownNickname: 이미 내 것으로 저장된 닉네임. 서버는 이것도 '사용 중'으로 답하므로 확인하지 않는다.
+export function useNicknameCheck(
+  value: string,
+  ownNickname?: string,
+): NicknameCheckStatus {
   const trimmed = value.trim();
   const formatStatus = getNicknameFormatStatus(value);
+  const isOwn = Boolean(ownNickname) && trimmed === ownNickname;
+  const shouldCheck = formatStatus === "valid" && !isOwn;
   const [result, setResult] = useState<CheckResult | null>(null);
 
+  // 입력이 바뀌면 이전 확인 결과를 버린다. A → B → A로 돌아와도 예전 'A 사용 가능'을
+  // 다시 쓰지 않고, 새 응답이 올 때까지 'checking'으로 둔다 (#334 리뷰)
+  const [checkedInput, setCheckedInput] = useState(trimmed);
+  if (checkedInput !== trimmed) {
+    setCheckedInput(trimmed);
+    setResult(null);
+  }
+
   useEffect(() => {
-    if (formatStatus !== "valid") return;
+    if (!shouldCheck) return;
     let active = true;
     const timer = window.setTimeout(() => {
       checkNickname(trimmed)
@@ -52,8 +66,9 @@ export function useNicknameCheck(value: string): NicknameCheckStatus {
       active = false;
       window.clearTimeout(timer);
     };
-  }, [trimmed, formatStatus]);
+  }, [trimmed, shouldCheck]);
 
   if (formatStatus !== "valid") return formatStatus;
+  if (isOwn) return "own";
   return result?.nickname === trimmed ? result.status : "checking";
 }

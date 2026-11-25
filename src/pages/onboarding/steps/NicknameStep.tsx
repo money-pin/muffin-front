@@ -8,6 +8,11 @@ import {
 
 interface NicknameStepProps {
   nickname: string;
+  // 이미 서버에 저장한 닉네임 (뒤로 돌아와 그대로 진행하면 다시 저장하지 않는다)
+  savedNickname?: string;
+  isSaving: boolean;
+  // [완료]로 저장하다 실패한 이유. 입력을 바꾸면 화면에서 지운다
+  saveError?: string;
   onChange: (value: string) => void;
   onNext: () => void;
 }
@@ -24,12 +29,16 @@ const ERROR_TEXT: Partial<Record<NicknameCheckStatus, string>> = {
 
 export default function NicknameStep({
   nickname,
+  savedNickname,
+  isSaving,
+  saveError,
   onChange,
   onNext,
 }: NicknameStepProps) {
-  // 형식 확인 후 서버 중복 확인까지 통과해야 다음 단계로 진행한다 (#333)
-  const status = useNicknameCheck(nickname);
-  const canSubmit = status === "available";
+  // 형식 확인 후 서버 중복 확인까지 통과해야 [완료]가 눌린다 (#333)
+  const status = useNicknameCheck(nickname, savedNickname);
+  const isUsable = status === "available" || status === "own";
+  const error = saveError ?? ERROR_TEXT[status];
 
   return (
     <div className="flex flex-1 flex-col px-5 pt-5 pb-8">
@@ -42,8 +51,8 @@ export default function NicknameStep({
         <TextField
           placeholder="최대 6자 설정 가능"
           hint={status === "checking" ? "닉네임 확인 중이에요..." : HINT_TEXT}
-          error={ERROR_TEXT[status]}
-          success={canSubmit ? "사용 가능한 닉네임이에요." : undefined}
+          error={error}
+          success={isUsable ? "사용 가능한 닉네임이에요." : undefined}
           maxLength={NICKNAME_MAX_LENGTH}
           value={nickname}
           onChange={(v) => onChange(v.slice(0, NICKNAME_MAX_LENGTH))}
@@ -51,8 +60,8 @@ export default function NicknameStep({
       </div>
 
       <div className="mt-auto">
-        <Button onClick={onNext} disabled={!canSubmit}>
-          완료
+        <Button onClick={onNext} disabled={!isUsable || isSaving || !!error}>
+          {isSaving ? "저장 중..." : "완료"}
         </Button>
       </div>
     </div>
