@@ -8,8 +8,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Regular"),
-    url("./assets/fonts/SpoqaHanSansNeo-Regular.woff2")
-      format("woff2");
+    url("./assets/fonts/SpoqaHanSansNeo-Regular.woff2") format("woff2");
 }
 
 @font-face {
@@ -19,8 +18,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Medium"),
-    url("./assets/fonts/SpoqaHanSansNeo-Medium.woff2")
-      format("woff2");
+    url("./assets/fonts/SpoqaHanSansNeo-Medium.woff2") format("woff2");
 }
 
 @font-face {
@@ -30,8 +28,7 @@
   font-display: swap;
   src:
     local("Spoqa Han Sans Neo Bold"),
-    url("./assets/fonts/SpoqaHanSansNeo-Bold.woff2")
-      format("woff2");
+    url("./assets/fonts/SpoqaHanSansNeo-Bold.woff2") format("woff2");
 }
 
 @theme {
@@ -300,12 +297,28 @@
   animation: splash-logo-in 2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* 소개 화면 데모: 반복할 때마다 새 바퀴가 서서히 나타난다 (#335).
+   fill-mode를 두지 않아야 끝난 뒤 흐려지는 전환(opacity-0)이 그대로 먹는다. */
+@keyframes intro-demo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.intro-demo-cycle {
+  animation: intro-demo-in 400ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home-greeting-pop,
   .home-character-bounce {
     animation: none;
   }
-  .animate-splash-logo {
+  .animate-splash-logo,
+  .intro-demo-cycle {
     animation: none;
   }
 }

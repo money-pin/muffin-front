@@ -109,6 +109,7 @@ export default function SocialAuthSheet({
       isOpen={isOpen}
       onClose={handleClose}
       ariaLabel={copy.ariaLabel}
+      showHandle={false}
     >
       <div className="flex flex-col items-center gap-4 px-[21px] pb-[60px]">
         <h2 className="text-heading-20-bd text-center text-neutral-900">

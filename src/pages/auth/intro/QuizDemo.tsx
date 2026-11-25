@@ -2,6 +2,7 @@ import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import giftIcon from "@/assets/bi_gift-fill.svg";
 import QuizStepIndicator from "@/pages/quiz/components/QuizStepIndicator";
 
+import DemoCycle from "./DemoCycle";
 import PhoneMockup from "./PhoneMockup";
 import { useDemoPhase } from "./useDemoPhase";
 
@@ -114,7 +115,7 @@ function QuestionScreen({ phase }: { phase: number }) {
       </div>
 
       <div
-        className={`bg-positive-50 absolute inset-x-0 bottom-[230px] rounded-t-[20px] px-5 pt-6 pb-[42px] transition-transform duration-500 ease-out ${
+        className={`bg-positive-50 absolute inset-x-0 bottom-[230px] rounded-t-[20px] px-5 pt-6 pb-[42px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
           showFeedback ? "translate-y-0" : "translate-y-[calc(100%+230px)]"
         }`}
       >
@@ -212,21 +213,23 @@ function ResultScreen() {
 
 // 소개 2: "오늘 구운 뉴스 퀴즈로 복습해요" — 퀴즈 풀이 → 해설 → 보상 미리보기
 export default function QuizDemo() {
-  const phase = useDemoPhase(PHASE_DELAYS, REDUCED_PHASE);
+  const { phase, cycle, isLeaving } = useDemoPhase(PHASE_DELAYS, REDUCED_PHASE);
   const showResult = phase >= 3;
 
   return (
-    <PhoneMockup className="top-[215px] h-[675px] rounded-[30px]">
-      <div className="relative">
-        <QuestionScreen phase={phase} />
-        <div
-          className={`absolute inset-0 transition-opacity duration-500 ${
-            showResult ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <ResultScreen />
+    <DemoCycle cycle={cycle} isLeaving={isLeaving}>
+      <PhoneMockup className="top-[215px] h-[675px] rounded-[30px]">
+        <div className="relative">
+          <QuestionScreen phase={phase} />
+          <div
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              showResult ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <ResultScreen />
+          </div>
         </div>
-      </div>
-    </PhoneMockup>
+      </PhoneMockup>
+    </DemoCycle>
   );
 }
