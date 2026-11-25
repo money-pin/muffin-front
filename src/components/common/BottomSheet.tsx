@@ -21,6 +21,8 @@ interface BottomSheetProps {
   ariaLabel: string;
   children: ReactNode;
   snapMode?: "content" | "half-full";
+  // 손잡이(핸들) 노출 여부. 끄면 같은 높이(20px) 여백만 남는다 (회원가입·로그인 시트, #335)
+  showHandle?: boolean;
 }
 
 export default function BottomSheet({
@@ -29,6 +31,7 @@ export default function BottomSheet({
   ariaLabel,
   children,
   snapMode = "content",
+  showHandle = true,
 }: BottomSheetProps) {
   const [isMounted, setIsMounted] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
@@ -199,20 +202,24 @@ export default function BottomSheet({
                 : "translate-y-full"
           }`}
         >
-          <div
-            aria-hidden="true"
-            className={`flex shrink-0 touch-none justify-center pt-4 ${
-              snapMode === "half-full"
-                ? "from-neutral-0 to-neutral-0/0 bg-gradient-to-b from-[39%] to-[85%] pb-8"
-                : ""
-            }`}
-            onPointerDown={handleHandlePointerDown}
-            onPointerMove={moveSheetDrag}
-            onPointerUp={endSheetDrag}
-            onPointerCancel={endSheetDrag}
-          >
-            <div className="h-1 w-12 rounded-full bg-neutral-100" />
-          </div>
+          {showHandle ? (
+            <div
+              aria-hidden="true"
+              className={`flex shrink-0 touch-none justify-center pt-4 ${
+                snapMode === "half-full"
+                  ? "from-neutral-0 to-neutral-0/0 bg-gradient-to-b from-[39%] to-[85%] pb-8"
+                  : ""
+              }`}
+              onPointerDown={handleHandlePointerDown}
+              onPointerMove={moveSheetDrag}
+              onPointerUp={endSheetDrag}
+              onPointerCancel={endSheetDrag}
+            >
+              <div className="h-1 w-12 rounded-full bg-neutral-100" />
+            </div>
+          ) : (
+            <div aria-hidden="true" className="h-5 shrink-0" />
+          )}
 
           {snapMode === "half-full" ? (
             <div className="min-h-0 flex-1 touch-pan-y overflow-y-scroll overscroll-contain [-webkit-overflow-scrolling:touch]">

@@ -50,7 +50,7 @@ export default function ConfirmModal({
             type="button"
             onClick={onConfirm}
             className={`text-body-16-bd-tighter h-[48px] flex-1 rounded-[12px] ${
-              danger ? "bg-positive-50 text-positive" : "bg-primary text-white"
+              danger ? "bg-positive text-white" : "bg-primary text-white"
             }`}
           >
             {confirmLabel}

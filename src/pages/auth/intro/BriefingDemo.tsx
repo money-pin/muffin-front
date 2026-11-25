@@ -3,11 +3,15 @@ import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 import bookmarkLineWhite from "@/assets/icon-24px/bookmark-line-white.svg";
 import arrowUpIcon from "@/assets/icon-24px/arrow-up.svg";
 
+import DemoCycle from "./DemoCycle";
 import PhoneMockup from "./PhoneMockup";
 import { useDemoPhase } from "./useDemoPhase";
 
 // 0: 카드가 아래에서 흐리게 올라옴 → 1: 브리핑 노출 → 2: '뉴스보기'로 확대 → 3: 뉴스 상세 진입
-const PHASE_DELAYS = [300, 2400, 3000] as const;
+// 확대가 끝난 뒤 상세가 들어오도록 간격을 둔다(겹치면 버벅여 보임, #335)
+const PHASE_DELAYS = [300, 2000, 3100] as const;
+// 확대·스크롤은 같은 시간·곡선으로 움직인다
+const ZOOM_TRANSITION = "duration-[800ms] ease-[cubic-bezier(0.65,0,0.35,1)]";
 const REDUCED_PHASE = 1;
 
 // '뉴스보기'를 누르는 듯한 확대 연출 (Figma: 카드 312→544px, 윗변은 206px 근처에 고정)
@@ -25,7 +29,7 @@ function BriefingScreen({
 }) {
   return (
     <div
-      className="bg-neutral-0 relative h-[1200px] transition-transform duration-700 ease-out"
+      className={`bg-neutral-0 relative h-[1200px] transition-transform will-change-transform ${ZOOM_TRANSITION}`}
       style={{
         transform: scrolled ? `translateY(-${ZOOM_SCROLL_PX}px)` : undefined,
       }}
@@ -152,7 +156,7 @@ function NewsDetailScreen() {
 
 // 소개 1: "경제 뉴스, 이제 1분이면 충분해요" — 브리핑 → 뉴스 상세 흐름 미리보기
 export default function BriefingDemo() {
-  const phase = useDemoPhase(PHASE_DELAYS, REDUCED_PHASE);
+  const { phase, cycle, isLeaving } = useDemoPhase(PHASE_DELAYS, REDUCED_PHASE);
 
   const isZoomed = phase >= 2;
   const briefingTransform =
@@ -163,21 +167,26 @@ export default function BriefingDemo() {
         : "none";
 
   return (
-    <>
+    <DemoCycle cycle={cycle} isLeaving={isLeaving}>
       <PhoneMockup
-        className="top-[215px] h-[640px] rounded-[24px] transition-transform duration-700 ease-out"
+        // 상세 화면이 들어오면 뒤의 확대된 브리핑은 흐려서 상세 카드 위로 비치지 않게 한다 (#335)
+        className={`top-[215px] h-[640px] rounded-[24px] transition-[transform,opacity] will-change-transform ${
+          phase <= 1
+            ? "duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            : ZOOM_TRANSITION
+        } ${phase >= 3 ? "opacity-0" : "opacity-100"}`}
         style={{ transform: briefingTransform, transformOrigin: ZOOM_ORIGIN }}
       >
         <BriefingScreen dimmed={phase === 0} scrolled={isZoomed} />
       </PhoneMockup>
 
       <PhoneMockup
-        className={`top-[215px] h-[640px] rounded-[24px] transition-transform duration-500 ease-out ${
+        className={`top-[215px] h-[640px] rounded-[24px] transition-transform duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
           phase >= 3 ? "translate-x-0" : "translate-x-[400px]"
         }`}
       >
         <NewsDetailScreen />
       </PhoneMockup>
-    </>
+    </DemoCycle>
   );
 }

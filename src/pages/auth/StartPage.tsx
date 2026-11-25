@@ -76,8 +76,9 @@ function StartPage() {
   };
 
   return (
-    // 배경: 화면 아래쪽에서 퍼지는 복숭아빛 원형 그라데이션 (Figma 온보딩 배경)
-    <main className="flex min-h-[100dvh] flex-col bg-[radial-gradient(circle_540px_at_50%_60%,#ffffff_52%,#ffffff_60%,#f8d4bc_100%)]">
+    // 배경: Figma 온보딩0의 원형 그라데이션(390×844 기준 중심 195,505 · 반지름 540)을
+    // 화면 크기에 맞춰 늘린다. px 원으로 두면 긴 화면에서 하단이 진해진다 (#335)
+    <main className="flex min-h-[100dvh] flex-col bg-[radial-gradient(ellipse_138.46%_63.98%_at_50%_59.83%,#ffffff_51.6%,#ffffff_60.2%,#f8d4bc_100%)]">
       {/* Figma 844px 기준 캐릭터 그룹 상단이 205px에 오도록 위쪽 여백을 둔다 */}
       <div className="flex flex-1 flex-col items-center justify-center pt-[17dvh] pb-6">
         <SpeechBubble />

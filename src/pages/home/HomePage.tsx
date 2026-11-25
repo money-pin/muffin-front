@@ -16,6 +16,9 @@ import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
 import { useSettlementResultQuery } from "@/pages/invest/settlementResultQueries";
 import { useMyHomeQuery } from "@/lib/mypageQueries";
 import { characterTypeToVariant } from "@/lib/character";
+import { isBriefingVisible } from "@/lib/briefingApi";
+import { useBriefing } from "@/pages/briefing/briefingQueries";
+import TodayBriefingCard from "@/pages/news/components/TodayBriefingCard";
 import TodayNewsCarouselCard from "@/pages/news/components/TodayNewsCarouselCard";
 import { useTodayNews } from "@/pages/news/newsQueries";
 
@@ -43,6 +46,9 @@ function HomePage() {
   const investmentAssetQuery = useInvestmentAssetQuery();
   const statsSummaryQuery = useStatsSummaryQuery();
   const todayNewsQuery = useTodayNews();
+  // 따끈한 금융 소식: 오늘의 브리핑이 공개됐으면 브리핑 카드, 아니면 오늘의 뉴스 (#333)
+  const { data: briefing } = useBriefing();
+  const showBriefing = isBriefingVisible(briefing);
 
   // 최근 투자 성과 상세는 시트를 열 때만 조회
   const recentDetailQuery = useStatsRecentDetailQuery(recentPerformanceOpen);
@@ -164,7 +170,11 @@ function HomePage() {
             />
           </div>
 
-          {todayNewsList.length > 0 ? (
+          {showBriefing && briefing ? (
+            <div className="px-5">
+              <TodayBriefingCard briefing={briefing} />
+            </div>
+          ) : todayNewsList.length > 0 ? (
             <Carousel>
               {todayNewsList.map((news) => (
                 <TodayNewsCarouselCard key={news.newsId} news={news} />

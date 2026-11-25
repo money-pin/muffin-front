@@ -103,6 +103,12 @@ function IntroPage() {
       {/* key로 슬라이드마다 다시 마운트해 데모 애니메이션을 처음부터 재생 */}
       <div key={slideIndex}>{slide.demo()}</div>
 
+      {/* 하단 버튼 영역 뒤로 데모가 비치지 않게 흰색으로 덮는다(위쪽만 부드럽게 사라짐, #335) */}
+      <div
+        aria-hidden="true"
+        className="from-neutral-0 to-neutral-0/0 pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[150px] bg-gradient-to-t from-[72%]"
+      />
+
       <div className="absolute inset-x-0 bottom-[34px] z-10 flex h-[68px] items-center justify-between px-5 py-2">
         <IntroIndicator total={SLIDES.length} current={slideIndex} />
         <button

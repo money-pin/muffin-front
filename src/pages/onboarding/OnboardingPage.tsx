@@ -9,7 +9,9 @@ import {
   ONBOARDING_START_VIDEO,
 } from "@/lib/characterVideos";
 import { completeOnboarding, saveOnboardingCharacter } from "@/lib/authApi";
+import { ApiError } from "@/lib/api";
 import { getMyHome, updateNickname } from "@/lib/mypageApi";
+import { NICKNAME_INVALID_TEXT } from "@/lib/nickname";
 import chevronLeftIcon from "@/assets/icon-28px/chevron-left.svg";
 
 import {
@@ -79,6 +81,10 @@ function OnboardingPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  // 닉네임은 닉네임 화면의 [완료]에서 바로 저장한다. 실패하면 그 화면에 머문다 (#334 리뷰)
+  const [savedNickname, setSavedNickname] = useState<string>();
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
+  const [nicknameSaveError, setNicknameSaveError] = useState<string>();
 
   const step = STEPS[stepIndex];
   const displayName = nickname.trim() || "회원";
@@ -132,21 +138,39 @@ function OnboardingPage() {
         throw new Error("온보딩 캐릭터가 저장되지 않았습니다.");
       }
 
-      // 완료 확인됨 → 닉네임 저장(실패해도 홈 진입은 막지 않음)
-      const trimmedNickname = nickname.trim();
-      if (trimmedNickname) {
-        try {
-          await updateNickname(trimmedNickname);
-        } catch {
-          // 마이페이지에서 다시 변경 가능
-        }
-      }
-
       navigate("/home", { replace: true });
     } catch {
       setSubmitError("온보딩 완료에 실패했어요. 잠시 후 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const saveNicknameAndNext = async () => {
+    const trimmed = nickname.trim();
+    if (isSavingNickname) return;
+    // 이미 저장한 닉네임 그대로면 다시 저장하지 않는다(서버가 '사용 중'으로 거절함)
+    if (trimmed === savedNickname) {
+      setStepIndex((i) => i + 1);
+      return;
+    }
+    setIsSavingNickname(true);
+    setNicknameSaveError(undefined);
+    try {
+      await updateNickname(trimmed);
+      setSavedNickname(trimmed);
+      setStepIndex((i) => i + 1);
+    } catch (error) {
+      const code = error instanceof ApiError ? error.code : "";
+      setNicknameSaveError(
+        code === "USER_409_002"
+          ? "이미 사용 중인 닉네임이에요!"
+          : code.includes("_400_")
+            ? NICKNAME_INVALID_TEXT
+            : "닉네임 저장에 실패했어요. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setIsSavingNickname(false);
     }
   };
 
@@ -200,8 +224,14 @@ function OnboardingPage() {
       {step === "nickname" && (
         <NicknameStep
           nickname={nickname}
-          onChange={setNickname}
-          onNext={goNext}
+          savedNickname={savedNickname}
+          isSaving={isSavingNickname}
+          saveError={nicknameSaveError}
+          onChange={(value) => {
+            setNickname(value);
+            setNicknameSaveError(undefined);
+          }}
+          onNext={() => void saveNicknameAndNext()}
         />
       )}
 

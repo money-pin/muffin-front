@@ -101,7 +101,11 @@ function MySettingsPage() {
     },
   });
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+  // 회원 탈퇴는 2단계 확인 (Figma): 재가입 제한 안내 → 최종 확인 (#333)
+  const [withdrawStep, setWithdrawStep] = useState<"notice" | "confirm" | null>(
+    null,
+  );
+  const closeWithdrawModal = () => setWithdrawStep(null);
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
   const [withdrawError, setWithdrawError] = useState<ErrorMessageInfo | null>(
     null,
@@ -131,7 +135,7 @@ function MySettingsPage() {
         } catch (error) {
           // 애플 로그인 창을 닫으면 탈퇴를 진행하지 않는다
           if (error instanceof SocialLoginCancelledError) {
-            setWithdrawModalOpen(false);
+            closeWithdrawModal();
             return;
           }
           throw error;
@@ -139,7 +143,7 @@ function MySettingsPage() {
       }
       await withdraw({ authorizationCode });
     } catch (error) {
-      setWithdrawModalOpen(false);
+      closeWithdrawModal();
       setWithdrawError(
         getErrorMessage(error instanceof ApiError ? error.code : "", {
           title: "회원 탈퇴에 실패했어요.",
@@ -194,7 +198,7 @@ function MySettingsPage() {
         <LinkRow
           label="회원 탈퇴"
           danger
-          onClick={() => setWithdrawModalOpen(true)}
+          onClick={() => setWithdrawStep("notice")}
         />
       </Section>
 
@@ -227,12 +231,23 @@ function MySettingsPage() {
         onConfirm={handleLogout}
       />
       <ConfirmModal
-        isOpen={withdrawModalOpen}
+        isOpen={withdrawStep === "notice"}
+        title="잠깐, 확인해 주세요."
+        description={
+          "탈퇴 후 30일 동안은 재가입이 불가능하며,\n해당 기간에는 계정을 다시 만들 수 없습니다."
+        }
+        confirmLabel="확인"
+        danger
+        onCancel={closeWithdrawModal}
+        onConfirm={() => setWithdrawStep("confirm")}
+      />
+      <ConfirmModal
+        isOpen={withdrawStep === "confirm"}
         title="정말 탈퇴하시겠어요?"
         description={"탈퇴 시 계정은 영구 삭제되며\n복구할 수 없습니다."}
         confirmLabel="탈퇴하기"
         danger
-        onCancel={() => setWithdrawModalOpen(false)}
+        onCancel={closeWithdrawModal}
         onConfirm={handleWithdraw}
       />
       <PrivacyPolicyModal
