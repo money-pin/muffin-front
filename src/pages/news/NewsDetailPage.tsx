@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import BottomSheet from "@/components/common/BottomSheet";
 import Badge from "@/components/common/Badge";
 import ErrorModal from "@/components/common/ErrorModal";
@@ -97,6 +97,8 @@ function renderMarkdownBold(content: string) {
 
 export default function NewsDetailPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromNotification = searchParams.get("from") === "notification";
   const { newsId } = useParams<{ newsId: string }>();
   const idNum = newsId ? Number(newsId) : NaN;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -163,10 +165,18 @@ export default function NewsDetailPage() {
 
   useEffect(() => {
     if (!isError) return;
+    if (
+      fromNotification &&
+      detailError instanceof ApiError &&
+      ["404", "CONTENT_404_001", "CONTENT_403_001"].includes(detailError.code)
+    ) {
+      navigate("/news", { replace: true });
+      return;
+    }
     queueMicrotask(() => {
       showDetailError(detailError);
     });
-  }, [isError, detailError, showDetailError]);
+  }, [isError, detailError, showDetailError, fromNotification, navigate]);
 
   useEffect(() => {
     hasReadRef.current = false;

@@ -6,18 +6,52 @@ const ACCESS_TOKEN_KEY = "muffin:accessToken";
 const AUTH_PROVIDER_KEY = "muffin:authProvider";
 
 export type AuthProvider = "google" | "kakao" | "apple";
+export const AUTH_SESSION_CHANGED_EVENT = "muffin:auth-session-changed";
+// 한 앱 실행 안에서 로그인/로그아웃과 단순 access token 갱신을 구분한다.
+let sessionRevision = 0;
+export const getAuthSessionRevision = () => sessionRevision;
+function notifySessionChanged() {
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+}
 
-export function saveAccessToken(token: string) {
+export function saveAccessToken(
+  token: string,
+  { preserveSession = false }: { preserveSession?: boolean } = {},
+) {
+  if (!preserveSession) sessionRevision++;
   try {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
   } catch {
     // 저장 실패(프라이빗 모드 등)는 무시
   }
+  notifySessionChanged();
 }
 
 export function getAccessToken(): string | null {
   try {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+// UI 로컬 상태의 계정 구분에만 사용한다. 인증·권한 검증은 서버가 담당한다.
+export function getAccountId(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const claims: unknown = JSON.parse(
+      atob(payload.padEnd(Math.ceil(payload.length / 4) * 4, "=")),
+    );
+    if (!claims || typeof claims !== "object" || !("sub" in claims))
+      return null;
+    return typeof claims.sub === "string" && /^\d+$/.test(claims.sub)
+      ? claims.sub
+      : null;
   } catch {
     return null;
   }
@@ -43,12 +77,14 @@ export function getAuthProvider(): AuthProvider | null {
 }
 
 export function clearAccessToken() {
+  sessionRevision++;
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(AUTH_PROVIDER_KEY);
   } catch {
     // 삭제 실패는 무시
   }
+  notifySessionChanged();
 }
 
 export function isLoggedIn(): boolean {

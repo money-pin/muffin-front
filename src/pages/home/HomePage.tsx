@@ -1,5 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  AUTH_SESSION_CHANGED_EVENT,
+  getAccountId,
+  getAuthSessionRevision,
+} from "@/lib/auth";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  hasSeenSettlement,
+  markSettlementSeen,
+  shouldShowSettlementPopup,
+} from "./settlementPopup";
 
 import Logo from "@/components/common/Logo";
 import Carousel from "@/components/common/Carousel";
@@ -26,10 +36,34 @@ import QuizBanner from "./components/QuizBanner";
 import InvestResultSheet from "./components/InvestResultSheet";
 import { getHomeGreetingMessage, HOME_GREETING_MESSAGES } from "./homeData";
 
-const INVEST_RESULT_SEEN_KEY = "muffin:investResultSeenDate";
+function subscribeToAccountChange(listener: () => void) {
+  window.addEventListener(AUTH_SESSION_CHANGED_EVENT, listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, listener);
+    window.removeEventListener("storage", listener);
+  };
+}
 
 function HomePage() {
+  const accountId = useSyncExternalStore(
+    subscribeToAccountChange,
+    getAccountId,
+  );
+  const revision = useSyncExternalStore(
+    subscribeToAccountChange,
+    getAuthSessionRevision,
+  );
+  return (
+    <AccountHomePage key={`${revision}:${accountId}`} accountId={accountId} />
+  );
+}
+
+function AccountHomePage({ accountId }: { accountId: string | null }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const fromSettlementNotification = searchParams.get("popup") === "settlement";
   const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
 
   const myHomeQuery = useMyHomeQuery();
@@ -48,7 +82,7 @@ function HomePage() {
   const recentDetailQuery = useStatsRecentDetailQuery(recentPerformanceOpen);
 
   // 실제 정산 결과 API 호출
-  const settlementResultQuery = useSettlementResultQuery();
+  const settlementResultQuery = useSettlementResultQuery(accountId);
 
   const todayNewsList = todayNewsQuery.data?.items ?? [];
   const topSectors = statsSummaryQuery.data?.topSectors ?? [];
@@ -63,25 +97,83 @@ function HomePage() {
   const [investResultOpen, setInvestResultOpen] = useState(false);
   const resultShownRef = useRef(false);
 
+  // 알림은 정산 완료 직후(10시 전에도) 온다. 캐시가 아닌 최신 결과를 확인하고
+  // 이미 본 결과·정산 대기·재조회 실패에서는 팝업을 띄우지 않는다.
+  const refetchSettlement = settlementResultQuery.refetch;
+  useEffect(() => {
+    if (!fromSettlementNotification || !accountId) return;
+    let active = true;
+    const revision = getAuthSessionRevision();
+    resultShownRef.current = true;
+    void refetchSettlement({ cancelRefetch: false }).then(
+      ({ data, isError }) => {
+        if (
+          !active ||
+          getAccountId() !== accountId ||
+          getAuthSessionRevision() !== revision
+        )
+          return;
+        const result = !isError ? data?.result : null;
+        if (
+          result &&
+          shouldShowSettlementPopup(
+            hasSeenSettlement(accountId, result.date),
+            true,
+          )
+        ) {
+          markSettlementSeen(accountId, result.date);
+          setInvestResultOpen(true);
+        }
+        setSearchParams(
+          (current) => {
+            const next = new URLSearchParams(current);
+            next.delete("popup");
+            return next;
+          },
+          { replace: true },
+        );
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [
+    accountId,
+    fromSettlementNotification,
+    location.key,
+    refetchSettlement,
+    setSearchParams,
+  ]);
+
   // 정산 결과가 있고, 오전 10시 이후이며,
   // 해당 날짜를 아직 안 봤을 때 1회 자동 노출.
   useEffect(() => {
-    if (resultShownRef.current || !settlementResult) return;
-
-    const isAfterReveal = new Date().getHours() >= 10;
-
-    const alreadySeen =
-      localStorage.getItem(INVEST_RESULT_SEEN_KEY) === settlementResult.date;
-
-    if (!isAfterReveal || alreadySeen) return;
+    if (
+      fromSettlementNotification ||
+      !accountId ||
+      resultShownRef.current ||
+      !settlementResult
+    )
+      return;
+    if (
+      !shouldShowSettlementPopup(
+        hasSeenSettlement(accountId, settlementResult.date),
+        false,
+      )
+    )
+      return;
 
     resultShownRef.current = true;
 
-    localStorage.setItem(INVEST_RESULT_SEEN_KEY, settlementResult.date);
+    markSettlementSeen(accountId, settlementResult.date);
 
     // setState-in-effect 룰 회피: 팀 컨벤션대로 queueMicrotask로 감싼다
-    queueMicrotask(() => setInvestResultOpen(true));
-  }, [settlementResult]);
+    const revision = getAuthSessionRevision();
+    queueMicrotask(() => {
+      if (getAccountId() === accountId && getAuthSessionRevision() === revision)
+        setInvestResultOpen(true);
+    });
+  }, [accountId, settlementResult, fromSettlementNotification]);
 
   if (
     investmentAssetQuery.isLoading ||
