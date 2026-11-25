@@ -25,6 +25,7 @@ import {
 import { useInvestmentAssetQuery } from "@/pages/invest/investmentAssetQueries";
 import { useSettlementResultQuery } from "@/pages/invest/settlementResultQueries";
 import { useMyHomeQuery } from "@/lib/mypageQueries";
+import { requestIosPushPermission } from "@/lib/push/iosPush";
 import { characterTypeToVariant } from "@/lib/character";
 import TodayNewsCarouselCard from "@/pages/news/components/TodayNewsCarouselCard";
 import { useTodayNews } from "@/pages/news/newsQueries";
@@ -67,6 +68,11 @@ function AccountHomePage({ accountId }: { accountId: string | null }) {
   const [recentPerformanceOpen, setRecentPerformanceOpen] = useState(false);
 
   const myHomeQuery = useMyHomeQuery();
+  // 서비스 이용 준비(온보딩)가 끝난 뒤에만 첫 알림 권한을 요청한다.
+  const isOnboardingComplete = Boolean(myHomeQuery.data?.character);
+  useEffect(() => {
+    if (isOnboardingComplete) void requestIosPushPermission();
+  }, [isOnboardingComplete]);
   const nickname = myHomeQuery.data?.nickname ?? "";
 
   // 캐릭터는 마이페이지와 동일하게 서버값을 사용 (localStorage 불일치 방지)

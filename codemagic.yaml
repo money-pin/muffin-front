@@ -19,6 +19,7 @@ workflows:
         # VITE_API_BASE_URL, VITE_GOOGLE_CLIENT_ID (웹 빌드에 들어가는 값)
         - muffin_env
       vars:
+        VITE_APNS_ENVIRONMENT: PRODUCTION
         XCODE_PROJECT: ios/App/App.xcodeproj
         XCODE_SCHEME: App
         # 앱 소셜 로그인 (#266). 앱 안에 그대로 들어가는 공개 값이라 여기에 둔다
@@ -37,6 +38,7 @@ workflows:
           pnpm install --frozen-lockfile
       - name: 웹 빌드 후 iOS에 복사
         script: |
+          test "$VITE_APNS_ENVIRONMENT" = "PRODUCTION" || { echo "APNs environment must be PRODUCTION for TestFlight"; exit 1; }
           pnpm build
           npx cap sync ios
       - name: 서명 설정

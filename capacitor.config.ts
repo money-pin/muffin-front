@@ -15,6 +15,8 @@ const config: CapacitorConfig = {
     contentInset: "never",
   },
   plugins: {
+    // 앱 사용 중에는 배너·소리·배지를 표시하지 않는다 (#322).
+    PushNotifications: { presentationOptions: [] },
     CapacitorHttp: {
       enabled: true,
     },

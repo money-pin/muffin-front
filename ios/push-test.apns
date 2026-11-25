@@ -1,0 +1,11 @@
+{
+  "Simulator Target Bundle": "kr.ai.muffin",
+  "aps": {
+    "alert": {
+      "title": "오늘의 한입 퀴즈 도착! 🧁",
+      "body": "3문항 풀고 최대 30만원 받아가세요."
+    },
+    "sound": "default"
+  },
+  "deepLink": "muffin://quiz/today"
+}
