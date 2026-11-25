@@ -12,6 +12,7 @@ import {
   loginWithAppleNative,
   loginWithGoogleNative,
   loginWithKakaoNative,
+  getLoginErrorMessage,
   SocialLoginCancelledError,
 } from "@/lib/socialLogin";
 
@@ -81,10 +82,10 @@ export default function SocialAuthSheet({
       if (!(error instanceof SocialLoginCancelledError)) {
         setNotice({
           tone: "error",
-          message:
-            error instanceof Error && error.message
-              ? error.message
-              : "로그인에 실패했어요. 잠시 후 다시 시도해주세요.",
+          message: getLoginErrorMessage(
+            error,
+            "로그인에 실패했어요. 네트워크 상태를 확인하고 다시 시도해주세요.",
+          ),
         });
       }
     } finally {

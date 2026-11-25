@@ -2,7 +2,7 @@ import { Capacitor } from "@capacitor/core";
 import { SocialLogin } from "@capgo/capacitor-social-login";
 import { CapacitorKakaoLogin } from "@team-lepisode/capacitor-kakao-login";
 
-import { apiRequest } from "./api";
+import { ApiError, apiRequest } from "./api";
 import { saveAccessToken, saveAuthProvider, type AuthProvider } from "./auth";
 
 // 소셜 로그인 (#266)
@@ -11,6 +11,15 @@ import { saveAccessToken, saveAuthProvider, type AuthProvider } from "./auth";
 // 받은 ID 토큰은 POST /auth/{provider}로 넘겨 머핀 accessToken으로 바꾼다.
 
 export class SocialLoginCancelledError extends Error {}
+
+// 로그인 실패 시 보여줄 문구 (#331)
+// 서버 안내나 우리가 만든 한글 안내는 그대로 쓰고, 네트워크 끊김("Failed to fetch") 같은
+// 브라우저·SDK의 영어 원문은 기본 안내로 바꾼다.
+export function getLoginErrorMessage(error: unknown, fallback: string) {
+  const message = error instanceof Error ? error.message.trim() : "";
+  if (error instanceof ApiError && message) return message;
+  return /[가-힣]/.test(message) ? message : fallback;
+}
 
 export function isNativeApp() {
   return Capacitor.isNativePlatform();

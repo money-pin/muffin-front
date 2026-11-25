@@ -44,8 +44,9 @@ export interface NewsDetailResponse {
   isScrapped: boolean;
 }
 
-// 섹터 영향도 3단계
-export type SectorImpact = "POSITIVE" | "NEUTRAL" | "NEGATIVE";
+// 섹터 영향도 5단계 (백엔드 ImpactType). 화면에서는 강한 상승·하락을 상승·하락으로 묶는다
+export type SectorImpact =
+  "STRONG_POSITIVE" | "POSITIVE" | "NEUTRAL" | "NEGATIVE" | "STRONG_NEGATIVE";
 
 export interface SectorImpactItem {
   sectorCode: string;
