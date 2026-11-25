@@ -35,28 +35,26 @@ export interface OnboardingResult {
   sectors: [string, string]; // 추천 섹터 칩
 }
 
-export const ONBOARDING_RESULTS: Record<
-  OnboardingResultType,
-  OnboardingResult
-> = {
-  plain: {
-    characterName: "플레인 머핀",
-    titleTemplate: "투자가 서툰 {name}님을 위해\n{char}이 함께해요!",
-    sectors: ["달러", "금"],
-  },
-  sprinkle: {
-    characterName: "스프링클 머핀",
-    titleTemplate:
-      "투자 경험을 바탕으로 더 넓은 기회를\n찾을 {name}님을 위해\n{char}이 함께해요!",
-    sectors: ["금융", "테크"],
-  },
-  butter: {
-    characterName: "버터빛 머핀",
-    titleTemplate:
-      "차근차근 투자 감각을 키워갈\n{name}님을 위해\n{char}이 함께해요!",
-    sectors: ["반도체", "방산"],
-  },
-};
+export const ONBOARDING_RESULTS: Record<OnboardingResultType, OnboardingResult> =
+  {
+    plain: {
+      characterName: "플레인 머핀",
+      titleTemplate: "투자가 서툰 {name}님을 위해\n{char}이 함께해요!",
+      sectors: ["달러", "금"],
+    },
+    sprinkle: {
+      characterName: "스프링클 머핀",
+      titleTemplate:
+        "투자 경험을 바탕으로 더 넓은 기회를\n찾을 {name}님을 위해\n{char}이 함께해요!",
+      sectors: ["금융", "테크"],
+    },
+    butter: {
+      characterName: "버터빛 머핀",
+      titleTemplate:
+        "차근차근 투자 감각을 키워갈\n{name}님을 위해\n{char}이 함께해요!",
+      sectors: ["반도체", "방산"],
+    },
+  };
 
 // 답변 조합 → 결과 타입
 // - 뉴스 "거의 안 봐요"(NEVER) 또는 투자 "처음이에요"(BEGINNER) → 플레인
