@@ -1,4 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  AUTH_SESSION_CHANGED_EVENT,
+  getAccountId,
+  getAuthSessionRevision,
+} from "@/lib/auth";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   hasSeenSettlement,
@@ -31,7 +36,30 @@ import QuizBanner from "./components/QuizBanner";
 import InvestResultSheet from "./components/InvestResultSheet";
 import { getHomeGreetingMessage, HOME_GREETING_MESSAGES } from "./homeData";
 
+function subscribeToAccountChange(listener: () => void) {
+  window.addEventListener(AUTH_SESSION_CHANGED_EVENT, listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, listener);
+    window.removeEventListener("storage", listener);
+  };
+}
+
 function HomePage() {
+  const accountId = useSyncExternalStore(
+    subscribeToAccountChange,
+    getAccountId,
+  );
+  const revision = useSyncExternalStore(
+    subscribeToAccountChange,
+    getAuthSessionRevision,
+  );
+  return (
+    <AccountHomePage key={`${revision}:${accountId}`} accountId={accountId} />
+  );
+}
+
+function AccountHomePage({ accountId }: { accountId: string | null }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -54,7 +82,7 @@ function HomePage() {
   const recentDetailQuery = useStatsRecentDetailQuery(recentPerformanceOpen);
 
   // 실제 정산 결과 API 호출
-  const settlementResultQuery = useSettlementResultQuery();
+  const settlementResultQuery = useSettlementResultQuery(accountId);
 
   const todayNewsList = todayNewsQuery.data?.items ?? [];
   const topSectors = statsSummaryQuery.data?.topSectors ?? [];
@@ -73,18 +101,27 @@ function HomePage() {
   // 이미 본 결과·정산 대기·재조회 실패에서는 팝업을 띄우지 않는다.
   const refetchSettlement = settlementResultQuery.refetch;
   useEffect(() => {
-    if (!fromSettlementNotification) return;
+    if (!fromSettlementNotification || !accountId) return;
     let active = true;
+    const revision = getAuthSessionRevision();
     resultShownRef.current = true;
     void refetchSettlement({ cancelRefetch: false }).then(
       ({ data, isError }) => {
-        if (!active) return;
+        if (
+          !active ||
+          getAccountId() !== accountId ||
+          getAuthSessionRevision() !== revision
+        )
+          return;
         const result = !isError ? data?.result : null;
         if (
           result &&
-          shouldShowSettlementPopup(hasSeenSettlement(result.date), true)
+          shouldShowSettlementPopup(
+            hasSeenSettlement(accountId, result.date),
+            true,
+          )
         ) {
-          markSettlementSeen(result.date);
+          markSettlementSeen(accountId, result.date);
           setInvestResultOpen(true);
         }
         setSearchParams(
@@ -101,6 +138,7 @@ function HomePage() {
       active = false;
     };
   }, [
+    accountId,
     fromSettlementNotification,
     location.key,
     refetchSettlement,
@@ -112,13 +150,14 @@ function HomePage() {
   useEffect(() => {
     if (
       fromSettlementNotification ||
+      !accountId ||
       resultShownRef.current ||
       !settlementResult
     )
       return;
     if (
       !shouldShowSettlementPopup(
-        hasSeenSettlement(settlementResult.date),
+        hasSeenSettlement(accountId, settlementResult.date),
         false,
       )
     )
@@ -126,11 +165,15 @@ function HomePage() {
 
     resultShownRef.current = true;
 
-    markSettlementSeen(settlementResult.date);
+    markSettlementSeen(accountId, settlementResult.date);
 
     // setState-in-effect 룰 회피: 팀 컨벤션대로 queueMicrotask로 감싼다
-    queueMicrotask(() => setInvestResultOpen(true));
-  }, [settlementResult, fromSettlementNotification]);
+    const revision = getAuthSessionRevision();
+    queueMicrotask(() => {
+      if (getAccountId() === accountId && getAuthSessionRevision() === revision)
+        setInvestResultOpen(true);
+    });
+  }, [accountId, settlementResult, fromSettlementNotification]);
 
   if (
     investmentAssetQuery.isLoading ||
