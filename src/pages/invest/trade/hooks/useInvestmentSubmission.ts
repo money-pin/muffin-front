@@ -5,6 +5,8 @@ import { ApiError } from "@/lib/api";
 import { useApiErrorModal } from "@/lib/useApiErrorModal";
 import { getTodayInvestment } from "@/pages/invest/trade/apis/investmentApi";
 import { INVESTMENT_AVAILABLE_STATUSES } from "@/pages/invest/trade/constants/investmentStatus";
+import { getKstDateKey } from "@/pages/invest/trade/utils/investmentDate";
+import type { InvestmentCompletion } from "@/pages/invest/trade/utils/investmentQuizPrompt";
 import {
   investmentQueryKeys,
   useConfirmInvestmentMutation,
@@ -34,12 +36,6 @@ interface UseInvestmentSubmissionOptions {
   onConfirmed: (quantities: InvestmentQuantityMap) => void;
 }
 
-function getKstDateKey(date: Date) {
-  return new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Seoul" }).format(
-    date,
-  );
-}
-
 // 제출 잠금, 응답 유실 후 복구, 재조회 전 임시 확정 내역을 관리한다.
 export function useInvestmentSubmission({
   assetQuantities,
@@ -63,6 +59,8 @@ export function useInvestmentSubmission({
   } | null>(null);
 
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [completedSubmission, setCompletedSubmission] =
+    useState<InvestmentCompletion | null>(null);
   // 제출 성공 직후 재조회가 끝나기 전까지 표시할 내역. 이후에는 서버 응답을 사용한다.
   const [submittedInvestment, setSubmittedInvestment] = useState<{
     sourceUpdateCount: number;
@@ -104,6 +102,7 @@ export function useInvestmentSubmission({
         ? pending.body
         : createInvestmentRequest(quantities, assetById);
     const isEdit = retry && pending ? pending.isEdit : isEditMode;
+    const submissionDateKey = pending?.dateKey ?? getKstDateKey(new Date());
 
     if (requestBody.sectors.length === 0) {
       setConfirmInvestmentErrorMessage("하나 이상의 섹터를 선택해주세요.");
@@ -155,6 +154,7 @@ export function useInvestmentSubmission({
           onConfirmed(quantities);
           setIsConfirmSheetOpen(false);
           closeInvestmentError();
+          setCompletedSubmission({ isEdit, dateKey: submissionDateKey });
           setIsCompleteModalOpen(true);
           return;
         }
@@ -190,7 +190,7 @@ export function useInvestmentSubmission({
         body: requestBody,
         quantities: { ...quantities },
         isEdit,
-        dateKey: getKstDateKey(new Date()),
+        dateKey: submissionDateKey,
       };
       if (isEdit) {
         await updateInvestmentMutation.mutateAsync(requestBody);
@@ -211,6 +211,7 @@ export function useInvestmentSubmission({
       onConfirmed(quantities);
       setIsConfirmSheetOpen(false);
       closeInvestmentError();
+      setCompletedSubmission({ isEdit, dateKey: submissionDateKey });
       setIsCompleteModalOpen(true);
       void queryClient.invalidateQueries({
         queryKey: investmentQueryKeys.today(),
@@ -234,6 +235,7 @@ export function useInvestmentSubmission({
     setIsConfirmSheetOpen,
     isCompleteModalOpen,
     setIsCompleteModalOpen,
+    completedSubmission,
     confirmInvestmentErrorMessage,
     setConfirmInvestmentErrorMessage,
     pendingConfirmedQuantities,
